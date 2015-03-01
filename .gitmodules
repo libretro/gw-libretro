@@ -1,0 +1,6 @@
+[submodule "gwrom"]
+	path = gwrom
+	url = https://github.com/leiradel/gwrom.git
+[submodule "gwlua"]
+	path = gwlua
+	url = https://github.com/leiradel/gwlua.git

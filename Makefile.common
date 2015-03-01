@@ -1,14 +1,15 @@
 INCFLAGS := -I$(CORE_DIR) \
             -I$(CORE_DIR)/src \
             -I$(CORE_DIR)/gwrom \
+            -I$(CORE_DIR)/gwlua \
             -I$(CORE_DIR)/bzip2 \
             -I$(CORE_DIR)/lua/src
 
 SOURCES_C += $(CORE_DIR)/src/libretro.c
-SOURCES_C += $(CORE_DIR)/src/gwlua.c
 SOURCES_CXX += $(CORE_DIR)/src/constcast.cpp
 
 SOURCES_C += $(CORE_DIR)/gwrom/gwrom.c
+SOURCES_C += $(CORE_DIR)/gwlua/gwlua.c
 
 SOURCES_C += $(CORE_DIR)/bzip2/blocksort.c
 SOURCES_C += $(CORE_DIR)/bzip2/huffman.c
