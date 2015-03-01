@@ -1,0 +1,7 @@
+display_name = "Game & Watch"
+supported_extensions = "mgw"
+corename = "gw"
+manufacturer = "Many"
+systemname = "Many"
+license = "zlib"
+permissions = ""
