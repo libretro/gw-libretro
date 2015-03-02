@@ -19,6 +19,21 @@
 
 /*---------------------------------------------------------------------------*/
 
+static int is_little_endian( void )
+{
+  union
+  {
+    uint16_t u16;
+    uint8_t u8[ 2 ];
+  }
+  u;
+  
+  u.u16 = 1;
+  return u.u8[ 0 ];
+}
+
+/*---------------------------------------------------------------------------*/
+
 static void dummy_log( enum retro_log_level level, const char* fmt, ... )
 {
   (void)level;
@@ -308,17 +323,20 @@ int gwlua_load_sound( gwlua_state_t* state, gwlua_sound_t* sound, const char* na
     
     if ( *entry.user_flags == 0 )
     {
-      /* TODO find out if we're really running on a LE platform */
       /* convert to little-endian */
       *entry.user_flags = 1;
-      sound->size /= 2;
-      int i;
       
-      for ( i = 0; i < sound->size; i++ )
+      if ( is_little_endian() )
       {
-        uint16_t sample = sound->data[ i ];
-        sample = ( sample >> 8 ) | ( sample << 8 );
-        sound->data[ i ] = sample;
+        sound->size /= 2;
+        int i;
+        
+        for ( i = 0; i < sound->size; i++ )
+        {
+          uint16_t sample = sound->data[ i ];
+          sample = ( sample >> 8 ) | ( sample << 8 );
+          sound->data[ i ] = sample;
+        }
       }
     }
     
