@@ -22,6 +22,7 @@ typedef struct
   int        button_up_ref;
   int64_t    now;
   uint64_t   seed;
+  int        first_frame;
 }
 state_t;
 
@@ -324,16 +325,17 @@ static int sprite_newindex( lua_State* L )
   case 0x7c618d53U: // visible
     {
       int is_visible = lua_toboolean( L, 3 );
+      state_t* s = state_get( L );
       
-      if ( is_visible != self->is_visible && self->picture )
+      if ( ( is_visible != self->is_visible || s->first_frame ) && self->picture )
       {
         if ( is_visible )
         {
-          gwlua_blit_picture( (gwlua_state_t*)state_get( L ), (gwlua_picture_t*)self->picture, self->x, self->y );
+          gwlua_blit_picture( (gwlua_state_t*)s, (gwlua_picture_t*)self->picture, self->x, self->y );
         }
         else
         {
-          gwlua_unblit_picture( (gwlua_state_t*)state_get( L ), (gwlua_picture_t*)self->picture, self->x, self->y );
+          gwlua_unblit_picture( (gwlua_state_t*)s, (gwlua_picture_t*)self->picture, self->x, self->y );
         }
       }
       
@@ -344,17 +346,18 @@ static int sprite_newindex( lua_State* L )
   case 0xad68f281U: // picture
     {
       picture_t* picture = ref_new( L, 3, &self->picture_ref, (ud_checker)picture_check, 1 );
+      state_t* s = state_get( L );
       
-      if ( picture != self->picture && self->is_visible )
+      if ( ( picture != self->picture || s->first_frame ) && self->is_visible )
       {
         if ( self->picture )
         {
-          gwlua_unblit_picture( (gwlua_state_t*)state_get( L ), (gwlua_picture_t*)self->picture, self->x, self->y );
+          gwlua_unblit_picture( (gwlua_state_t*)s, (gwlua_picture_t*)self->picture, self->x, self->y );
         }
         
         if ( picture )
         {
-          gwlua_blit_picture( (gwlua_state_t*)state_get( L ), (gwlua_picture_t*)picture, self->x, self->y );
+          gwlua_blit_picture( (gwlua_state_t*)s, (gwlua_picture_t*)picture, self->x, self->y );
         }
       }
       
@@ -383,7 +386,7 @@ static int sprite_new( lua_State* L )
   
   self->x = x;
   self->y = y;
-  self->is_visible = 0;
+  self->is_visible = 1;
   self->picture = ref_create( L, 3, &self->picture_ref, (ud_checker)picture_check, 1 );
   
   if ( luaL_newmetatable( L, "sprite" ) != 0 )
@@ -805,6 +808,7 @@ void gwlua_tick( gwlua_state_t* state, int64_t now )
   }
   
   lua_settop( s->L, top );
+  s->first_frame = 0;
 }
 
 static const char* button_name( int button )
@@ -915,6 +919,7 @@ int gwlua_create( gwlua_state_t* state, const void* main, size_t size )
     s->tick_ref = LUA_NOREF;
     s->button_down_ref = LUA_NOREF;
     s->button_up_ref = LUA_NOREF;
+    s->first_frame = 1;
     
     lua_setstateud( s->L, (void*)s );
     int top = lua_gettop( s->L );
