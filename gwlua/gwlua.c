@@ -26,6 +26,25 @@ typedef struct
 }
 state_t;
 
+/*---------------------------------------------------------------------------*/
+
+static void gwlog( const char* format, ... )
+{
+  va_list args;
+  va_start( args, format );
+  gwlua_log( format, args );
+  va_end( args );
+}
+
+static void error( const char* message )
+{
+  gwlog( "==============================================================================\n" );
+  gwlog( "%s\n", message );
+  gwlog( "------------------------------------------------------------------------------\n" );
+}
+
+/*---------------------------------------------------------------------------*/
+
 #ifdef NDEBUG
 void  lua_setstateud( lua_State* L, void* ud );
 void* lua_getstateud( lua_State* L );
@@ -42,6 +61,8 @@ static state_t* state_get( lua_State* L )
 
 /*---------------------------------------------------------------------------*/
 
+#ifndef NDEBUG
+
 #include <stdio.h>
 
 static void dump_stack( lua_State* L )
@@ -51,45 +72,47 @@ static void dump_stack( lua_State* L )
   
   for ( i = 1; i <= top; i++ )
   {
-    printf( "%2d %3d ", i, i - top - 1 );
+    gwlog( "%2d %3d ", i, i - top - 1 );
     
     lua_pushvalue( L, i );
     
     switch ( lua_type( L, -1 ) )
     {
     case LUA_TNIL:
-      printf( "nil\n" );
+      gwlog( "nil\n" );
       break;
     case LUA_TNUMBER:
-      printf( "%e\n", lua_tonumber( L, -1 ) );
+      gwlog( "%e\n", lua_tonumber( L, -1 ) );
       break;
     case LUA_TBOOLEAN:
-      printf( "%s\n", lua_toboolean( L, -1 ) ? "true" : "false" );
+      gwlog( "%s\n", lua_toboolean( L, -1 ) ? "true" : "false" );
       break;
     case LUA_TSTRING:
-      printf( "\"%s\"\n", lua_tostring( L, -1 ) );
+      gwlog( "\"%s\"\n", lua_tostring( L, -1 ) );
       break;
     case LUA_TTABLE:
-      printf( "table\n" );
+      gwlog( "table\n" );
       break;
     case LUA_TFUNCTION:
-      printf( "function\n" );
+      gwlog( "function\n" );
       break;
     case LUA_TUSERDATA:
-      printf( "userdata\n" );
+      gwlog( "userdata\n" );
       break;
     case LUA_TTHREAD:
-      printf( "thread\n" );
+      gwlog( "thread\n" );
       break;
     case LUA_TLIGHTUSERDATA:
-      printf( "light userdata\n" );
+      gwlog( "light userdata\n" );
       break;
     default:
-      printf( "?\n" );
+      gwlog( "?\n" );
       break;
     }
   }
 }
+
+#endif
 
 /*---------------------------------------------------------------------------*/
 
@@ -444,7 +467,7 @@ static int timer_tick( lua_State* L )
     
     if ( lua_pcall( L, 1, 0, -3 ) != LUA_OK )
     {
-      fprintf( stderr, "%s", lua_tostring( L, -1 ) );
+      error( lua_tostring( L, -1 ) );
     }
   }
   
@@ -804,7 +827,7 @@ void gwlua_tick( gwlua_state_t* state, int64_t now )
   
   if ( lua_pcall( s->L, 0, 0, -2 ) != LUA_OK )
   {
-    fprintf( stderr, "%s", lua_tostring( s->L, -1 ) );
+    error( lua_tostring( s->L, -1 ) );
   }
   
   lua_settop( s->L, top );
@@ -848,7 +871,7 @@ void gwlua_button_down( gwlua_state_t* state, unsigned controller_ndx, int butto
   
   if ( lua_pcall( s->L, 2, 0, -4 ) != LUA_OK )
   {
-    fprintf( stderr, "%s", lua_tostring( s->L, -1 ) );
+    error( lua_tostring( s->L, -1 ) );
   }
   
   lua_settop( s->L, top );
@@ -867,7 +890,7 @@ void gwlua_button_up( gwlua_state_t* state, unsigned controller_ndx, int button 
   
   if ( lua_pcall( s->L, 2, 0, -4 ) != LUA_OK )
   {
-    fprintf( stderr, "%s", lua_tostring( s->L, -1 ) );
+    error( lua_tostring( s->L, -1 ) );
   }
   
   lua_settop( s->L, top );
@@ -948,25 +971,25 @@ int gwlua_create( gwlua_state_t* state, const void* main, size_t size )
         return 0;
       }
 
-      fprintf( stderr, "%s", lua_tostring( s->L, -1 ) );
+      error( lua_tostring( s->L, -1 ) );
       break;
       
     case LUA_ERRSYNTAX:
-      fprintf( stderr, "%s", lua_tostring( s->L, -1 ) );
+      error( lua_tostring( s->L, -1 ) );
       break;
       
     case LUA_ERRMEM:
-      fprintf( stderr, "out of memory" );
+      error( "out of memory" );
       break;
       
     case LUA_ERRGCMM:
-      fprintf( stderr, "error running __gc" );
+      error( "error running __gc" );
       break;
     }
   }
   else
   {
-    fprintf( stderr, "main.lua not found" );
+    error( "main.lua not found" );
   }
     
   lua_close( s->L );

@@ -410,6 +410,15 @@ int gwlua_set_bg( gwlua_state_t* state, const gwlua_picture_t* bg )
   return -1;
 }
 
+void gwlua_log( const char* format, va_list args )
+{
+  char buffer[ 8192 ]; /* should be enough */
+  
+  vsnprintf( buffer, sizeof( buffer ), format, args );
+  buffer[ sizeof( buffer ) - 1 ] = 0;
+  log_cb( RETRO_LOG_ERROR, "%s", buffer );
+}
+
 /*---------------------------------------------------------------------------*/
 /* gwrom user-defined functions */
 

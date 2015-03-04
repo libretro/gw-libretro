@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 /*---------------------------------------------------------------------------*/
 /* Registry value types for gwlua_(load|save)_value */
@@ -97,6 +98,9 @@ void        gwlua_save_value( gwlua_state_t* state, const char* key, const char*
 
 /* control */
 int gwlua_set_bg( gwlua_state_t* state, const gwlua_picture_t* bg );
+
+/* log */
+void gwlua_log( const char* format, va_list args );
 
 /*---------------------------------------------------------------------------*/
 /* api */
