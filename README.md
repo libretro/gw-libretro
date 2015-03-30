@@ -1,10 +1,5 @@
 # gw-libretro
 
-DejaVu Sans Bold Semi-Condensed size 18
-color 210, 198, 0 (0x00d2c600)
-Layer -> Text to Path
-New Layer
-Select -> From Path
-Select -> Grow -> 3
-Bucket Fill -> black
-Merge Visible Layers
+**gw-libretro** is a [libretro](http://www.libretro.com/) core that runs Game & Watch simulators.
+
+It runs simulators converted from source code available in [MADrigal](http://www.madrigaldesign.it/sim/). Each simulator was converted with [pas2lua](https://github.com/leiradel/pas2lua), which was written specifically for this purpose.
