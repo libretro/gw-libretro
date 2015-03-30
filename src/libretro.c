@@ -6,31 +6,23 @@
 
 #include <gwlua.h>
 
-/*---------------------------------------------------------------------------*/
-/* stb_image config and inclusion */
-
-#define STBI_ASSERT( x )
-
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-/*---------------------------------------------------------------------------*/
-
-static int is_little_endian( void )
-{
-  union
-  {
-    uint16_t u16;
-    uint8_t u8[ 2 ];
-  }
-  u;
-  
-  u.u16 = 1;
-  return u.u8[ 0 ];
-}
+#include "images/button_a.h"
+#include "images/button_a_small.h"
+#include "images/button_b.h"
+#include "images/button_b_small.h"
+#include "images/button_l.h"
+#include "images/button_r.h"
+#include "images/button_x.h"
+#include "images/button_x_small.h"
+#include "images/button_y.h"
+#include "images/button_y_small.h"
+#include "images/dpad.h"
+#include "images/dpad_down.h"
+#include "images/dpad_left.h"
+#include "images/dpad_right.h"
+#include "images/dpad_up.h"
+#include "images/select.h"
+#include "images/start.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -48,9 +40,8 @@ static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 static struct retro_perf_callback perf_cb;
 
-/* TODO think harder about how to manage the state creating and get rid of this hack */
-static uint8_t state_space[ sizeof( gwlua_state_t ) + 512 ];
-static gwlua_state_t* gwlua_state = (gwlua_state_t*)state_space;
+static gwrom_t rom;
+static gwlua_t state;
 
 #define MAX_PADS 2
 static unsigned input_devices[ MAX_PADS ];
@@ -107,310 +98,273 @@ void* gwlua_realloc( void* pointer, size_t size )
   return realloc( pointer, size );
 }
 
-int gwlua_load_picture( gwlua_state_t* state, gwlua_picture_t* picture, const char* name )
+void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y )
 {
-  gwrom_entry_t entry;
-  
-  if ( gwrom_find( &entry, &state->gwrom, name ) == GWROM_OK )
+  if ( picture->pixels )
   {
-    int width, height;
-    uint32_t* abgr32 = (uint32_t*)stbi_load_from_memory( (const stbi_uc*)entry.data, (int)entry.size, &width, &height, NULL, STBI_rgb_alpha );
+    int width = (int)picture->width;
+    int height = (int)picture->height;
     
-    if ( abgr32 )
+    int d_width = (int)picture->state->screen.width;
+    int d_height = (int)picture->state->screen.height;
+    
+    if ( x > -width && x < d_width && y > -height && y < d_height )
     {
-      uint16_t* rgab16 = (uint16_t*)malloc( width * height * sizeof( uint16_t ) );
+      const uint16_t* source = picture->pixels;
+      unsigned pitch = picture->width;
       
-      if ( rgab16 )
+      uint16_t* dest = picture->state->screen.pixels;
+      unsigned d_pitch = picture->state->screen.width;
+      
+      uint16_t transp = source[ ( height - 1 ) * width ];
+      
+      if ( x < 0 )
       {
-        picture->pixels = rgab16;
-        uint32_t* to_free = abgr32;
-        const uint32_t* end = abgr32 + width * height;
-        
-        while ( abgr32 < end )
-        {
-          uint32_t p = *abgr32++;
-          *rgab16++ = ( ( p & 0xf8 ) << 8 ) | ( ( p & 0xf800 ) >> 5 ) | ( ( p & 0xf80000 ) >> 19 ) | ( ( ( p & 0xff000000U ) != 0 ) << 5 );
-        }
-        
-        free( to_free );
-        picture->width = width;
-        picture->height = height;
-        picture->pitch = width;
-        picture->parent = NULL;
-        
-        return 0;
+        width += x;
+        source += x;
+        x = 0;
       }
       
-      free( abgr32 );
-    }
-  }
-  
-  return -1;
-}
-
-int gwlua_sub_picture( gwlua_state_t* state, gwlua_picture_t* picture, const gwlua_picture_t* parent, int x0, int y0, unsigned width, unsigned height )
-{
-  (void)state;
-  
-  picture->width = width;
-  picture->height = height;
-  picture->pitch = parent->pitch;
-  picture->pixels = parent->pixels + y0 * parent->pitch + x0;
-  picture->parent = parent;
-  
-  return 0;
-}
-
-void gwlua_destroy_picture( gwlua_state_t* state, gwlua_picture_t* picture )
-{
-  (void)state;
-  
-  if ( picture->parent == NULL )
-  {
-    free( picture->pixels );
-  }
-}
-
-void gwlua_blit_picture( gwlua_state_t* state, const gwlua_picture_t* picture, int x, int y )
-{
-  int width = (int)picture->width;
-  int height = (int)picture->height;
-  
-  int d_width = (int)state->screen.width;
-  int d_height = (int)state->screen.height;
-  
-  if ( x > -width && x < d_width && y > -height && y < d_height )
-  {
-    const uint16_t* source = picture->pixels;
-    unsigned pitch = picture->pitch;
-    
-    uint16_t* dest = state->screen.pixels;
-    unsigned d_pitch = state->screen.pitch;
-    
-    if ( x < 0 )
-    {
-      width += x;
-      source += x;
-      x = 0;
-    }
-    
-    if ( x + width > d_width )
-    {
-      int out = x + width - d_width;
-      width -= out;
-    }
-    
-    if ( y < 0 )
-    {
-      height += y;
-      source -= y * pitch;
-      y = 0;
-    }
-    
-    if ( y + height > d_height )
-    {
-      int out = y + height - d_height;
-      height -= out;
-    }
-    
-    dest += y * d_pitch + x;
-    d_pitch -= width;
-    pitch -= width;
-    
-    int i, j;
-    
-    for ( j = 0; j < height; j++ )
-    {
-      for ( i = 0; i < width; i++ )
+      if ( x + width > d_width )
       {
-        if ( *source & ( 1 << 5 ) )
-        {
-          *dest = *source;
-        }
-        
-        source++;
-        dest++;
+        int out = x + width - d_width;
+        width -= out;
       }
       
-      source += pitch;
-      dest += d_pitch;
+      if ( y < 0 )
+      {
+        height += y;
+        source -= y * pitch;
+        y = 0;
+      }
+      
+      if ( y + height > d_height )
+      {
+        int out = y + height - d_height;
+        height -= out;
+      }
+      
+      dest += y * d_pitch + x;
+      d_pitch -= width;
+      pitch -= width;
+      
+      int i, j;
+      
+      for ( j = 0; j < height; j++ )
+      {
+        for ( i = 0; i < width; i++ )
+        {
+          if ( *source != transp )
+          {
+            *dest = *source;
+          }
+          
+          source++;
+          dest++;
+        }
+        
+        source += pitch;
+        dest += d_pitch;
+      }
     }
-    
-    state->updated = 1;
   }
 }
 
-void gwlua_unblit_picture( gwlua_state_t* state, const gwlua_picture_t* picture, int x, int y )
+void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y )
 {
-  int width = (int)picture->width;
-  int height = (int)picture->height;
-  
-  int d_width = (int)state->screen.width;
-  int d_height = (int)state->screen.height;
-  
-  if ( x > -width && x < d_width && y > -height && y < d_height )
+  if ( picture->pixels && picture->state->bg )
   {
-    const uint16_t* source = picture->pixels;
-    unsigned pitch = picture->pitch;
+    int width = (int)picture->width;
+    int height = (int)picture->height;
     
-    uint16_t* dest = state->screen.pixels;
-    unsigned d_pitch = state->screen.pitch;
+    int d_width = (int)picture->state->screen.width;
+    int d_height = (int)picture->state->screen.height;
     
-    if ( x < 0 )
+    if ( x > -width && x < d_width && y > -height && y < d_height )
     {
-      width += x;
-      source += x;
-      x = 0;
-    }
-    
-    if ( x + width > d_width )
-    {
-      int out = x + width - d_width;
-      width -= out;
-    }
-    
-    if ( y < 0 )
-    {
-      height += y;
-      source -= y * pitch;
-      y = 0;
-    }
-    
-    if ( y + height > d_height )
-    {
-      int out = y + height - d_height;
-      height -= out;
-    }
-    
-    const uint16_t* bg = state->bg->pixels + y * d_pitch + x;
-    dest += y * d_pitch + x;
-    d_pitch -= width;
-    pitch -= width;
-    
-    int i, j;
-    
-    for ( j = 0; j < height; j++ )
-    {
-      for ( i = 0; i < width; i++ )
+      const uint16_t* source = picture->pixels;
+      unsigned pitch = picture->width;
+      
+      uint16_t* dest = picture->state->screen.pixels;
+      unsigned d_pitch = picture->state->screen.width;
+      
+      uint16_t transp = source[ ( height - 1 ) * width ];
+      
+      if ( x < 0 )
       {
-        if ( *source & ( 1 << 5 ) )
-        {
-          *dest = *bg;
-        }
-        
-        source++;
-        dest++;
-        bg++;
+        width += x;
+        source += x;
+        x = 0;
       }
       
-      source += pitch;
-      dest += d_pitch;
-      bg += d_pitch;
+      if ( x + width > d_width )
+      {
+        int out = x + width - d_width;
+        width -= out;
+      }
+      
+      if ( y < 0 )
+      {
+        height += y;
+        source -= y * pitch;
+        y = 0;
+      }
+      
+      if ( y + height > d_height )
+      {
+        int out = y + height - d_height;
+        height -= out;
+      }
+      
+      const uint16_t* bg = picture->state->bg->pixels + y * d_pitch + x;
+      dest += y * d_pitch + x;
+      d_pitch -= width;
+      pitch -= width;
+      
+      int i, j;
+      
+      for ( j = 0; j < height; j++ )
+      {
+        for ( i = 0; i < width; i++ )
+        {
+          if ( *source != transp )
+          {
+            *dest = *bg;
+          }
+          
+          source++;
+          dest++;
+          bg++;
+        }
+        
+        source += pitch;
+        dest += d_pitch;
+        bg += d_pitch;
+      }
     }
-    
-    state->updated = 1;
   }
 }
 
-int gwlua_load_sound( gwlua_state_t* state, gwlua_sound_t* sound, const char* name )
+int gwlua_get_button_picture( gwlua_t* state, uint32_t hash, void** data, size_t* size )
 {
-  gwrom_entry_t entry;
-  
-  if ( gwrom_find( &entry, &state->gwrom, name ) == GWROM_OK )
+  switch ( hash )
   {
-    sound->data = (int16_t*)entry.data;
-    sound->size = entry.size;
-    
-    if ( *entry.user_flags == 0 )
-    {
-      /* convert to little-endian */
-      *entry.user_flags = 1;
-      
-      if ( is_little_endian() )
-      {
-        sound->size /= 2;
-        int i;
-        
-        for ( i = 0; i < sound->size; i++ )
-        {
-          uint16_t sample = sound->data[ i ];
-          sample = ( sample >> 8 ) | ( sample << 8 );
-          sound->data[ i ] = sample;
-        }
-      }
-    }
-    
+  case 0x0002b606U: // a
+    *data = (void*)src_images_button_a_png;
+    *size = src_images_button_a_png_len;
+    return 0;
+  case 0x1489287eU: // a_small
+    *data = (void*)src_images_button_a_small_png;
+    *size = src_images_button_a_small_png_len;
+    return 0;
+  case 0x0002b607U: // b
+    *data = (void*)src_images_button_b_png;
+    *size = src_images_button_b_png_len;
+    return 0;
+  case 0x6183653fU: // b_small
+    *data = (void*)src_images_button_b_small_png;
+    *size = src_images_button_b_small_png_len;
+    return 0;
+  case 0x0002b611U: // l
+    *data = (void*)src_images_button_l_png;
+    *size = src_images_button_l_png_len;
+    return 0;
+  case 0x0002b617U: // r
+    *data = (void*)src_images_button_r_png;
+    *size = src_images_button_r_png_len;
+    return 0;
+  case 0x0002b61dU: // x
+    *data = (void*)src_images_button_x_png;
+    *size = src_images_button_x_png_len;
+    return 0;
+  case 0xff049dd5U: // x_small
+    *data = (void*)src_images_button_x_small_png;
+    *size = src_images_button_x_small_png_len;
+    return 0;
+  case 0x0002b61eU: // y
+    *data = (void*)src_images_button_y_png;
+    *size = src_images_button_y_png_len;
+    return 0;
+  case 0x4bfeda96U: // y_small
+    *data = (void*)src_images_button_y_small_png;
+    *size = src_images_button_y_small_png_len;
+    return 0;
+  case 0x7c95cebeU: // dpad
+    *data = (void*)src_images_dpad_png;
+    *size = src_images_dpad_png_len;
+    return 0;
+  case 0xea8a8b35U: // dpad_down
+    *data = (void*)src_images_dpad_down_png;
+    *size = src_images_dpad_down_png_len;
+    return 0;
+  case 0xea8ec188U: // dpad_left
+    *data = (void*)src_images_dpad_left_png;
+    *size = src_images_dpad_left_png_len;
+    return 0;
+  case 0x3cd5ba3bU: // dpad_right
+    *data = (void*)src_images_dpad_right_png;
+    *size = src_images_dpad_right_png_len;
+    return 0;
+  case 0x21d4e1a2U: // dpad_up
+    *data = (void*)src_images_dpad_up_png;
+    *size = src_images_dpad_up_png_len;
+    return 0;
+  case 0x1b80e3c5U: // select
+    *data = (void*)src_images_select_png;
+    *size = src_images_select_png_len;
+    return 0;
+  case 0x106149d3U: // start
+    *data = (void*)src_images_start_png;
+    *size = src_images_start_png_len;
     return 0;
   }
   
   return -1;
 }
 
-void gwlua_destroy_sound( gwlua_state_t* state, gwlua_sound_t* sound )
+void gwlua_play_sound( const gwlua_sound_t* sound )
 {
-  (void)state;
-  (void)sound;
+  sound->state->position = 0;
+  sound->state->playing = sound;
 }
 
-void gwlua_play_sound( gwlua_state_t* state, const gwlua_sound_t* sound )
-{
-  state->position = 0;
-  state->playing = sound;
-}
-
-void gwlua_stop_all_sounds( gwlua_state_t* state )
+void gwlua_stop_all_sounds( gwlua_t* state )
 {
   state->playing = NULL;
 }
 
-const char* gwlua_load_value( gwlua_state_t* state, const char* key, int* type )
+const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 {
   log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", %p )\n", __FUNCTION__, state, key, type );
   return NULL;
 }
 
-void gwlua_save_value( gwlua_state_t* state, const char* key, const char* value, int type )
+void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type )
 {
   log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", \"%s\", %d )\n", __FUNCTION__, state, key, value, type );
 }
 
-int gwlua_set_bg( gwlua_state_t* state, const gwlua_picture_t* bg )
+int gwlua_set_fb( const gwlua_picture_t* fb )
 {
-  size_t size = bg->width * bg->height * sizeof( uint16_t );
-  state->screen.pixels = (uint16_t*)malloc( size );
+  struct retro_game_geometry geometry;
   
-  if ( state->screen.pixels )
-  {
-    state->bg = bg;
-    
-    state->screen.width = bg->width;
-    state->screen.height = bg->height;
-    state->screen.pitch = bg->width;
-    memcpy( state->screen.pixels, bg->pixels, size );
-    state->screen.parent = NULL;
-    
-    struct retro_game_geometry geometry;
-    
-    geometry.base_width = bg->width;
-    geometry.base_height = bg->height;
-    geometry.max_width = bg->width;
-    geometry.max_height = bg->height;
-    geometry.aspect_ratio = 0.0f;
-    
-    env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
-    
-    log_cb( RETRO_LOG_INFO, "gwmw resolution changed to:\n");
-    log_cb( RETRO_LOG_INFO, "  width  = %u\n", bg->width );
-    log_cb( RETRO_LOG_INFO, "  height = %u\n", bg->height );
-    log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", bg->width );
-    
-    return 0;
-  }
+  geometry.base_width = fb->width;
+  geometry.base_height = fb->height;
+  geometry.max_width = fb->width;
+  geometry.max_height = fb->height;
+  geometry.aspect_ratio = 0.0f;
   
-  return -1;
+  env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
+  
+  log_cb( RETRO_LOG_INFO, "gwmw resolution changed to:\n");
+  log_cb( RETRO_LOG_INFO, "  width  = %u\n", fb->width );
+  log_cb( RETRO_LOG_INFO, "  height = %u\n", fb->height );
+  log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", fb->width );
+  
+  return 0;
 }
 
-void gwlua_log( const char* format, va_list args )
+void gwlua_vlog( const char* format, va_list args )
 {
   char buffer[ 8192 ]; /* should be enough */
   
@@ -518,7 +472,7 @@ bool retro_load_game( const struct retro_game_info* info )
   env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
   memset( input_state, 0, sizeof( input_state ) );
   
-  int res = gwrom_init( &gwlua_state->gwrom, constcast( info->data ), info->size, GWROM_COPY_ALWAYS );
+  int res = gwrom_init( &rom, constcast( info->data ), info->size, GWROM_COPY_ALWAYS );
   
   if ( res != GWROM_OK )
   {
@@ -526,22 +480,12 @@ bool retro_load_game( const struct retro_game_info* info )
     return false;
   }
   
-  gwrom_entry_t entry;
-  
-  if ( gwrom_find( &entry, &gwlua_state->gwrom, "main.lua" ) != GWROM_OK )
-  {
-    gwrom_destroy( &gwlua_state->gwrom );
-    log_cb( RETRO_LOG_ERROR, "Error initializing the rom: ", gwrom_error_message( res ) );
-    return false;
-  }
-  
-  if ( gwlua_create( gwlua_state, entry.data, entry.size ) )
+  if ( gwlua_create( &state, &rom, perf_cb.get_time_usec() ) )
   {
     log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
     return false;
   }
   
-  gwlua_state->first_frame = 1;
   return true;
 }
 
@@ -590,10 +534,10 @@ void retro_get_system_av_info( struct retro_system_av_info* info )
 {
   log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, info );
   
-  info->geometry.base_width = gwlua_state->screen.width;
-  info->geometry.base_height = gwlua_state->screen.height;
-  info->geometry.max_width = gwlua_state->screen.width;
-  info->geometry.max_height = gwlua_state->screen.height;
+  info->geometry.base_width = state.screen.width;
+  info->geometry.base_height = state.screen.height;
+  info->geometry.max_width = state.screen.width;
+  info->geometry.max_height = state.screen.height;
   info->geometry.aspect_ratio = 0.0f;
   info->timing.fps = 60.0;
   info->timing.sample_rate = 44100.0;
@@ -632,9 +576,6 @@ void retro_run()
     { RETRO_DEVICE_ID_JOYPAD_START,  GWLUA_START },
   };
   
-  gwlua_state->updated = gwlua_state->first_frame;
-  gwlua_state->first_frame = 0;
-  
   input_poll_cb();
   
   unsigned port, id;
@@ -650,37 +591,37 @@ void retro_run()
         if ( !input_state[ port ][ id ] )
         {
           input_state[ port ][ id ] = true;
-          gwlua_button_down( gwlua_state, port, map[ id ].gw );
+          gwlua_button_down( &state, port, map[ id ].gw );
         }
       }
       else
       {
-        if (input_state[ port ][ id ] )
+        if ( input_state[ port ][ id ] )
         {
           input_state[ port ][ id ] = false;
-          gwlua_button_up( gwlua_state, port, map[ id ].gw );
+          gwlua_button_up( &state, port, map[ id ].gw );
         }
       }
     }
   }
   
-  gwlua_tick( gwlua_state, perf_cb.get_time_usec() );
-  video_cb( gwlua_state->updated ? gwlua_state->screen.pixels : NULL, gwlua_state->screen.width, gwlua_state->screen.height, gwlua_state->screen.pitch * sizeof( uint16_t ) );
+  gwlua_tick( &state, perf_cb.get_time_usec() );
+  video_cb( state.screen.pixels, state.screen.width, state.screen.height, state.screen.width * sizeof( uint16_t ) );
   
-  memset( gwlua_state->sound, 0, sizeof( gwlua_state->sound ) );
+  memset( state.sound, 0, sizeof( state.sound ) );
 
-  if ( gwlua_state->playing )
+  if ( state.playing )
   {
-    const int16_t* src = gwlua_state->playing->data + gwlua_state->position;
-    size_t size = gwlua_state->playing->size - gwlua_state->position;
-    const size_t max_size = sizeof( gwlua_state->sound ) / sizeof( gwlua_state->sound[ 0 ] ) / 2;
+    const int16_t* src = state.playing->pcm16 + state.position;
+    size_t size = state.playing->size - state.position;
+    const size_t max_size = sizeof( state.sound ) / sizeof( state.sound[ 0 ] ) / 2;
     
     if ( size > max_size )
     {
       size = max_size;
     }
     
-    int16_t* dest = gwlua_state->sound;
+    int16_t* dest = state.sound;
     size_t i;
     
     for ( i = size; i != 0; --i )
@@ -689,15 +630,15 @@ void retro_run()
       *dest++ = *src++;
     }
     
-    gwlua_state->position += size;
+    state.position += size;
     
-    if ( gwlua_state->position == gwlua_state->playing->size )
+    if ( state.position == state.playing->size )
     {
-      gwlua_state->playing = NULL;
+      state.playing = NULL;
     }
   }
   
-  audio_cb( gwlua_state->sound, sizeof( gwlua_state->sound ) / sizeof( gwlua_state->sound[ 0 ] ) / 2 );
+  audio_cb( state.sound, sizeof( state.sound ) / sizeof( state.sound[ 0 ] ) / 2 );
 }
 
 void retro_deinit()
@@ -727,7 +668,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
 
 void retro_reset()
 {
-  gwlua_reset( gwlua_state );
+  gwlua_reset( &state );
 }
 
 size_t retro_serialize_size()
@@ -767,12 +708,8 @@ bool retro_load_game_special(unsigned a, const struct retro_game_info* b, size_t
 void retro_unload_game()
 {
   log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
-  
-  if ( gwlua_state )
-  {
-    gwrom_destroy( &gwlua_state->gwrom );
-    gwlua_destroy( gwlua_state );
-  }
+  gwlua_destroy( &state );
+  gwrom_destroy( &rom );
 }
 
 unsigned retro_get_region()

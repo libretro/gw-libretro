@@ -262,8 +262,12 @@ CXXFLAGS += -Wall
 
 LDFLAGS +=
 
+LUA =
+PNG =
+
 include Makefile.common
 
+HEADERS = $(LUA:.lua=.h) $(PNG:.png=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
 INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
@@ -277,6 +281,12 @@ INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 %.o: %.S
 	$(CC_AS) -c -o $@ $< $(CFLAGS) $(INCDIRS)
 
+%.h: %.lua
+	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
+
+%.h: %.png
+	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
+
 ifeq ($(platform), theos_ios)
 COMMON_FLAGS := -DIOS $(COMMON_DEFINES) $(INCFLAGS) -I$(THEOS_INCLUDE_PATH) -Wno-error
 $(LIBRARY_NAME)_CFLAGS += $(CFLAGS) $(COMMON_FLAGS)
@@ -287,7 +297,7 @@ include $(THEOS_MAKE_PATH)/library.mk
 else
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(HEADERS) $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
@@ -299,6 +309,7 @@ clean-objs:
 
 clean:
 	rm -f $(OBJS)
+	rm -f $(HEADERS)
 	rm -f $(TARGET)
 
 .PHONY: $(TARGET) clean clean-objs

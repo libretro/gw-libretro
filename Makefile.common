@@ -5,11 +5,19 @@ INCFLAGS := -I$(CORE_DIR) \
             -I$(CORE_DIR)/bzip2 \
             -I$(CORE_DIR)/lua/src
 
-SOURCES_C += $(CORE_DIR)/src/libretro.c
+#SOURCES_C += $(CORE_DIR)/src/libretro.c
 SOURCES_CXX += $(CORE_DIR)/src/constcast.cpp
 
 SOURCES_C += $(CORE_DIR)/gwrom/gwrom.c
+SOURCES_C += $(CORE_DIR)/src/libretro.c
+
+SOURCES_C += $(CORE_DIR)/gwlua/functions.c
 SOURCES_C += $(CORE_DIR)/gwlua/gwlua.c
+SOURCES_C += $(CORE_DIR)/gwlua/image.c
+SOURCES_C += $(CORE_DIR)/gwlua/picture.c
+SOURCES_C += $(CORE_DIR)/gwlua/ref.c
+SOURCES_C += $(CORE_DIR)/gwlua/sound.c
+SOURCES_C += $(CORE_DIR)/gwlua/timer.c
 
 SOURCES_C += $(CORE_DIR)/bzip2/blocksort.c
 SOURCES_C += $(CORE_DIR)/bzip2/huffman.c
@@ -52,3 +60,38 @@ SOURCES_LUA_C += $(CORE_DIR)/lua/src/ltablib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lutf8lib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/loadlib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/linit.c
+
+LUA += $(CORE_DIR)/gwlua/lua/class.lua
+LUA += $(CORE_DIR)/gwlua/lua/classes.lua
+LUA += $(CORE_DIR)/gwlua/lua/controls.lua
+LUA += $(CORE_DIR)/gwlua/lua/dialogs.lua
+LUA += $(CORE_DIR)/gwlua/lua/extctrls.lua
+LUA += $(CORE_DIR)/gwlua/lua/fmod.lua
+LUA += $(CORE_DIR)/gwlua/lua/fmodtypes.lua
+LUA += $(CORE_DIR)/gwlua/lua/forms.lua
+LUA += $(CORE_DIR)/gwlua/lua/graphics.lua
+LUA += $(CORE_DIR)/gwlua/lua/jpeg.lua
+LUA += $(CORE_DIR)/gwlua/lua/math.lua
+LUA += $(CORE_DIR)/gwlua/lua/messages.lua
+LUA += $(CORE_DIR)/gwlua/lua/registry.lua
+LUA += $(CORE_DIR)/gwlua/lua/stdctrls.lua
+LUA += $(CORE_DIR)/gwlua/lua/sysutils.lua
+LUA += $(CORE_DIR)/gwlua/lua/windows.lua
+
+PNG += $(CORE_DIR)/src/images/button_a.png
+PNG += $(CORE_DIR)/src/images/button_a_small.png
+PNG += $(CORE_DIR)/src/images/button_b.png
+PNG += $(CORE_DIR)/src/images/button_b_small.png
+PNG += $(CORE_DIR)/src/images/button_l.png
+PNG += $(CORE_DIR)/src/images/button_r.png
+PNG += $(CORE_DIR)/src/images/button_x.png
+PNG += $(CORE_DIR)/src/images/button_x_small.png
+PNG += $(CORE_DIR)/src/images/button_y.png
+PNG += $(CORE_DIR)/src/images/button_y_small.png
+PNG += $(CORE_DIR)/src/images/dpad.png
+PNG += $(CORE_DIR)/src/images/dpad_down.png
+PNG += $(CORE_DIR)/src/images/dpad_left.png
+PNG += $(CORE_DIR)/src/images/dpad_right.png
+PNG += $(CORE_DIR)/src/images/dpad_up.png
+PNG += $(CORE_DIR)/src/images/select.png
+PNG += $(CORE_DIR)/src/images/start.png

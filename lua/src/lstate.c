@@ -72,13 +72,6 @@ typedef struct LG {
 
 #define fromstate(L)	(cast(LX *, cast(lu_byte *, (L)) - offsetof(LX, l)))
 
-void lua_setstateud (lua_State* L, void* ud) {
-  L->userdata = ud;
-}
-
-void* lua_getstateud (lua_State* L) {
-  return L->userdata;
-}
 
 /*
 ** Compute an initial seed as random as possible. Rely on Address Space

@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#include <lua.h>
+
 /*---------------------------------------------------------------------------*/
 /* Registry value types for gwlua_(load|save)_value */
 
@@ -41,34 +43,76 @@ and sound
 
 #include <gwrom.h>
 
-typedef struct gwlua_picture_t gwlua_picture_t;
-typedef struct gwlua_sound_t gwlua_sound_t;
-typedef struct gwlua_state_t gwlua_state_t;
+typedef struct gwlua_t gwlua_t;
 
-struct gwlua_picture_t
+typedef struct
 {
-  unsigned width, height, pitch;
+  gwlua_t* state;
+  
+  int64_t interval;
+  int64_t expiration;
+  int     is_enabled;
+  int     callback_ref;
+}
+gwlua_timer_t;
+
+typedef struct
+{
+  gwlua_t* state;
+  
+  unsigned  width;
+  unsigned  height;
   uint16_t* pixels;
-  const gwlua_picture_t* parent;
-};
+}
+gwlua_picture_t;
 
-struct gwlua_sound_t
+typedef struct
 {
-  int16_t* data;
-  size_t size;
-};
+  gwlua_t* state;
+  
+  int x;
+  int y;
+  int is_visible;
+  
+  gwlua_picture_t* picture;
+  int              picture_ref;
+}
+gwlua_image_t;
 
-struct gwlua_state_t
+typedef struct
 {
-  gwrom_t gwrom;
+  gwlua_t* state;
+  
+  int16_t* pcm16;
+  size_t   size;
+}
+gwlua_sound_t;
+
+struct gwlua_t
+{
+  /* contents */
+  gwrom_t* rom;
+  
+  /* screen */
   const gwlua_picture_t* bg;
   gwlua_picture_t screen;
-  int first_frame;
-  int updated;
   
+  /* control */
+  lua_State* L;
+  int first_frame;
+  uint64_t seed;
+  int64_t now;
+  
+  /* sound */
   const gwlua_sound_t* playing;
   size_t position;
   int16_t sound[ 735 * 2 ];
+  
+  /* references */
+  int bg_ref;
+  int keyup_ref;
+  int keydown_ref;
+  int tick_ref;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -80,37 +124,41 @@ void  gwlua_free( void* pointer );
 void* gwlua_realloc( void* pointer, size_t size );
 
 /* picture */
-int  gwlua_load_picture( gwlua_state_t* state, gwlua_picture_t* picture, const char* name );
-int  gwlua_sub_picture( gwlua_state_t* state, gwlua_picture_t* picture, const gwlua_picture_t* parent, int x0, int y0, unsigned width, unsigned height );
-void gwlua_destroy_picture( gwlua_state_t* state, gwlua_picture_t* picture );
-void gwlua_blit_picture( gwlua_state_t* state, const gwlua_picture_t* picture, int x, int y );
-void gwlua_unblit_picture( gwlua_state_t* state, const gwlua_picture_t* picture, int x, int y );
+void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y );
+void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y );
+int  gwlua_get_button_picture( gwlua_t* state, uint32_t hash, void** data, size_t* size );
 
 /* sound */
-int  gwlua_load_sound( gwlua_state_t* state, gwlua_sound_t* sound, const char* name );
-void gwlua_destroy_sound( gwlua_state_t* state, gwlua_sound_t* sound );
-void gwlua_play_sound( gwlua_state_t* state, const gwlua_sound_t* sound );
-void gwlua_stop_all_sounds( gwlua_state_t* state );
+void gwlua_play_sound( const gwlua_sound_t* sound );
+void gwlua_stop_all_sounds( gwlua_t* state );
 
 /* registry */
-const char* gwlua_load_value( gwlua_state_t* state, const char* key, int* type );
-void        gwlua_save_value( gwlua_state_t* state, const char* key, const char* value, int type );
+const char* gwlua_load_value( gwlua_t* state, const char* key, int* type );
+void        gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type );
 
 /* control */
-int gwlua_set_bg( gwlua_state_t* state, const gwlua_picture_t* bg );
+int gwlua_set_fb( const gwlua_picture_t* fb );
 
 /* log */
-void gwlua_log( const char* format, va_list args );
+void gwlua_vlog( const char* format, va_list args );
 
 /*---------------------------------------------------------------------------*/
 /* api */
 
-int  gwlua_create( gwlua_state_t* state, const void* main, size_t size );
-void gwlua_destroy( gwlua_state_t* state );
-void gwlua_reset( gwlua_state_t* state );
+int  gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now );
+void gwlua_destroy( gwlua_t* state );
+int  gwlua_reset( gwlua_t* state );
 
-void gwlua_tick( gwlua_state_t* state, int64_t now );
-void gwlua_button_down( gwlua_state_t* state, unsigned controller_ndx, int button );
-void gwlua_button_up( gwlua_state_t* state, unsigned controller_ndx, int button );
+void gwlua_tick( gwlua_t* state, int64_t now );
+void gwlua_button_down( gwlua_t* state, unsigned controller_ndx, int button );
+void gwlua_button_up( gwlua_t* state, unsigned controller_ndx, int button );
+
+void gwlua_ref_create( lua_State* L, int index, int* ref );
+void gwlua_ref_destroy( lua_State* L, int* ref );
+void gwlua_ref_new( lua_State* L, int index, int* ref );
+void gwlua_ref_get( lua_State* L, int ref );
+
+uint32_t gwlua_djb2( const char* str );
+void     gwlua_log( const char* format, ... );
 
 #endif /* GWLUA_H */
