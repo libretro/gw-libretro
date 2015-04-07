@@ -42,5 +42,7 @@ M.vk_left = -3
 M.vk_right = -4
 M.vk_control = -5
 M.vk_menu = -6
+M.vk_shift = -7
+M.vk_insert = -8
 
 return M
