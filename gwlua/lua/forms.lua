@@ -36,6 +36,7 @@ end
 M.cafree = 0
 M.bsnone = 0
 M.ponone = 0
+M.poscreencenter = 1
 M.vk_up = -1
 M.vk_down = -2
 M.vk_left = -3
