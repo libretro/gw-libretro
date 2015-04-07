@@ -9,4 +9,9 @@ function M.tlabel:new()
   self.font = graphics.tfont()
 end
 
+M.tscrollbar = class.new()
+
+function M.tscrollbar:new()
+end
+
 return M

@@ -1,5 +1,6 @@
 local class = system.loadunit 'class'
 local graphics = system.loadunit 'graphics'
+local stdctrls = system.loadunit 'stdctrls'
 
 local M = {}
 
@@ -8,6 +9,8 @@ M.tform = class.new()
 function M.tform:new()
   --self.popupmenu = M.tform()
   self.font = graphics.tfont()
+  self.horzscrollbar = stdctrls.tscrollbar()
+  self.vertscrollbar = stdctrls.tscrollbar()
 end
 
 function M.tform:show()
