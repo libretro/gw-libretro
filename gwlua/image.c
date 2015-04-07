@@ -91,6 +91,7 @@ static int l_newindex( lua_State* L )
   case 0x45b29eb9U: // autosize
   case 0xaf079762U: // stretch
   case 0xf62fb286U: // center
+  case 0x6c13e8e8U: // onclick
     return 0;
     
   case 0x7c618d53U: // visible
