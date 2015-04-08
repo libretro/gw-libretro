@@ -24,17 +24,14 @@ static int l_tick( lua_State* L )
 {
   gwlua_timer_t* self = l_check( L, 1 );
   
-  if ( self->state->now >= self->expiration )
+  if ( self->is_enabled && self->callback_ref != LUA_NOREF && self->state->now >= self->expiration )
   {
     self->expiration = self->interval + self->state->now;
     
-    if ( self->is_enabled && self->callback_ref != LUA_NOREF )
-    {
-      gwlua_ref_get( L, self->callback_ref );
-      lua_pushvalue( L, 1 );
-      
-      lua_call( L, 1, 0 );
-    }
+    gwlua_ref_get( L, self->callback_ref );
+    lua_pushvalue( L, 1 );
+    
+    lua_call( L, 1, 0 );
   }
   
   return 0;
@@ -77,10 +74,12 @@ static int l_newindex( lua_State* L )
     
   case 0x8c344f2aU: // interval
     self->interval = luaL_checkinteger( L, 3 ) * 1000;
+    self->expiration = self->interval + self->state->now;
     return 0;
     
   case 0x6a23e990U: // enabled
     self->is_enabled = lua_toboolean( L, 3 );
+    self->expiration = self->interval + self->state->now;
     return 0;
     
   case 0x6d45f5a3U: // ontimer
