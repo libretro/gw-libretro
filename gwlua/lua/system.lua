@@ -8,13 +8,11 @@ return function( M )
     if unit then
       return unit
     end
-    print( '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@' )
-    print( 1, entry )
+
     local bin = M.loadbin( entry )
-    print( 2, bin )
+
     if not bin then
       bin = M.loadbs( name .. '.bs' )
-      print( 3, bin )
     end
     
     if bin then
