@@ -2,29 +2,35 @@ local cache = {}
 
 return function( M )
   M.loadunit = function( name )
-    name = name .. '.lua'
-    local unit = cache[ name ]
+    local entry = name .. '.lua'
+    local unit = cache[ entry ]
     
     if unit then
       return unit
     end
-    
-    local bin = M.loadbin( name )
+    print( '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@' )
+    print( 1, entry )
+    local bin = M.loadbin( entry )
+    print( 2, bin )
+    if not bin then
+      bin = M.loadbs( name .. '.bs' )
+      print( 3, bin )
+    end
     
     if bin then
       local err
-      unit, err = load( bin, name, 't' )
+      unit, err = load( bin, entry, 't' )
       
       if not unit then
         error( err )
       end
       
       unit = unit()
-      cache[ name ] = unit
+      cache[ entry ] = unit
       return unit
     end
     
-    error( 'unit ' .. name .. ' not found' )
+    error( 'unit ' .. entry .. ' not found' )
   end
   
   local class = M.loadunit 'class'

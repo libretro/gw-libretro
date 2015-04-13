@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <gwrom.h>
+#include <bsreader.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -118,18 +119,27 @@ static int l_create( lua_State* L )
 #endif
   
   gwrom_entry_t entry;
-  int error = gwrom_find( &entry, state->rom, "main.lua" );
+  int error = gwrom_find( &entry, state->rom, "main.bs" );
   
   if ( error != GWROM_OK )
   {
     return luaL_error( L, "%s", gwrom_error_message( error ) );
   }
   
-  if ( luaL_loadbufferx( L, (const char*)entry.data, entry.size, "main.lua", "t" ) != LUA_OK )
+  void* bs = bsnew( entry.data );
+  
+  if ( !bs )
   {
+    return luaL_error( L, "out of memory" );
+  }
+  
+  if ( lua_load( L, bsread, bs, "main.lua", "t" ) != LUA_OK )
+  {
+    free( bs );
     return lua_error( L );
   }
   
+  free( bs );
   lua_call( L, 0, 0 );
   return 0;
 }

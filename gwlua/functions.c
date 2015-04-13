@@ -9,6 +9,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include <bsreader.h>
+
 #include "lua/class.h"
 #include "lua/classes.h"
 #include "lua/controls.h"
@@ -349,7 +351,7 @@ static int l_loadbin( lua_State* L )
   default:
     if ( gwrom_find( &entry, state->rom, name ) != GWROM_OK )
     {
-      return luaL_error( L, "%s not found", name );
+      return 0;
     }
     
     break;
@@ -357,6 +359,45 @@ static int l_loadbin( lua_State* L )
   
   lua_pushlstring( L, (char*)entry.data, entry.size );
   return 1;
+}
+
+static int l_bsread( lua_State* L )
+{
+  void* bs = lua_touserdata( L, lua_upvalueindex( 1 ) );
+  const char* string;
+  size_t size;
+  
+  string = bsread( L, bs, &size );
+  
+  if ( string )
+  {
+    lua_pushlstring( L, string, size );
+    return 1;
+  }
+  
+  free( bs );
+  return 0;
+}
+
+static int l_loadbs( lua_State* L )
+{
+  gwlua_t* state = get_state( L );
+  const char* name = luaL_checkstring( L, 1 );
+  gwrom_entry_t entry;
+  
+  if ( gwrom_find( &entry, state->rom, name ) == GWROM_OK )
+  {
+    void* bs = bsnew( entry.data );
+    
+    if ( bs )
+    {
+      lua_pushlightuserdata( L, bs );
+      lua_pushcclosure( L, l_bsread, 1 );
+      return 1;
+    }
+  }
+  
+  return 0;
 }
 
 void register_functions( lua_State* L, gwlua_t* state )
@@ -376,6 +417,7 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "seteventfuncs", l_seteventfuncs },
     { "setbackground", l_setbackground },
     { "loadbin",       l_loadbin },
+    { "loadbs",        l_loadbs },
     { NULL, NULL }
   };
   

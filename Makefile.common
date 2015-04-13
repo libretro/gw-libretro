@@ -11,6 +11,7 @@ SOURCES_CXX += $(CORE_DIR)/src/constcast.cpp
 SOURCES_C += $(CORE_DIR)/gwrom/gwrom.c
 SOURCES_C += $(CORE_DIR)/src/libretro.c
 
+SOURCES_C += $(CORE_DIR)/gwlua/bsreader.c
 SOURCES_C += $(CORE_DIR)/gwlua/functions.c
 SOURCES_C += $(CORE_DIR)/gwlua/gwlua.c
 SOURCES_C += $(CORE_DIR)/gwlua/image.c
@@ -75,6 +76,7 @@ LUA += $(CORE_DIR)/gwlua/lua/math.lua
 LUA += $(CORE_DIR)/gwlua/lua/messages.lua
 LUA += $(CORE_DIR)/gwlua/lua/registry.lua
 LUA += $(CORE_DIR)/gwlua/lua/stdctrls.lua
+LUA += $(CORE_DIR)/gwlua/lua/system.lua
 LUA += $(CORE_DIR)/gwlua/lua/sysutils.lua
 LUA += $(CORE_DIR)/gwlua/lua/windows.lua
 
