@@ -77,7 +77,7 @@ const char* bsread( lua_State* L, void* data, size_t* size )
     return " ";
   }
   
-  const node_t* node = ROOT;
+  const node_t* node = BS_ROOT;
   
   while ( node->token == -1 )
   {
@@ -85,12 +85,12 @@ const char* bsread( lua_State* L, void* data, size_t* size )
     node = bit ? node->right : node->left;
   }
   
-  if ( node->token == LITERAL )
+  if ( node->token == BS_LITERAL )
   {
     literal = stream->literal;
     *size = getliteral( stream, stream->literal, sizeof( stream->literal ) );
   }
-  else if ( node->token != EOF )
+  else if ( node->token != BS_EOF )
   {
     literal = tokens[ node->token ].literal;
     *size = tokens[ node->token ].len;
