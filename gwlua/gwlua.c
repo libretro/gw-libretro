@@ -9,6 +9,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#if 0
 static void dump_stack( lua_State* L, const char* title )
 {
   printf( "================================\n%s\n", title );
@@ -58,6 +59,7 @@ static void dump_stack( lua_State* L, const char* title )
   
   lua_settop( L, top );
 }
+#endif
 
 static void* l_alloc( void* ud, void* ptr, size_t osize, size_t nsize )
 {
@@ -86,7 +88,7 @@ static int l_pcall( lua_State* L, int nargs, int nres )
   
   if ( lua_pcall( L, nargs, nres, -nargs - 2 ) != LUA_OK )
   {
-    gwlua_log( "==============================\n%s\n------------------------------\n", lua_tostring( L, -1 ) );
+    gwlua_log( "\n==============================\n%s\n------------------------------\n", lua_tostring( L, -1 ) );
     return -1;
   }
   
@@ -140,7 +142,9 @@ static int l_create( lua_State* L )
   }
   
   free( bs );
-  lua_call( L, 0, 0 );
+  
+  lua_call( L, 0, 1 );
+  gwlua_ref_create( L, -1, &state->tick_ref );
   return 0;
 }
 
@@ -159,6 +163,7 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   state->bg = NULL;
   state->first_frame = 1;
   state->now = now;
+  memset( (void*)state->input, 0, sizeof( state->input ) );
   state->playing = NULL;
   
   lua_pushcfunction( state->L, l_create );
@@ -188,6 +193,13 @@ int gwlua_reset( gwlua_t* state )
 
 /*---------------------------------------------------------------------------*/
 
+void gwlua_set_button( gwlua_t* state, int button, int pressed )
+{
+  state->input[ button ] = pressed;
+}
+
+/*---------------------------------------------------------------------------*/
+
 void gwlua_tick( gwlua_t* state, int64_t now )
 {
   state->now = now;
@@ -196,48 +208,6 @@ void gwlua_tick( gwlua_t* state, int64_t now )
   l_pcall( state->L, 0, 0 );
   
   state->first_frame = 0;
-}
-
-static const char* button_name( int button )
-{
-  switch ( button )
-  {
-  case GWLUA_UP:     return "up";
-  case GWLUA_DOWN:   return "down";
-  case GWLUA_LEFT:   return "left";
-  case GWLUA_RIGHT:  return "right";
-  case GWLUA_A:      return "a";
-  case GWLUA_B:      return "b";
-  case GWLUA_X:      return "x";
-  case GWLUA_Y:      return "y";
-  case GWLUA_L1:     return "l1";
-  case GWLUA_R1:     return "r1";
-  case GWLUA_L2:     return "l2";
-  case GWLUA_R2:     return "r2";
-  case GWLUA_L3:     return "l3";
-  case GWLUA_R3:     return "r3";
-  case GWLUA_SELECT: return "select";
-  case GWLUA_START:  return "start";
-  default:           return "?";
-  }
-}
-
-void gwlua_button_down( gwlua_t* state, unsigned controller_ndx, int button )
-{
-  gwlua_ref_get( state->L, state->keydown_ref );
-  lua_pushstring( state->L, button_name( button ) );
-  lua_pushinteger( state->L, controller_ndx );
-  
-  l_pcall( state->L, 2, 0 );
-}
-
-void gwlua_button_up( gwlua_t* state, unsigned controller_ndx, int button )
-{
-  gwlua_ref_get( state->L, state->keyup_ref );
-  lua_pushstring( state->L, button_name( button ) );
-  lua_pushinteger( state->L, controller_ndx );
-  
-  l_pcall( state->L, 2, 0 );
 }
 
 /*---------------------------------------------------------------------------*/

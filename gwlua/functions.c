@@ -198,15 +198,6 @@ static int l_savevalue( lua_State* L )
   return 1;
 }
 
-static int l_seteventfuncs( lua_State* L )
-{
-  gwlua_t* state = get_state( L );
-  gwlua_ref_create( L, 1, &state->keydown_ref );
-  gwlua_ref_create( L, 2, &state->keyup_ref );
-  gwlua_ref_create( L, 3, &state->tick_ref );
-  return 0;
-}
-
 static int l_setbackground( lua_State* L )
 {
   gwlua_t* state = get_state( L );
@@ -248,6 +239,53 @@ static int l_setbackground( lua_State* L )
   state->bg = bg;
   gwlua_set_fb( &state->screen );
   return 0;
+}
+
+static const char* button_name( int button )
+{
+  switch ( button )
+  {
+  case GWLUA_UP:     return "up";
+  case GWLUA_DOWN:   return "down";
+  case GWLUA_LEFT:   return "left";
+  case GWLUA_RIGHT:  return "right";
+  case GWLUA_A:      return "a";
+  case GWLUA_B:      return "b";
+  case GWLUA_X:      return "x";
+  case GWLUA_Y:      return "y";
+  case GWLUA_L1:     return "l1";
+  case GWLUA_R1:     return "r1";
+  case GWLUA_L2:     return "l2";
+  case GWLUA_R2:     return "r2";
+  case GWLUA_L3:     return "l3";
+  case GWLUA_R3:     return "r3";
+  case GWLUA_SELECT: return "select";
+  case GWLUA_START:  return "start";
+  default:           return "?";
+  }
+}
+
+static int l_inputstate( lua_State* L )
+{
+  gwlua_t* state = get_state( L );
+  int i;
+  
+  if ( lua_type( L, 1 ) == LUA_TTABLE )
+  {
+    lua_pushvalue( L, 1 );
+  }
+  else
+  {
+    lua_createtable( L, 0, 17 );
+  }
+  
+  for ( i = 1; i < sizeof( state->input ) / sizeof( state->input[ 0 ] ); i++ )
+  {
+    lua_pushboolean( L, state->input[ i ] );
+    lua_setfield( L, -2, button_name( i ) );
+  }
+  
+  return 1;
 }
 
 static int l_loadbin( lua_State* L )
@@ -414,8 +452,8 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "inttostr",      l_inttostr },
     { "loadvalue",     l_loadvalue },
     { "savevalue",     l_savevalue },
-    { "seteventfuncs", l_seteventfuncs },
     { "setbackground", l_setbackground },
+    { "inputstate",    l_inputstate },
     { "loadbin",       l_loadbin },
     { "loadbs",        l_loadbs },
     { NULL, NULL }

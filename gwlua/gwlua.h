@@ -103,6 +103,9 @@ struct gwlua_t
   uint64_t seed;
   int64_t now;
   
+  /* input */
+  char input[ GWLUA_START + 1 ];
+  
   /* sound */
   const gwlua_sound_t* playing;
   size_t position;
@@ -110,8 +113,6 @@ struct gwlua_t
   
   /* references */
   int bg_ref;
-  int keyup_ref;
-  int keydown_ref;
   int tick_ref;
 };
 
@@ -149,9 +150,8 @@ int  gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now );
 void gwlua_destroy( gwlua_t* state );
 int  gwlua_reset( gwlua_t* state );
 
+void gwlua_set_button( gwlua_t* state, int button, int pressed );
 void gwlua_tick( gwlua_t* state, int64_t now );
-void gwlua_button_down( gwlua_t* state, unsigned controller_ndx, int button );
-void gwlua_button_up( gwlua_t* state, unsigned controller_ndx, int button );
 
 void gwlua_ref_create( lua_State* L, int index, int* ref );
 void gwlua_ref_destroy( lua_State* L, int* ref );

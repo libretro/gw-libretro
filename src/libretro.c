@@ -43,9 +43,6 @@ static struct retro_perf_callback perf_cb;
 static gwrom_t rom;
 static gwlua_t state;
 
-#define MAX_PADS 2
-static unsigned input_devices[ MAX_PADS ];
-
 static struct retro_input_descriptor input_descriptors[] =
 {
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
@@ -68,8 +65,6 @@ static struct retro_input_descriptor input_descriptors[] =
   { 255, 255, 255, 255, "" }
 };
 
-static bool input_state[ MAX_PADS ][ sizeof( input_descriptors ) / sizeof( input_descriptors[ 0 ] ) - 1 ];
- 
 #ifdef LOG_PERFORMANCE
 #define RETRO_PERFORMANCE_INIT(name)  static struct retro_perf_counter name = {#name}; if (!name.registered) perf_cb.perf_register(&(name))
 #define RETRO_PERFORMANCE_START(name) perf_cb.perf_start(&(name))
@@ -470,7 +465,6 @@ bool retro_load_game( const struct retro_game_info* info )
   }
   
   env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
-  memset( input_state, 0, sizeof( input_state ) );
   
   int res = gwrom_init( &rom, constcast( info->data ), info->size, GWROM_COPY_ALWAYS );
   
@@ -578,31 +572,12 @@ void retro_run()
   
   input_poll_cb();
   
-  unsigned port, id;
+  unsigned id;
   
-  for ( port = 0; port < MAX_PADS; port++ )
+  for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
   {
-    for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
-    {
-      int16_t is_down = input_state_cb( port, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-
-      if ( is_down )
-      {
-        if ( !input_state[ port ][ id ] )
-        {
-          input_state[ port ][ id ] = true;
-          gwlua_button_down( &state, port, map[ id ].gw );
-        }
-      }
-      else
-      {
-        if ( input_state[ port ][ id ] )
-        {
-          input_state[ port ][ id ] = false;
-          gwlua_button_up( &state, port, map[ id ].gw );
-        }
-      }
-    }
+    int16_t pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
+    gwlua_set_button( &state, map[ id ].gw, pressed != 0 );
   }
   
   gwlua_tick( &state, perf_cb.get_time_usec() );
@@ -650,20 +625,9 @@ void retro_deinit()
 
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
+  (void)port;
+  (void)device;
   log_cb( RETRO_LOG_DEBUG, "%s( %u, %u )\n", __FUNCTION__, port, device );
-  
-  switch (device)
-  {
-  default:
-    log_cb( RETRO_LOG_WARN, "Unknown device 0x%04x\n", device );
-    device = RETRO_DEVICE_JOYPAD;
-    // fallthrough
-    
-  case RETRO_DEVICE_JOYPAD:
-    input_devices[ port ] = device;
-    log_cb( RETRO_LOG_INFO, "Device in port %u set to 0x%04x\n", port, device );
-    break;
-  }
 }
 
 void retro_reset()
