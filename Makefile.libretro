@@ -263,11 +263,10 @@ CXXFLAGS += -Wall
 LDFLAGS +=
 
 LUA =
-PNG =
 
 include Makefile.common
 
-HEADERS = $(LUA:.lua=.h) $(PNG:.png=.h)
+HEADERS = $(LUA:.lua=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
 INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
@@ -282,9 +281,6 @@ INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 	$(CC_AS) -c -o $@ $< $(CFLAGS) $(INCDIRS)
 
 %.h: %.lua
-	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
-
-%.h: %.png
 	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
 
 ifeq ($(platform), theos_ios)

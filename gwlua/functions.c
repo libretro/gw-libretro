@@ -362,29 +362,6 @@ static int l_loadbin( lua_State* L )
     entry.size = gwlua_lua_windows_lua_len;
     break;
     
-  case 0x0002b606U: // a
-  case 0x1489287eU: // a_small
-  case 0x0002b607U: // b
-  case 0x6183653fU: // b_small
-  case 0x0002b611U: // l
-  case 0x0002b617U: // r
-  case 0x0002b61dU: // x
-  case 0xff049dd5U: // x_small
-  case 0x0002b61eU: // y
-  case 0x4bfeda96U: // y_small
-  case 0x7c95cebeU: // dpad
-  case 0xea8a8b35U: // dpad_down
-  case 0xea8ec188U: // dpad_left
-  case 0x3cd5ba3bU: // dpad_right
-  case 0x21d4e1a2U: // dpad_up
-  case 0x1b80e3c5U: // select
-  case 0x106149d3U: // start
-    if ( gwlua_get_button_picture( state, hash, &entry.data, &entry.size ) )
-    {
-      return 0;
-    }
-    
-    break;
     
   default:
     if ( gwrom_find( &entry, state->rom, name ) != GWROM_OK )

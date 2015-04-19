@@ -127,7 +127,6 @@ void* gwlua_realloc( void* pointer, size_t size );
 /* picture */
 void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y );
 void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y );
-int  gwlua_get_button_picture( gwlua_t* state, uint32_t hash, void** data, size_t* size );
 
 /* sound */
 void gwlua_play_sound( const gwlua_sound_t* sound );

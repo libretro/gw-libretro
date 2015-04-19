@@ -6,24 +6,6 @@
 
 #include <gwlua.h>
 
-#include "images/button_a.h"
-#include "images/button_a_small.h"
-#include "images/button_b.h"
-#include "images/button_b_small.h"
-#include "images/button_l.h"
-#include "images/button_r.h"
-#include "images/button_x.h"
-#include "images/button_x_small.h"
-#include "images/button_y.h"
-#include "images/button_y_small.h"
-#include "images/dpad.h"
-#include "images/dpad_down.h"
-#include "images/dpad_left.h"
-#include "images/dpad_right.h"
-#include "images/dpad_up.h"
-#include "images/select.h"
-#include "images/start.h"
-
 /*---------------------------------------------------------------------------*/
 
 static void dummy_log( enum retro_log_level level, const char* fmt, ... )
@@ -238,83 +220,6 @@ void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y )
       }
     }
   }
-}
-
-int gwlua_get_button_picture( gwlua_t* state, uint32_t hash, void** data, size_t* size )
-{
-  switch ( hash )
-  {
-  case 0x0002b606U: // a
-    *data = (void*)src_images_button_a_png;
-    *size = src_images_button_a_png_len;
-    return 0;
-  case 0x1489287eU: // a_small
-    *data = (void*)src_images_button_a_small_png;
-    *size = src_images_button_a_small_png_len;
-    return 0;
-  case 0x0002b607U: // b
-    *data = (void*)src_images_button_b_png;
-    *size = src_images_button_b_png_len;
-    return 0;
-  case 0x6183653fU: // b_small
-    *data = (void*)src_images_button_b_small_png;
-    *size = src_images_button_b_small_png_len;
-    return 0;
-  case 0x0002b611U: // l
-    *data = (void*)src_images_button_l_png;
-    *size = src_images_button_l_png_len;
-    return 0;
-  case 0x0002b617U: // r
-    *data = (void*)src_images_button_r_png;
-    *size = src_images_button_r_png_len;
-    return 0;
-  case 0x0002b61dU: // x
-    *data = (void*)src_images_button_x_png;
-    *size = src_images_button_x_png_len;
-    return 0;
-  case 0xff049dd5U: // x_small
-    *data = (void*)src_images_button_x_small_png;
-    *size = src_images_button_x_small_png_len;
-    return 0;
-  case 0x0002b61eU: // y
-    *data = (void*)src_images_button_y_png;
-    *size = src_images_button_y_png_len;
-    return 0;
-  case 0x4bfeda96U: // y_small
-    *data = (void*)src_images_button_y_small_png;
-    *size = src_images_button_y_small_png_len;
-    return 0;
-  case 0x7c95cebeU: // dpad
-    *data = (void*)src_images_dpad_png;
-    *size = src_images_dpad_png_len;
-    return 0;
-  case 0xea8a8b35U: // dpad_down
-    *data = (void*)src_images_dpad_down_png;
-    *size = src_images_dpad_down_png_len;
-    return 0;
-  case 0xea8ec188U: // dpad_left
-    *data = (void*)src_images_dpad_left_png;
-    *size = src_images_dpad_left_png_len;
-    return 0;
-  case 0x3cd5ba3bU: // dpad_right
-    *data = (void*)src_images_dpad_right_png;
-    *size = src_images_dpad_right_png_len;
-    return 0;
-  case 0x21d4e1a2U: // dpad_up
-    *data = (void*)src_images_dpad_up_png;
-    *size = src_images_dpad_up_png_len;
-    return 0;
-  case 0x1b80e3c5U: // select
-    *data = (void*)src_images_select_png;
-    *size = src_images_select_png_len;
-    return 0;
-  case 0x106149d3U: // start
-    *data = (void*)src_images_start_png;
-    *size = src_images_start_png_len;
-    return 0;
-  }
-  
-  return -1;
 }
 
 void gwlua_play_sound( const gwlua_sound_t* sound )
