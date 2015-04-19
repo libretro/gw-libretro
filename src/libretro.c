@@ -222,10 +222,11 @@ void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y )
   }
 }
 
-void gwlua_play_sound( const gwlua_sound_t* sound )
+void gwlua_play_sound( const gwlua_sound_t* sound, int repeat )
 {
   sound->state->position = 0;
   sound->state->playing = sound;
+  sound->state->repeat = repeat;
 }
 
 void gwlua_stop_all_sounds( gwlua_t* state )
@@ -492,16 +493,18 @@ void retro_run()
 
   if ( state.playing )
   {
-    const int16_t* src = state.playing->pcm16 + state.position;
+    int16_t* dest = state.sound;
     size_t size = state.playing->size - state.position;
     const size_t max_size = sizeof( state.sound ) / sizeof( state.sound[ 0 ] ) / 2;
+    
+again:;
+    const int16_t* src = state.playing->pcm16 + state.position;
     
     if ( size > max_size )
     {
       size = max_size;
     }
     
-    int16_t* dest = state.sound;
     size_t i;
     
     for ( i = size; i != 0; --i )
@@ -514,7 +517,20 @@ void retro_run()
     
     if ( state.position == state.playing->size )
     {
-      state.playing = NULL;
+      if ( state.repeat )
+      {
+        state.position = 0;
+        
+        if ( size < max_size )
+        {
+          size = max_size - size;
+          goto again;
+        }
+      }
+      else
+      {
+        state.playing = NULL;
+      }
     }
   }
   

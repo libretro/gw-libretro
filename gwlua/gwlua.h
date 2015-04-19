@@ -109,6 +109,7 @@ struct gwlua_t
   /* sound */
   const gwlua_sound_t* playing;
   size_t position;
+  int repeat;
   int16_t sound[ 735 * 2 ];
   
   /* references */
@@ -129,7 +130,7 @@ void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y );
 void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y );
 
 /* sound */
-void gwlua_play_sound( const gwlua_sound_t* sound );
+void gwlua_play_sound( const gwlua_sound_t* sound, int repeat );
 void gwlua_stop_all_sounds( gwlua_t* state );
 
 /* registry */

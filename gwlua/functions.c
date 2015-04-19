@@ -35,7 +35,7 @@
 static int l_playsound( lua_State* L )
 {
   gwlua_sound_t* sound = (gwlua_sound_t*)luaL_checkudata( L, 1, "sound" );
-  gwlua_play_sound( sound );
+  gwlua_play_sound( sound, lua_toboolean( L, 2 ) );
   return 0;
 }
 
