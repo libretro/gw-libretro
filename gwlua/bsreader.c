@@ -9,7 +9,6 @@ typedef struct
 {
   unsigned char* byte;
   unsigned char  bit;
-  char           space;
   char           literal[ MAX_LITERAL_SIZE ];
 }
 stream_t;
@@ -63,21 +62,13 @@ static size_t getliteral( stream_t* stream, char* literal, size_t size )
 
 const char* bsread( lua_State* L, void* data, size_t* size )
 {
+  (void)L;
+  
   stream_t* stream = (stream_t*)data;
   int bit;
   const char* literal;
   
-  (void)L;
-  
-  stream->space = !stream->space;
-  
-  if ( !stream->space )
-  {
-    *size = 1;
-    return " ";
-  }
-  
-  const node_t* node = BS_ROOT;
+  const bsnode_t* node = BS_ROOT;
   
   while ( node->token == -1 )
   {
@@ -109,6 +100,5 @@ void* bsnew( void* data )
   stream_t* stream = (stream_t*)malloc( sizeof( *stream ) );
   stream->byte = (unsigned char*)data;
   stream->bit = 128;
-  stream->space = 0;
   return (void*)stream;
 }
