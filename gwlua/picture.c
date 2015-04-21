@@ -6,90 +6,297 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-/*---------------------------------------------------------------------------*/
-/* stb_image config and inclusion */
-
-#define STBI_ASSERT( x )
-
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
-#define STBI_ONLY_BMP
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-/*---------------------------------------------------------------------------*/
-
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
+
+static uint16_t ne16( uint16_t x )
+{
+  static const union
+  {
+    uint16_t u16;
+    uint8_t u8[ 2 ];
+  }
+  u = { 1 };
+  
+  return u.u8[ 0 ] ? x >> 8 | x << 8 : x;
+}
+
+static uint32_t ne32( uint32_t x )
+{
+  static const union
+  {
+    uint16_t u16;
+    uint8_t u8[ 2 ];
+  }
+  u = { 1 };
+  
+  if ( u.u8[ 0 ] )
+  {
+    return ne16( x ) << 16 | ne16( x >> 16 );
+  }
+  else
+  {
+    return x;
+  }
+}
 
 static void assign_data( lua_State* L, gwlua_picture_t* picture, void* data, size_t size )
 {
-  static const char* signatures[] =
-  {
-    "TBitmap",
-    "TJPEGImage",
-    NULL
-  };
+  union { void* v; uint16_t* u16; uint32_t* u32; } ptr;
+  uint16_t* rle;
   
-  if ( picture->pixels )
+  if ( picture->rle )
   {
-    luaL_error( L, "data reassign in sound" );
+    luaL_error( L, "data reassign in picture" );
     return;
   }
   
-  int i, offset = 0;
+  size -= 8; /* width, height, used */
+  picture->rle = (uint16_t*)gwlua_malloc( size );
   
-  for ( i = 0; signatures[ i ]; i++ )
+  if ( !picture->rle )
   {
-    size_t len = strlen( signatures[ i ] );
-    size_t len2 = *(uint8_t*)data;
-    
-    if ( len == len2 && !strncmp( signatures[ i ], (char*)data + 1, len ) )
-    {
-      offset = len + 5;
-      break;
-    }
-  }
-  
-  int width, height;
-  uint32_t* abgr32 = (uint32_t*)stbi_load_from_memory( (const stbi_uc*)data + offset, (int)size - offset, &width, &height, NULL, STBI_rgb_alpha );
-  
-  if ( !abgr32 )
-  {
-    luaL_error( L, "error loading image" );
-    return;
-  }
-  
-  uint32_t* to_free = abgr32;
-  uint16_t* rgab16 = (uint16_t*)gwlua_malloc( width * height * sizeof( uint16_t ) );
-  picture->pixels = rgab16;
-  
-  if ( !rgab16 )
-  {
-    gwlua_free( abgr32 );
     luaL_error( L, "out of memory" );
     return;
   }
   
-  const uint32_t* end = abgr32 + width * height;
+  ptr.v = data;
   
-  picture->pixels = rgab16;
-  picture->width = width;
-  picture->height = height;
+  picture->width = ne16( *ptr.u16++ );
+  picture->height = ne16( *ptr.u16++ );
+  picture->used = ne32( *ptr.u32++ );
   
-  while ( abgr32 < end )
+  rle = picture->rle;
+  
+  while ( size )
   {
-    uint32_t p = *abgr32++;
-    *rgab16++ = ( ( p & 0xf8 ) << 8 ) | ( ( p & 0xf800 ) >> 5 ) | ( ( p & 0xf80000 ) >> 19 ) | ( ( ( p & 0xff000000U ) != 0 ) << 5 );
+    *rle++ = ne16( *ptr.u16++ );
+    size -= 2;
   }
-  
-  gwlua_free( to_free );
+}
+
+void blit_picture( const gwlua_picture_t* picture, int x, int y, uint16_t* bg )
+{
+  if ( picture->rle )
+  {
+    uint16_t* fb = picture->state->screen + y * picture->state->width + x;
+    unsigned  pitch = picture->state->width - picture->width;
+    uint16_t* rle = picture->rle;
+    int       code, count;
+    uint32_t  c1, c2;
+    
+    y = picture->height;
+    
+    if ( bg )
+    {
+      do
+      {
+        /* runs in this row */
+        x = *rle++;
+        
+        do
+        {
+          /* decode */
+          code   = *rle++;
+          count  = code & 0x1fff;
+          code >>= 13;
+          
+          switch ( code & 7 )
+          {
+          case 4: /* opaque */
+            memcpy( (void*)bg, (void*)fb, count * 2 );
+            memcpy( (void*)fb, (void*)rle, count * 2 );
+            rle += count, fb += count, bg += count;
+            break;
+          
+          case 0: /* transparent */
+            fb += count;
+            break;
+          
+          case 2: /* 50% */
+            do
+            {
+              c1    = *fb;
+              *bg++ = c1;
+              c1   &= 0xf7de;
+              c2    = *rle++ & 0xf7de;
+              *fb++ = ( c1 + c2 ) >> 1;
+            }
+            while ( --count );
+            break;
+          
+          case 1: /* 25% */
+            do
+            {
+              c1    = *fb;
+              *bg++ = c1;
+              c1   &= 0xe79c;
+              c2    = *rle++ & 0xe79c;
+              *fb++ = ( 3 * c1 + c2 ) >> 2;
+            }
+            while ( --count );
+            break;
+          
+          case 3: /* 75% */
+            do
+            {
+              c1    = *fb;
+              *bg++ = c1;
+              c1   &= 0xe79c;
+              c2    = *rle++ & 0xe79c;
+              *fb++ = ( c1 + 3 * c2 ) >> 2;
+            }
+            while ( --count );
+            break;
+          
+          /* these are just to avoid gcc adding a cmp + ja */
+          case 5:
+            rle++;
+          case 6:
+            rle++;
+          case 7:
+            rle++;
+            break;
+          }
+        }
+        while ( --x );
+        
+        fb += pitch;
+      }
+      while ( --y );
+    }
+    else
+    {
+      do
+      {
+        /* runs in this row */
+        x = *rle++;
+        
+        do
+        {
+          /* decode */
+          code   = *rle++;
+          count  = code & 0x1fff;
+          code >>= 13;
+          
+          switch ( code & 7 )
+          {
+          case 4: /* opaque */
+            memcpy( (void*)fb, (void*)rle, count * 2 );
+            rle += count, fb += count;
+            break;
+          
+          case 0: /* transparent */
+            fb += count;
+            break;
+          
+          case 2: /* 50% */
+            do
+            {
+              c1    = *fb & 0xf7de;
+              c2    = *rle++ & 0xf7de;
+              *fb++ = ( c1 + c2 ) >> 1;
+            }
+            while ( --count );
+            break;
+          
+          case 1: /* 25% */
+            do
+            {
+              c1    = *fb & 0xe79c;
+              c2    = *rle++ & 0xe79c;
+              *fb++ = ( 3 * c1 + c2 ) >> 2;
+            }
+            while ( --count );
+            break;
+          
+          case 3: /* 75% */
+            do
+            {
+              c1    = *fb & 0xe79c;
+              c2    = *rle++ & 0xe79c;
+              *fb++ = ( c1 + 3 * c2 ) >> 2;
+            }
+            while ( --count );
+            break;
+          
+          /* these are just to avoid gcc adding a cmp + ja */
+          case 5:
+            rle++;
+          case 6:
+            rle++;
+          case 7:
+            rle++;
+            break;
+          }
+        }
+        while ( --x );
+        
+        fb += pitch;
+      }
+      while ( --y );
+    }
+  }
+}
+
+void unblit_picture( const gwlua_picture_t* picture, int x, int y, uint16_t* bg )
+{
+  if ( picture->rle )
+  {
+    uint16_t* fb = picture->state->screen + y * picture->state->width + x;
+    unsigned  pitch = picture->state->width - picture->width;
+    uint16_t* rle = picture->rle;
+    int       code, count;
+    
+    y = picture->height;
+    
+    do
+    {
+      /* runs in this row */
+      x = *rle++;
+      
+      do
+      {
+        /* decode */
+        code   = *rle++;
+        count  = code & 0x1fff;
+        code >>= 13;
+        
+        switch ( code & 7 )
+        {
+        case 4: /* opaque */
+        case 2: /* 50% */
+        case 1: /* 25% */
+        case 3: /* 75% */
+          memcpy( (void*)fb, (void*)bg, count * 2 );
+          rle += count, fb += count, bg += count;
+          break;
+        
+        case 0: /* transparent */
+          fb += count;
+          break;
+        
+        /* these are just to avoid gcc adding a cmp + ja */
+        case 5:
+          rle++;
+        case 6:
+          rle++;
+        case 7:
+          rle++;
+          break;
+        }
+      }
+      while ( --x );
+      
+      fb += pitch;
+    }
+    while ( --y );
+  }
 }
 
 static int l_gc( lua_State* L )
 {
   gwlua_picture_t* self = (gwlua_picture_t*)lua_touserdata( L, 1 );
-  gwlua_free( self->pixels );
+  gwlua_free( self->rle );
   return 0;
 }
 
@@ -100,9 +307,9 @@ static int l_index( lua_State* L )
 
   switch ( gwlua_djb2( key ) )
   {
-  case 0x7c95915fU: // data
-    lua_pushlightuserdata( L, (void*)self->pixels );
-    return 1;
+  // case 0x7c95915fU: // data
+    // lua_pushlightuserdata( L, (void*)self->rle );
+    // return 1;
   }
 
   return luaL_error( L, "%s not found in picture", key );
@@ -139,8 +346,8 @@ static int l_new( lua_State* L )
   gwlua_picture_t* self = (gwlua_picture_t*)lua_newuserdata( L, sizeof( gwlua_picture_t ) );
   
   self->state = state;
-  self->width = self->height = 0;
-  self->pixels = NULL;
+  self->width = self->height = self->used = 0;
+  self->rle = NULL;
   
   if ( luaL_newmetatable( L, "picture" ) != 0 )
   {

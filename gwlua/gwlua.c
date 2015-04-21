@@ -160,11 +160,18 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   luaL_openlibs( state->L );
   
   state->rom = rom;
-  state->bg = NULL;
+  state->width = state->height = 0;
+  state->screen = NULL;
+  state->updated = 0;
   state->first_frame = 1;
+  state->seed = 1;
   state->now = now;
   memset( (void*)state->input, 0, sizeof( state->input ) );
   state->playing = NULL;
+  state->position = 0;
+  state->repeat = 0;
+  memset( (void*)state->sound, 0, sizeof( state->sound ) );
+  state->tick_ref = LUA_NOREF;
   
   lua_pushcfunction( state->L, l_create );
   lua_pushlightuserdata( state->L, (void*)state );
@@ -202,12 +209,12 @@ void gwlua_set_button( gwlua_t* state, int button, int pressed )
 
 void gwlua_tick( gwlua_t* state, int64_t now )
 {
+  state->updated = state->first_frame;
+  state->first_frame = 0;
   state->now = now;
   
   gwlua_ref_get( state->L, state->tick_ref );
   l_pcall( state->L, 0, 0 );
-  
-  state->first_frame = 0;
 }
 
 /*---------------------------------------------------------------------------*/

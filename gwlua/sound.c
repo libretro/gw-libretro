@@ -9,17 +9,16 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
-static int is_little_endian( void )
+static uint16_t ne16( uint16_t x )
 {
-  union
+  static const union
   {
     uint16_t u16;
     uint8_t u8[ 2 ];
   }
-  u;
+  u = { 1 };
   
-  u.u16 = 1;
-  return u.u8[ 0 ];
+  return u.u8[ 0 ] ? x >> 8 | x << 8 : x;
 }
 
 static void assign_data( lua_State* L, gwlua_sound_t* sound, void* data, size_t size )
@@ -40,22 +39,13 @@ static void assign_data( lua_State* L, gwlua_sound_t* sound, void* data, size_t 
   
   sound->size = size / 2;
   
-  if ( is_little_endian() )
+  uint16_t* src = (uint16_t*)data;
+  uint16_t* dest = (uint16_t*)sound->pcm16;
+  const uint16_t* end = src + sound->size;
+  
+  while ( src < end )
   {
-    uint16_t* src = (uint16_t*)data;
-    uint16_t* dest = (uint16_t*)sound->pcm16;
-    const uint16_t* end = src + sound->size;
-    
-    while ( src < end )
-    {
-      uint16_t sample = *src++;
-      sample = ( sample >> 8 ) | ( sample << 8 );
-      *dest++ = sample;
-    }
-  }
-  else
-  {
-    memcpy( (void*)sound->pcm16, data, size );
+    *dest++ = ne16( *src++ );
   }
 }
 

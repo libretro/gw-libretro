@@ -62,7 +62,8 @@ typedef struct
   
   unsigned  width;
   unsigned  height;
-  uint16_t* pixels;
+  unsigned  used;
+  uint16_t* rle;
 }
 gwlua_picture_t;
 
@@ -73,9 +74,12 @@ typedef struct
   int x;
   int y;
   int is_visible;
+  int blitted;
   
   gwlua_picture_t* picture;
   int              picture_ref;
+  unsigned         used;
+  uint16_t*        bg;
 }
 gwlua_image_t;
 
@@ -94,11 +98,13 @@ struct gwlua_t
   gwrom_t* rom;
   
   /* screen */
-  const gwlua_picture_t* bg;
-  gwlua_picture_t screen;
+  unsigned  width;
+  unsigned  height;
+  uint16_t* screen;
   
   /* control */
   lua_State* L;
+  int updated;
   int first_frame;
   uint64_t seed;
   int64_t now;
@@ -113,7 +119,6 @@ struct gwlua_t
   int16_t sound[ 735 * 2 ];
   
   /* references */
-  int bg_ref;
   int tick_ref;
 };
 
@@ -125,10 +130,6 @@ void* gwlua_malloc( size_t size );
 void  gwlua_free( void* pointer );
 void* gwlua_realloc( void* pointer, size_t size );
 
-/* picture */
-void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y );
-void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y );
-
 /* sound */
 void gwlua_play_sound( const gwlua_sound_t* sound, int repeat );
 void gwlua_stop_all_sounds( gwlua_t* state );
@@ -138,7 +139,7 @@ const char* gwlua_load_value( gwlua_t* state, const char* key, int* type );
 void        gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type );
 
 /* control */
-int gwlua_set_fb( const gwlua_picture_t* fb );
+int gwlua_set_fb( unsigned width, unsigned height );
 
 /* log */
 void gwlua_vlog( const char* format, va_list args );

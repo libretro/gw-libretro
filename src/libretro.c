@@ -75,153 +75,6 @@ void* gwlua_realloc( void* pointer, size_t size )
   return realloc( pointer, size );
 }
 
-void gwlua_blit_picture( const gwlua_picture_t* picture, int x, int y )
-{
-  if ( picture->pixels )
-  {
-    int width = (int)picture->width;
-    int height = (int)picture->height;
-    
-    int d_width = (int)picture->state->screen.width;
-    int d_height = (int)picture->state->screen.height;
-    
-    if ( x > -width && x < d_width && y > -height && y < d_height )
-    {
-      const uint16_t* source = picture->pixels;
-      unsigned pitch = picture->width;
-      
-      uint16_t* dest = picture->state->screen.pixels;
-      unsigned d_pitch = picture->state->screen.width;
-      
-      uint16_t transp = source[ ( height - 1 ) * width ];
-      
-      if ( x < 0 )
-      {
-        width += x;
-        source += x;
-        x = 0;
-      }
-      
-      if ( x + width > d_width )
-      {
-        int out = x + width - d_width;
-        width -= out;
-      }
-      
-      if ( y < 0 )
-      {
-        height += y;
-        source -= y * pitch;
-        y = 0;
-      }
-      
-      if ( y + height > d_height )
-      {
-        int out = y + height - d_height;
-        height -= out;
-      }
-      
-      dest += y * d_pitch + x;
-      d_pitch -= width;
-      pitch -= width;
-      
-      int i, j;
-      
-      for ( j = 0; j < height; j++ )
-      {
-        for ( i = 0; i < width; i++ )
-        {
-          if ( *source != transp )
-          {
-            *dest = *source;
-          }
-          
-          source++;
-          dest++;
-        }
-        
-        source += pitch;
-        dest += d_pitch;
-      }
-    }
-  }
-}
-
-void gwlua_unblit_picture( const gwlua_picture_t* picture, int x, int y )
-{
-  if ( picture->pixels && picture->state->bg )
-  {
-    int width = (int)picture->width;
-    int height = (int)picture->height;
-    
-    int d_width = (int)picture->state->screen.width;
-    int d_height = (int)picture->state->screen.height;
-    
-    if ( x > -width && x < d_width && y > -height && y < d_height )
-    {
-      const uint16_t* source = picture->pixels;
-      unsigned pitch = picture->width;
-      
-      uint16_t* dest = picture->state->screen.pixels;
-      unsigned d_pitch = picture->state->screen.width;
-      
-      uint16_t transp = source[ ( height - 1 ) * width ];
-      
-      if ( x < 0 )
-      {
-        width += x;
-        source += x;
-        x = 0;
-      }
-      
-      if ( x + width > d_width )
-      {
-        int out = x + width - d_width;
-        width -= out;
-      }
-      
-      if ( y < 0 )
-      {
-        height += y;
-        source -= y * pitch;
-        y = 0;
-      }
-      
-      if ( y + height > d_height )
-      {
-        int out = y + height - d_height;
-        height -= out;
-      }
-      
-      const uint16_t* bg = picture->state->bg->pixels + y * d_pitch + x;
-      dest += y * d_pitch + x;
-      d_pitch -= width;
-      pitch -= width;
-      
-      int i, j;
-      
-      for ( j = 0; j < height; j++ )
-      {
-        for ( i = 0; i < width; i++ )
-        {
-          if ( *source != transp )
-          {
-            *dest = *bg;
-          }
-          
-          source++;
-          dest++;
-          bg++;
-        }
-        
-        source += pitch;
-        dest += d_pitch;
-        bg += d_pitch;
-      }
-    }
-  }
-}
-
 void gwlua_play_sound( const gwlua_sound_t* sound, int repeat )
 {
   sound->state->position = 0;
@@ -245,22 +98,22 @@ void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int t
   log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", \"%s\", %d )\n", __FUNCTION__, state, key, value, type );
 }
 
-int gwlua_set_fb( const gwlua_picture_t* fb )
+int gwlua_set_fb( unsigned width, unsigned height )
 {
   struct retro_game_geometry geometry;
   
-  geometry.base_width = fb->width;
-  geometry.base_height = fb->height;
-  geometry.max_width = fb->width;
-  geometry.max_height = fb->height;
+  geometry.base_width = width;
+  geometry.base_height = height;
+  geometry.max_width = width;
+  geometry.max_height = height;
   geometry.aspect_ratio = 0.0f;
   
   env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
   
   log_cb( RETRO_LOG_INFO, "gwmw resolution changed to:\n");
-  log_cb( RETRO_LOG_INFO, "  width  = %u\n", fb->width );
-  log_cb( RETRO_LOG_INFO, "  height = %u\n", fb->height );
-  log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", fb->width );
+  log_cb( RETRO_LOG_INFO, "  width  = %u\n", width );
+  log_cb( RETRO_LOG_INFO, "  height = %u\n", height );
+  log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", width );
   
   return 0;
 }
@@ -434,10 +287,10 @@ void retro_get_system_av_info( struct retro_system_av_info* info )
 {
   log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, info );
   
-  info->geometry.base_width = state.screen.width;
-  info->geometry.base_height = state.screen.height;
-  info->geometry.max_width = state.screen.width;
-  info->geometry.max_height = state.screen.height;
+  info->geometry.base_width = state.width;
+  info->geometry.base_height = state.height;
+  info->geometry.max_width = state.width;
+  info->geometry.max_height = state.height;
   info->geometry.aspect_ratio = 0.0f;
   info->timing.fps = 60.0;
   info->timing.sample_rate = 44100.0;
@@ -487,7 +340,7 @@ void retro_run()
   }
   
   gwlua_tick( &state, perf_cb.get_time_usec() );
-  video_cb( state.screen.pixels, state.screen.width, state.screen.height, state.screen.width * sizeof( uint16_t ) );
+  video_cb( state.updated ? state.screen : NULL, state.width, state.height, state.width * sizeof( uint16_t ) );
   
   memset( state.sound, 0, sizeof( state.sound ) );
 

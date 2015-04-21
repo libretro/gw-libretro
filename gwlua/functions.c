@@ -1,4 +1,5 @@
 #include <gwlua.h>
+#include <picture.h>
 
 #include <string.h>
 #include <stdint.h>
@@ -79,6 +80,7 @@ static int l_round( lua_State* L )
   double d1 = x - f;
   double d2 = c - x;
   
+  /* TODO: is this behavior present in a built-in function? */
   if ( d1 < d2 )
   {
     lua_pushnumber( L, f );
@@ -202,42 +204,21 @@ static int l_setbackground( lua_State* L )
 {
   gwlua_t* state = get_state( L );
   gwlua_picture_t* bg = (gwlua_picture_t*)luaL_checkudata( L, 1, "picture" );
-  gwlua_ref_create( L, 1, &state->bg_ref );
   
-  state->screen.state = state;
-  state->screen.width = bg->width;
-  state->screen.height = bg->height;
+  state->width = bg->width;
+  state->height = bg->height;
   
   size_t size = bg->width * bg->height * sizeof( uint16_t );
+  state->screen = (uint16_t*)gwlua_malloc( size );
   
-  state->screen.pixels = (uint16_t*)gwlua_malloc( size );
-  
-  if ( !state->screen.pixels )
+  if ( !state->screen )
   {
     return luaL_error( L, "out of memory" );
   }
   
-  if ( lua_isnoneornil( L, 2 ) )
-  {
-    memcpy( (void*)state->screen.pixels, (void*)bg->pixels, size );
-  }
-  else
-  {
-    uint16_t* src = bg->pixels;
-    const uint16_t* end = src + size / sizeof( uint16_t );
-    uint16_t* dest = state->screen.pixels;
-    uint32_t color = (uint32_t)luaL_checkinteger( L, 2 );
-    uint16_t transp = ( ( color & 0xf8 ) << 8 ) | ( ( color & 0xf800 ) >> 5 ) | ( ( color & 0xf80000 ) >> 19 ) | ( ( ( color & 0xff000000U ) != 0 ) << 5 );
-    
-    while ( src < end )
-    {
-      *dest++ = *src == transp ? 0 : *src;
-      src++;
-    }
-  }
-  
-  state->bg = bg;
-  gwlua_set_fb( &state->screen );
+  memset( state->screen, 0, size );
+  blit_picture( bg, 0, 0, NULL );
+  gwlua_set_fb( state->width, state->height );
   return 0;
 }
 
