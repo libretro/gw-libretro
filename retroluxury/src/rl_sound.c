@@ -20,7 +20,7 @@
 // #define free    rl_free
 // #define pow     pow
 // #define floor   floor
-// #define alloca( a ) 0
+#define alloca( a ) 0
 
 #include <stb_vorbis.c>
 /*---------------------------------------------------------------------------*/
