@@ -4,7 +4,7 @@ LOG_PERFORMANCE = 1
 
 
 CORE_DIR      = ..
-INCDIRS       = -I$(NDK)/platforms/android-9/arch-mips/usr/include
+INCDIRS       = -I$(NDK_ROOT)/platforms/android-9/arch-mips/usr/include
 SOURCES_C     =
 SOURCES_CXX   =
 SOURCES_LUA_C =
@@ -15,9 +15,9 @@ include Makefile.common
 
 
 
-CC  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-gcc
-CXX = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-g++
-AS  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-as
+CC  = $(NDK_ROOT)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-gcc
+CXX = $(NDK_ROOT)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-g++
+AS  = $(NDK_ROOT)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-as
 
 
 
@@ -30,7 +30,7 @@ TARGET = gw_libretro$(SOEXT)
 PLATDEFS     = -DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST -Dl_getlocaledecpoint\(\)=\(\'.\'\)
 PLATCFLAGS   = -fpic -fno-strict-aliasing -finline-functions -ffunction-sections -funwind-tables -fmessage-length=0 -fno-inline-functions-called-once -fgcse-after-reload -frerun-cse-after-loop -frename-registers -no-canonical-prefixes -fomit-frame-pointer -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security
 PLATCXXFLAGS = -fpic -fno-strict-aliasing -finline-functions -ffunction-sections -funwind-tables -fmessage-length=0 -fno-inline-functions-called-once -fgcse-after-reload -frerun-cse-after-loop -frename-registers -no-canonical-prefixes -fomit-frame-pointer -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security
-PLATLDFLAGS  = -shared --sysroot=$(NDK)/platforms/android-9/arch-mips -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm
+PLATLDFLAGS  = -shared --sysroot=$(NDK_ROOT)/platforms/android-9/arch-mips -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm
 
 
 
