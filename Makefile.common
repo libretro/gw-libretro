@@ -16,6 +16,7 @@ SOURCES_C += $(CORE_DIR)/gwlua/functions.c
 SOURCES_C += $(CORE_DIR)/gwlua/gwlua.c
 SOURCES_C += $(CORE_DIR)/gwlua/image.c
 SOURCES_C += $(CORE_DIR)/gwlua/ref.c
+SOURCES_C += $(CORE_DIR)/gwlua/sound.c
 SOURCES_C += $(CORE_DIR)/gwlua/timer.c
 
 SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_backgrnd.c
