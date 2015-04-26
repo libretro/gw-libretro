@@ -68,7 +68,11 @@ static void* l_alloc( void* ud, void* ptr, size_t osize, size_t nsize )
   
   if ( nsize == 0 )
   {
-    gwlua_free( ptr );
+    if ( ptr )
+    {
+      gwlua_free( ptr );
+    }
+    
     return NULL;
   }
 
@@ -97,7 +101,6 @@ static int l_pcall( lua_State* L, int nargs, int nres )
 
 void register_functions( lua_State* L, gwlua_t* state );
 void register_image( lua_State* L, gwlua_t* state );
-void register_picture( lua_State* L, gwlua_t* state );
 void register_sound( lua_State* L, gwlua_t* state );
 void register_timer( lua_State* L, gwlua_t* state );
 
@@ -109,16 +112,10 @@ static int l_create( lua_State* L )
   
   register_functions( L, state );
   register_image( L, state );
-  register_picture( L, state );
   register_sound( L, state );
   register_timer( L, state );
   
   lua_setglobal( L, "system" );
-  
-#ifndef NDEBUG
-  lua_pushboolean( L, 1 );
-  lua_setglobal( L, "_DEBUG" );
-#endif
   
   gwrom_entry_t entry;
   int error = gwrom_find( &entry, state->rom, "main.bs" );
@@ -157,20 +154,20 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
     return -1;
   }
   
+#ifndef NDEBUG
+  lua_pushboolean( state->L, 1 );
+  lua_setglobal( state->L, "_DEBUG" );
+#endif
+  
   luaL_openlibs( state->L );
   
   state->rom = rom;
   state->width = state->height = 0;
   state->screen = NULL;
-  state->updated = 0;
-  state->first_frame = 1;
+  state->help = 0;
   state->seed = 1;
   state->now = now;
   memset( (void*)state->input, 0, sizeof( state->input ) );
-  state->playing = NULL;
-  state->position = 0;
-  state->repeat = 0;
-  memset( (void*)state->sound, 0, sizeof( state->sound ) );
   state->tick_ref = LUA_NOREF;
   
   lua_pushcfunction( state->L, l_create );
@@ -202,15 +199,31 @@ int gwlua_reset( gwlua_t* state )
 
 void gwlua_set_button( gwlua_t* state, int button, int pressed )
 {
-  state->input[ button ] = pressed;
+  if ( button != GWLUA_START )
+  {
+    state->input[ button ] = pressed;
+  }
+  else
+  {
+    if ( pressed )
+    {
+      if ( !state->input[ GWLUA_START ] )
+      {
+        state->input[ GWLUA_START ] = 1;
+        state->help = !state->help;
+      }
+    }
+    else
+    {
+      state->input[ GWLUA_START ] = 0;
+    }
+  }
 }
 
 /*---------------------------------------------------------------------------*/
 
 void gwlua_tick( gwlua_t* state, int64_t now )
 {
-  state->updated = state->first_frame;
-  state->first_frame = 0;
   state->now = now;
   
   gwlua_ref_get( state->L, state->tick_ref );

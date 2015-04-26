@@ -7,6 +7,12 @@
 
 #include <lua.h>
 
+#include <gwrom.h>
+
+#include <rl_image.h>
+#include <rl_sprite.h>
+#include <rl_sound.h>
+
 /*---------------------------------------------------------------------------*/
 /* Registry value types for gwlua_(load|save)_value */
 
@@ -41,8 +47,6 @@ define these structures the way you need to properly handle states, pictures
 and sound
 */
 
-#include <gwrom.h>
-
 typedef struct gwlua_t gwlua_t;
 
 typedef struct
@@ -56,67 +60,23 @@ typedef struct
 }
 gwlua_timer_t;
 
-typedef struct
-{
-  gwlua_t* state;
-  
-  unsigned  width;
-  unsigned  height;
-  unsigned  used;
-  uint16_t* rle;
-}
-gwlua_picture_t;
-
-typedef struct
-{
-  gwlua_t* state;
-  
-  int x;
-  int y;
-  int is_visible;
-  int blitted;
-  
-  gwlua_picture_t* picture;
-  int              picture_ref;
-  unsigned         used;
-  uint16_t*        bg;
-}
-gwlua_image_t;
-
-typedef struct
-{
-  gwlua_t* state;
-  
-  int16_t* pcm16;
-  size_t   size;
-}
-gwlua_sound_t;
-
 struct gwlua_t
 {
   /* contents */
   gwrom_t* rom;
   
   /* screen */
-  unsigned  width;
-  unsigned  height;
+  int width, height;
   uint16_t* screen;
   
   /* control */
   lua_State* L;
-  int updated;
-  int first_frame;
+  int help;
   uint64_t seed;
   int64_t now;
   
   /* input */
   char input[ GWLUA_START + 1 ];
-  
-  /* sound */
-  const gwlua_sound_t* playing;
-  size_t position;
-  int repeat;
-  int16_t sound[ 735 * 2 ];
   
   /* references */
   int tick_ref;
@@ -129,10 +89,6 @@ struct gwlua_t
 void* gwlua_malloc( size_t size );
 void  gwlua_free( void* pointer );
 void* gwlua_realloc( void* pointer, size_t size );
-
-/* sound */
-void gwlua_play_sound( const gwlua_sound_t* sound, int repeat );
-void gwlua_stop_all_sounds( gwlua_t* state );
 
 /* registry */
 const char* gwlua_load_value( gwlua_t* state, const char* key, int* type );

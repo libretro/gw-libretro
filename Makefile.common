@@ -3,22 +3,25 @@ INCFLAGS := -I$(CORE_DIR) \
             -I$(CORE_DIR)/gwrom \
             -I$(CORE_DIR)/gwlua \
             -I$(CORE_DIR)/bzip2 \
-            -I$(CORE_DIR)/lua/src
+            -I$(CORE_DIR)/lua/src \
+            -I$(CORE_DIR)/retroluxury/src
 
-#SOURCES_C += $(CORE_DIR)/src/libretro.c
+SOURCES_C += $(CORE_DIR)/src/libretro.c
 SOURCES_CXX += $(CORE_DIR)/src/constcast.cpp
 
 SOURCES_C += $(CORE_DIR)/gwrom/gwrom.c
-SOURCES_C += $(CORE_DIR)/src/libretro.c
 
 SOURCES_C += $(CORE_DIR)/gwlua/bsreader.c
 SOURCES_C += $(CORE_DIR)/gwlua/functions.c
 SOURCES_C += $(CORE_DIR)/gwlua/gwlua.c
 SOURCES_C += $(CORE_DIR)/gwlua/image.c
-SOURCES_C += $(CORE_DIR)/gwlua/picture.c
 SOURCES_C += $(CORE_DIR)/gwlua/ref.c
-SOURCES_C += $(CORE_DIR)/gwlua/sound.c
 SOURCES_C += $(CORE_DIR)/gwlua/timer.c
+
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_backgrnd.c
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_image.c
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_sound.c
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_sprite.c
 
 SOURCES_C += $(CORE_DIR)/bzip2/blocksort.c
 SOURCES_C += $(CORE_DIR)/bzip2/huffman.c

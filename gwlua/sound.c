@@ -9,71 +9,22 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
-static uint16_t ne16( uint16_t x )
-{
-  static const union
-  {
-    uint16_t u16;
-    uint8_t u8[ 2 ];
-  }
-  u = { 1 };
-  
-  return u.u8[ 0 ] ? x >> 8 | x << 8 : x;
-}
-
-static void assign_data( lua_State* L, gwlua_sound_t* sound, void* data, size_t size )
-{
-  if ( sound->pcm16 )
-  {
-    luaL_error( L, "data reassign in sound" );
-    return;
-  }
-  
-  sound->pcm16 = (int16_t*)gwlua_malloc( size );
-  
-  if ( !sound->pcm16 )
-  {
-    luaL_error( L, "out of memory" );
-    return;
-  }
-  
-  sound->size = size / 2;
-  
-  uint16_t* src = (uint16_t*)data;
-  uint16_t* dest = (uint16_t*)sound->pcm16;
-  const uint16_t* end = src + sound->size;
-  
-  while ( src < end )
-  {
-    *dest++ = ne16( *src++ );
-  }
-}
-
 static int l_gc( lua_State* L )
 {
-  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
-  gwlua_free( self->pcm16 );
+  rl_sound_t* self = *(rl_sound_t**)lua_touserdata( L, 1 );
+  rl_sound_destroy( self );
   return 0;
 }
 
 static int l_index( lua_State* L )
 {
-  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
   const char* key = luaL_checkstring( L, 2 );
-
-  switch ( gwlua_djb2( key ) )
-  {
-  case 0x7c95915fU: // data
-    lua_pushlightuserdata( L, (void*)self->pcm16 );
-    return 1;
-  }
-
   return luaL_error( L, "%s not found in sound", key );
 }
 
 static int l_newindex( lua_State* L )
 {
-  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
+  rl_sound_t** self = (rl_sound_t**)lua_touserdata( L, 1 );
   const char* key = luaL_checkstring( L, 2 );
   const char* data;
   size_t len;
@@ -82,7 +33,13 @@ static int l_newindex( lua_State* L )
   {
   case 0x7c95915fU: // data
     data = luaL_checklstring( L, 3, &len );
-    assign_data( L, self, (void*)data, len );
+    *self = rl_sound_create( data, len, 0 );
+    
+    if ( !*self )
+    {
+      return luaL_error( L, "out of memory" );
+    }
+    
     return 0;
   }
 
@@ -91,19 +48,16 @@ static int l_newindex( lua_State* L )
 
 static int l_tostring( lua_State* L )
 {
-  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
+  rl_sound_t* self = *(rl_sound_t**)lua_touserdata( L, 1 );
   lua_pushfstring( L, "sound@%p", self );
   return 1;
 }
 
 static int l_new( lua_State* L )
 {
-  gwlua_t* state = get_state( L );
-  gwlua_sound_t* self = (gwlua_sound_t*)lua_newuserdata( L, sizeof( gwlua_sound_t ) );
+  rl_sound_t** self = (rl_sound_t**)lua_newuserdata( L, sizeof( rl_sound_t* ) );
   
-  self->state = state;
-  self->pcm16 = NULL;
-  self->size = 0;
+  *self = NULL;
   
   if ( luaL_newmetatable( L, "sound" ) != 0 )
   {

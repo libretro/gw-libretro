@@ -60,33 +60,6 @@ static struct retro_input_descriptor input_descriptors[] =
 /*---------------------------------------------------------------------------*/
 /* gwlua user-defined functions */
 
-void* gwlua_malloc( size_t size )
-{
-  return malloc( size );
-}
-
-void gwlua_free( void* pointer )
-{
-  free( pointer );
-}
-
-void* gwlua_realloc( void* pointer, size_t size )
-{
-  return realloc( pointer, size );
-}
-
-void gwlua_play_sound( const gwlua_sound_t* sound, int repeat )
-{
-  sound->state->position = 0;
-  sound->state->playing = sound;
-  sound->state->repeat = repeat;
-}
-
-void gwlua_stop_all_sounds( gwlua_t* state )
-{
-  state->playing = NULL;
-}
-
 const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 {
   log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", %p )\n", __FUNCTION__, state, key, type );
@@ -125,19 +98,6 @@ void gwlua_vlog( const char* format, va_list args )
   vsnprintf( buffer, sizeof( buffer ), format, args );
   buffer[ sizeof( buffer ) - 1 ] = 0;
   log_cb( RETRO_LOG_ERROR, "%s", buffer );
-}
-
-/*---------------------------------------------------------------------------*/
-/* gwrom user-defined functions */
-
-void* gwrom_malloc( size_t size )
-{
-  return malloc( size );
-}
-
-void gwrom_free( void* ptr )
-{
-  free( ptr );
 }
 
 /*---------------------------------------------------------------------------*/
@@ -340,54 +300,12 @@ void retro_run()
   }
   
   gwlua_tick( &state, perf_cb.get_time_usec() );
-  video_cb( state.updated ? state.screen : NULL, state.width, state.height, state.width * sizeof( uint16_t ) );
   
-  memset( state.sound, 0, sizeof( state.sound ) );
-
-  if ( state.playing )
-  {
-    int16_t* dest = state.sound;
-    size_t size = state.playing->size - state.position;
-    const size_t max_size = sizeof( state.sound ) / sizeof( state.sound[ 0 ] ) / 2;
-    
-again:;
-    const int16_t* src = state.playing->pcm16 + state.position;
-    
-    if ( size > max_size )
-    {
-      size = max_size;
-    }
-    
-    size_t i;
-    
-    for ( i = size; i != 0; --i )
-    {
-      *dest++ = *src;
-      *dest++ = *src++;
-    }
-    
-    state.position += size;
-    
-    if ( state.position == state.playing->size )
-    {
-      if ( state.repeat )
-      {
-        state.position = 0;
-        
-        if ( size < max_size )
-        {
-          size = max_size - size;
-          goto again;
-        }
-      }
-      else
-      {
-        state.playing = NULL;
-      }
-    }
-  }
+  rl_sprites_begin();
+  video_cb( state.screen, state.width, state.height, state.width * sizeof( uint16_t ) );
+  rl_sprites_end();
   
-  audio_cb( state.sound, sizeof( state.sound ) / sizeof( state.sound[ 0 ] ) / 2 );
+  audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }
 
 void retro_deinit()

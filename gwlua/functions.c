@@ -1,5 +1,4 @@
 #include <gwlua.h>
-#include <picture.h>
 
 #include <string.h>
 #include <stdint.h>
@@ -35,15 +34,15 @@
 
 static int l_playsound( lua_State* L )
 {
-  gwlua_sound_t* sound = (gwlua_sound_t*)luaL_checkudata( L, 1, "sound" );
-  gwlua_play_sound( sound, lua_toboolean( L, 2 ) );
+  rl_sound_t* sound = *(rl_sound_t**)luaL_checkudata( L, 1, "sound" );
+  rl_sound_stop_all();
+  rl_sound_play( sound, lua_toboolean( L, 2 ), NULL );
   return 0;
 }
 
 static int l_stopsounds( lua_State* L )
 {
-  gwlua_t* state = get_state( L );
-  gwlua_stop_all_sounds( state );
+  rl_sound_stop_all();
   return 0;
 }
 
@@ -200,24 +199,27 @@ static int l_savevalue( lua_State* L )
   return 1;
 }
 
+typedef struct
+{
+  rl_image_t** image;
+}
+picture_t;
+
 static int l_setbackground( lua_State* L )
 {
   gwlua_t* state = get_state( L );
-  gwlua_picture_t* bg = (gwlua_picture_t*)luaL_checkudata( L, 1, "picture" );
+  picture_t* picture = (picture_t*)luaL_checkudata( L, 1, "picture" );
+  rl_image_t* bg = *picture->image;
   
-  state->width = bg->width;
-  state->height = bg->height;
-  
-  size_t size = bg->width * bg->height * sizeof( uint16_t );
-  state->screen = (uint16_t*)gwlua_malloc( size );
-  
-  if ( !state->screen )
+  if ( rl_backgrnd_create( bg->width, bg->height ) )
   {
     return luaL_error( L, "out of memory" );
   }
   
-  memset( state->screen, 0, size );
-  blit_picture( bg, 0, 0, NULL );
+  state->screen = rl_backgrnd_fb( &state->width, &state->height );
+  rl_backgrnd_clear( 0 );
+  rl_image_blit_nobg( bg, 0, 0 );
+  
   gwlua_set_fb( state->width, state->height );
   return 0;
 }

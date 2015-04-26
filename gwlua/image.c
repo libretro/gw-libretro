@@ -1,5 +1,4 @@
 #include <gwlua.h>
-#include <picture.h>
 
 #include <stdint.h>
 
@@ -9,63 +8,87 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
-static int blit( gwlua_image_t* image )
+static int l_pic_index( lua_State* L )
 {
-  gwlua_picture_t* picture = image->picture;
-  
-  if ( image->is_visible && picture && image->state->screen )
-  {
-    if ( picture->used > image->used )
-    {
-      image->bg = (uint16_t*)gwlua_realloc( image->bg, picture->used * sizeof( uint16_t ) );
-      
-      if ( !image->bg )
-      {
-        return -1;
-      }
-      
-      image->used = picture->used;
-    }
-    
-    blit_picture( picture, image->x, image->y, image->bg );
-    image->blitted = 1;
-    image->state->updated = 1;
-  }
-  
-  return 0;
+  const char* key = luaL_checkstring( L, 2 );
+  return luaL_error( L, "%s not found in picture", key );
 }
 
-static void unblit( gwlua_image_t* image )
+static int l_pic_newindex( lua_State* L )
 {
-  if ( image->blitted )
+  rl_image_t*** self = (rl_image_t***)lua_touserdata( L, 1 );
+  const char* key = luaL_checkstring( L, 2 );
+  const char* data;
+  size_t len;
+
+  switch ( gwlua_djb2( key ) )
   {
-    unblit_picture( image->picture, image->x, image->y, image->bg );
-    image->blitted = 0;
-    image->state->updated = 1;
+  case 0x7c95915fU: // data
+    data = luaL_checklstring( L, 3, &len );
+    **self = rl_image_create( data, len );
+    
+    if ( !**self )
+    {
+      return luaL_error( L, "out of memory" );
+    }
+    
+    return 0;
   }
+
+  return luaL_error( L, "%s not found in picture", key );
+}
+
+static int l_pic_tostring( lua_State* L )
+{
+  rl_image_t*** self = (rl_image_t***)lua_touserdata( L, 1 );
+  lua_pushfstring( L, "picture@%p", **self );
+  return 1;
+}
+
+static int l_pic_push( lua_State* L, rl_image_t** pic )
+{
+  rl_image_t*** self = (rl_image_t***)lua_newuserdata( L, sizeof( rl_image_t** ) );
+  
+  *self = pic;
+  
+  if ( luaL_newmetatable( L, "picture" ) != 0 )
+  {
+    static const luaL_Reg methods[] =
+    {
+      { "__index",    l_pic_index },
+      { "__newindex", l_pic_newindex },
+      { "__tostring", l_pic_tostring },
+      { NULL, NULL }
+    };
+    
+    luaL_setfuncs( L, methods, 0 );
+  }
+
+  lua_setmetatable( L, -2 );
+  return 1;
 }
 
 static int l_gc( lua_State* L )
 {
-  gwlua_image_t* self = (gwlua_image_t*)lua_touserdata( L, 1 );
-  gwlua_ref_destroy( L, &self->picture_ref );
-  gwlua_free( self->bg );
+  rl_sprite_t* self = *(rl_sprite_t**)lua_touserdata( L, 1 );
+  rl_sprite_destroy( self );
+  gwlua_free( self );
   return 0;
 }
 
 static int l_index( lua_State* L )
 {
-  gwlua_image_t* self = (gwlua_image_t*)lua_touserdata( L, 1 );
+  rl_sprite_t* self = *(rl_sprite_t**)lua_touserdata( L, 1 );
   const char* key = luaL_checkstring( L, 2 );
 
   switch ( gwlua_djb2( key ) )
   {
   case 0x7c618d53U: // visible
-    lua_pushboolean( L, self->is_visible );
+    lua_pushboolean( L, ( self->flags & RL_SPRITE_INVISIBLE ) == 0 );
     return 1;
     
   case 0xad68f281U: // picture
-    gwlua_ref_get( L, self->picture_ref );
+    l_pic_push( L, &self->image );
     return 1;
     
   case 0x7c97e438U: // hint
@@ -73,27 +96,11 @@ static int l_index( lua_State* L )
     return 1;
     
   case 0x10a3b0a5U: // width
-    if ( self->picture )
-    {
-      lua_pushinteger( L, self->picture->width );
-    }
-    else
-    {
-      lua_pushnil( L );
-    }
-    
+    lua_pushinteger( L, self->image ? self->image->width : 0 );
     return 1;
     
   case 0x01d688deU: // height
-    if ( self->picture )
-    {
-      lua_pushinteger( L, self->picture->height );
-    }
-    else
-    {
-      lua_pushnil( L );
-    }
-    
+    lua_pushinteger( L, self->image ? self->image->height : 0 );
     return 1;
     
   }
@@ -103,7 +110,7 @@ static int l_index( lua_State* L )
 
 static int l_newindex( lua_State* L )
 {
-  gwlua_image_t* self = (gwlua_image_t*)lua_touserdata( L, 1 );
+  rl_sprite_t* self = *(rl_sprite_t**)lua_touserdata( L, 1 );
   const char* key = luaL_checkstring( L, 2 );
   
   switch ( gwlua_djb2( key ) )
@@ -132,35 +139,30 @@ static int l_newindex( lua_State* L )
   case 0x6c13e8e8U: // onclick
   case 0x164d61e1U: // dragcursor
     return 0;
+  
+  case 0x0fd89782U: // layer
+    self->layer = luaL_checkinteger( L, 3 );
+    return 0;
     
   case 0x7c618d53U: // visible
-    unblit( self );
-    self->is_visible = lua_toboolean( L, 3 );
-    
-    if ( blit( self ) )
+    if ( lua_toboolean( L, 3 ) )
     {
-      return luaL_error( L, "out of memory" );
+      self->flags &= ~RL_SPRITE_INVISIBLE;
+    }
+    else
+    {
+      self->flags |= RL_SPRITE_INVISIBLE;
     }
     
     return 0;
     
   case 0xad68f281U: // picture
-    unblit( self );
-    
+    self->image = NULL;
+  
     if ( !lua_isnoneornil( L, 3 ) )
     {
-      self->picture = (gwlua_picture_t*)luaL_checkudata( L, 3, "picture" );
-      gwlua_ref_new( L, 3, &self->picture_ref );
-    }
-    else
-    {
-      self->picture = NULL;
-      gwlua_ref_destroy( L, &self->picture_ref );
-    }
-    
-    if ( blit( self ) )
-    {
-      return luaL_error( L, "out of memory" );
+      rl_image_t*** picture = (rl_image_t***)luaL_checkudata( L, 3, "picture" );
+      self->image = **picture;
     }
     
     return 0;
@@ -171,39 +173,23 @@ static int l_newindex( lua_State* L )
 
 static int l_tostring( lua_State* L )
 {
-  gwlua_image_t* self = (gwlua_image_t*)lua_touserdata( L, 1 );
+  rl_sprite_t* self = *(rl_sprite_t**)lua_touserdata( L, 1 );
   lua_pushfstring( L, "image@%p", self );
   return 1;
 }
 
 static int l_new( lua_State* L )
 {
-  gwlua_t* state = get_state( L );
-  gwlua_image_t* self = (gwlua_image_t*)lua_newuserdata( L, sizeof( gwlua_image_t ) );
+  rl_sprite_t** self = (rl_sprite_t**)lua_newuserdata( L, sizeof( rl_sprite_t* ) );
   
-  self->state = state;
-  self->x = self->y = 0;
-  self->is_visible = 1;
-  self->blitted = 0;
+  *self = rl_sprite_create();
   
-  lua_getglobal( L, "system" );
-  lua_getfield( L, -1, "newpicture" );
-  
-  lua_call( L, 0, 1 );
-  
-  self->picture = (gwlua_picture_t*)lua_touserdata( L, -1 );
-  gwlua_ref_create( L, -1, &self->picture_ref );
-  
-  self->bg = (uint16_t*)gwlua_malloc( self->picture->used * sizeof( uint16_t ) );
-  
-  if ( !self->bg )
+  if ( !*self )
   {
     return luaL_error( L, "out of memory" );
   }
   
-  self->used = self->picture->used;
-  
-  lua_pop( L, 2 );
+  ( *self )->layer = 1;
   
   if ( luaL_newmetatable( L, "image" ) != 0 )
   {
