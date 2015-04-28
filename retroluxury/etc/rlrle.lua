@@ -16,6 +16,10 @@ local function newwriter()
     append = function( self, rle )
       self.bytes[ #self.bytes + 1 ] = table.concat( rle.bytes )
     end,
+    get = function( self )
+      self.bytes = { table.concat( self.bytes ) }
+      return self.bytes[ 1 ]
+    end,
     size = function( self )
       self.bytes = { table.concat( self.bytes ) }
       return #self.bytes[ 1 ]
@@ -148,7 +152,7 @@ local function rleimage( png, limit, transp )
   return rle
 end
 
-return function( args )
+local function main( args )
   if #args == 0 then
     io.write( 'usage: luai rle.lua [ options ] <image>\n' )
     io.write( '--transp r g b   makes the given color transparent\n' )
@@ -196,3 +200,5 @@ return function( args )
   rle:save( dir .. path.separator .. name .. '.rle' )
   return 0
 end
+
+return main, rleimage
