@@ -36,6 +36,8 @@ void rl_sprite_init( void );
 rl_sprite_t* rl_sprite_create( void );
 #define      rl_sprite_destroy( sprite ) do { ( sprite )->flags |= RL_SPRITE_UNUSED; } while ( 0 )
 
+void rl_sprites_translate( int x0, int y0 );
+
 void rl_sprites_begin( void );
 void rl_sprites_end( void );
 

@@ -100,22 +100,12 @@ static int l_pcall( lua_State* L, int nargs, int nres )
 }
 
 void register_functions( lua_State* L, gwlua_t* state );
-void register_image( lua_State* L, gwlua_t* state );
-void register_sound( lua_State* L, gwlua_t* state );
-void register_timer( lua_State* L, gwlua_t* state );
 
 static int l_create( lua_State* L )
 {
   gwlua_t* state = (gwlua_t*)lua_touserdata( L, 1 );
   
-  lua_newtable( L );
-  
   register_functions( L, state );
-  register_image( L, state );
-  register_sound( L, state );
-  register_timer( L, state );
-  
-  lua_setglobal( L, "system" );
   
   gwrom_entry_t entry;
   int error = gwrom_find( &entry, state->rom, "main.bs" );

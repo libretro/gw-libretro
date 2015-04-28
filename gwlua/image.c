@@ -189,7 +189,7 @@ static int l_new( lua_State* L )
     return luaL_error( L, "out of memory" );
   }
   
-  ( *self )->layer = 1;
+  ( *self )->layer = 100;
   
   if ( luaL_newmetatable( L, "image" ) != 0 )
   {

@@ -30,6 +30,81 @@
 
 #include "lua/system.h"
 
+#include "png/boxybold_20.h"
+#include "png/boxybold_21.h"
+#include "png/boxybold_22.h"
+#include "png/boxybold_23.h"
+#include "png/boxybold_24.h"
+#include "png/boxybold_25.h"
+#include "png/boxybold_26.h"
+#include "png/boxybold_27.h"
+#include "png/boxybold_28.h"
+#include "png/boxybold_29.h"
+#include "png/boxybold_2a.h"
+#include "png/boxybold_2b.h"
+#include "png/boxybold_2c.h"
+#include "png/boxybold_2d.h"
+#include "png/boxybold_2e.h"
+#include "png/boxybold_2f.h"
+#include "png/boxybold_30.h"
+#include "png/boxybold_31.h"
+#include "png/boxybold_32.h"
+#include "png/boxybold_33.h"
+#include "png/boxybold_34.h"
+#include "png/boxybold_35.h"
+#include "png/boxybold_36.h"
+#include "png/boxybold_37.h"
+#include "png/boxybold_38.h"
+#include "png/boxybold_39.h"
+#include "png/boxybold_3a.h"
+#include "png/boxybold_3b.h"
+#include "png/boxybold_3c.h"
+#include "png/boxybold_3d.h"
+#include "png/boxybold_3e.h"
+#include "png/boxybold_3f.h"
+#include "png/boxybold_40.h"
+#include "png/boxybold_41.h"
+#include "png/boxybold_42.h"
+#include "png/boxybold_43.h"
+#include "png/boxybold_44.h"
+#include "png/boxybold_45.h"
+#include "png/boxybold_46.h"
+#include "png/boxybold_47.h"
+#include "png/boxybold_48.h"
+#include "png/boxybold_49.h"
+#include "png/boxybold_4a.h"
+#include "png/boxybold_4b.h"
+#include "png/boxybold_4c.h"
+#include "png/boxybold_4d.h"
+#include "png/boxybold_4e.h"
+#include "png/boxybold_4f.h"
+#include "png/boxybold_50.h"
+#include "png/boxybold_51.h"
+#include "png/boxybold_52.h"
+#include "png/boxybold_53.h"
+#include "png/boxybold_54.h"
+#include "png/boxybold_55.h"
+#include "png/boxybold_56.h"
+#include "png/boxybold_57.h"
+#include "png/boxybold_58.h"
+#include "png/boxybold_59.h"
+#include "png/boxybold_5a.h"
+#include "png/boxybold_5b.h"
+#include "png/boxybold_5c.h"
+#include "png/boxybold_5d.h"
+#include "png/boxybold_5e.h"
+#include "png/boxybold_5f.h"
+#include "png/boxybold_60.h"
+#include "png/boxybold_7b.h"
+#include "png/boxybold_7c.h"
+#include "png/boxybold_7d.h"
+#include "png/boxybold_7e.h"
+#include "png/snes.h"
+
+#define __inline
+#include "entries.c"
+#undef __inline
+
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
 static int l_playsound( lua_State* L )
@@ -199,26 +274,27 @@ static int l_savevalue( lua_State* L )
   return 1;
 }
 
-typedef struct
-{
-  rl_image_t** image;
-}
-picture_t;
+#define MAX( a, b ) ( a > b ? a : b )
 
 static int l_setbackground( lua_State* L )
 {
   gwlua_t* state = get_state( L );
-  picture_t* picture = (picture_t*)luaL_checkudata( L, 1, "picture" );
-  rl_image_t* bg = *picture->image;
+  rl_image_t*** picture = (rl_image_t***)luaL_checkudata( L, 1, "picture" );
+  rl_image_t* bg = **picture;
   
-  if ( rl_backgrnd_create( bg->width, bg->height ) )
+  int width = MAX( bg->width, 480 );
+  
+  if ( rl_backgrnd_create( width, bg->height ) )
   {
     return luaL_error( L, "out of memory" );
   }
   
+  int x0 = ( width - bg->width ) / 2;
+  
   state->screen = rl_backgrnd_fb( &state->width, &state->height );
   rl_backgrnd_clear( 0 );
-  rl_image_blit_nobg( bg, 0, 0 );
+  rl_image_blit_nobg( bg, x0, 0 );
+  rl_sprites_translate( x0, 0 );
   
   gwlua_set_fb( state->width, state->height );
   return 0;
@@ -274,85 +350,22 @@ static int l_inputstate( lua_State* L )
 static int l_loadbin( lua_State* L )
 {
   gwlua_t* state = get_state( L );
-  const char* name = luaL_checkstring( L, 1 );
+  size_t len;
+  const char* name = luaL_checklstring( L, 1, &len );
+  const struct binary_t* found = in_word_set( name, len );
   gwrom_entry_t entry;
-  uint32_t hash = gwlua_djb2( name );
-
-  switch ( hash )
+  
+  if ( found )
   {
-  case 0xe95068abU: // class.lua
-    entry.data = (void*)gwlua_lua_class_lua;
-    entry.size = gwlua_lua_class_lua_len;
-    break;
-  case 0xffb0f4e3U: // classes.lua
-    entry.data = (void*)gwlua_lua_classes_lua;
-    entry.size = gwlua_lua_classes_lua_len;
-    break;
-  case 0x38da66e9U: // controls.lua
-    entry.data = (void*)gwlua_lua_controls_lua;
-    entry.size = gwlua_lua_controls_lua_len;
-    break;
-  case 0xd3e282d8U: // dialogs.lua
-    entry.data = (void*)gwlua_lua_dialogs_lua;
-    entry.size = gwlua_lua_dialogs_lua_len;
-    break;
-  case 0x6671c6aeU: // extctrls.lua
-    entry.data = (void*)gwlua_lua_extctrls_lua;
-    entry.size = gwlua_lua_extctrls_lua_len;
-    break;
-  case 0x6e933e5bU: // fmod.lua
-    entry.data = (void*)gwlua_lua_fmod_lua;
-    entry.size = gwlua_lua_fmod_lua_len;
-    break;
-  case 0x609badf0U: // fmodtypes.lua
-    entry.data = (void*)gwlua_lua_fmodtypes_lua;
-    entry.size = gwlua_lua_fmodtypes_lua_len;
-    break;
-  case 0x1a2a4f5cU: // forms.lua
-    entry.data = (void*)gwlua_lua_forms_lua;
-    entry.size = gwlua_lua_forms_lua_len;
-    break;
-  case 0x68d4ae86U: // graphics.lua
-    entry.data = (void*)gwlua_lua_graphics_lua;
-    entry.size = gwlua_lua_graphics_lua_len;
-    break;
-  case 0xef6bfb5bU: // jpeg.lua
-    entry.data = (void*)gwlua_lua_jpeg_lua;
-    entry.size = gwlua_lua_jpeg_lua_len;
-    break;
-  case 0x5497649fU: // math.lua
-    entry.data = (void*)gwlua_lua_math_lua;
-    entry.size = gwlua_lua_math_lua_len;
-    break;
-  case 0x63f0376dU: // messages.lua
-    entry.data = (void*)gwlua_lua_messages_lua;
-    entry.size = gwlua_lua_messages_lua_len;
-    break;
-  case 0x3f6b838eU: // registry.lua
-    entry.data = (void*)gwlua_lua_registry_lua;
-    entry.size = gwlua_lua_registry_lua_len;
-    break;
-  case 0xbda4fae8U: // stdctrls.lua
-    entry.data = (void*)gwlua_lua_stdctrls_lua;
-    entry.size = gwlua_lua_stdctrls_lua_len;
-    break;
-  case 0x1106d565U: // sysutils.lua
-    entry.data = (void*)gwlua_lua_sysutils_lua;
-    entry.size = gwlua_lua_sysutils_lua_len;
-    break;
-  case 0x675996c0U: // windows.lua
-    entry.data = (void*)gwlua_lua_windows_lua;
-    entry.size = gwlua_lua_windows_lua_len;
-    break;
-    
-    
-  default:
+    entry.data = found->data;
+    entry.size = found->size;
+  }
+  else
+  {
     if ( gwrom_find( &entry, state->rom, name ) != GWROM_OK )
     {
       return 0;
     }
-    
-    break;
   }
   
   lua_pushlstring( L, (char*)entry.data, entry.size );
@@ -398,6 +411,10 @@ static int l_loadbs( lua_State* L )
   return 0;
 }
 
+void register_image( lua_State* L, gwlua_t* state );
+void register_sound( lua_State* L, gwlua_t* state );
+void register_timer( lua_State* L, gwlua_t* state );
+
 void register_functions( lua_State* L, gwlua_t* state )
 {
   static const luaL_Reg statics[] =
@@ -418,6 +435,12 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "loadbs",        l_loadbs },
     { NULL, NULL }
   };
+  
+  lua_newtable( L );
+  
+  register_image( L, state );
+  register_sound( L, state );
+  register_timer( L, state );
   
   lua_pushlightuserdata( L, (void*)state );
   luaL_setfuncs( L, statics, 1 );
@@ -443,4 +466,8 @@ void register_functions( lua_State* L, gwlua_t* state )
   lua_call( L, 1, 0 );
   
   // module
+  
+  lua_setglobal( L, "system" );
+  
+  // --
 }
