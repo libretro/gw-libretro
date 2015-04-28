@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <bsreader.h>
 #include <bstree.h>
 
