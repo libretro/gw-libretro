@@ -316,7 +316,6 @@ clean-objs:
 
 clean:
 	rm -f $(OBJS)
-	rm -f $(HEADERS)
 	rm -f $(TARGET)
 
 .PHONY: $(TARGET) clean clean-objs
