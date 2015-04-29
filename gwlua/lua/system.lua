@@ -208,9 +208,6 @@ return function( M )
       start  = { 232, 144 }
     }
     
-    msgs.select = msgs.select and 'Zoom' or ''
-    msgs.start = 'Help'
-    
     local snes_x = ( width - snes.width ) // 2
     local snes_y = ( height - snes.height ) // 2
     
@@ -246,6 +243,9 @@ return function( M )
       msgs[ button ] = keys[ #keys ]
       keys[ #keys ] = nil
     end
+    
+    msgs.select = zoom and 'Zoom' or ''
+    msgs.start = 'Help'
     
     system.setbackground( background.picture )
     local help = createhelp( background.width, background.height, msgs )
