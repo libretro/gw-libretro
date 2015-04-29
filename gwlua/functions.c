@@ -300,6 +300,31 @@ static int l_setbackground( lua_State* L )
   return 0;
 }
 
+static int l_setzoom( lua_State* L )
+{
+  gwlua_t* state = get_state( L );
+  
+  if ( lua_type( L, 1 ) == LUA_TTABLE )
+  {
+    lua_geti( L, 1, 1 );
+    int x0 = luaL_checkinteger( L, -1 );
+    lua_geti( L, 1, 2 );
+    int y0 = luaL_checkinteger( L, -1 );
+    lua_geti( L, 1, 3 );
+    int width = luaL_checkinteger( L, -1 );
+    lua_geti( L, 1, 4 );
+    int height = luaL_checkinteger( L, -1 );
+    
+    gwlua_zoom( state, x0, y0, width, height );
+  }
+  else
+  {
+    gwlua_zoom( state, -1, -1, -1, -1 );
+  }
+  
+  return 0;
+}
+
 static const char* button_name( int button )
 {
   switch ( button )
@@ -430,6 +455,7 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "loadvalue",     l_loadvalue },
     { "savevalue",     l_savevalue },
     { "setbackground", l_setbackground },
+    { "setzoom",       l_setzoom },
     { "inputstate",    l_inputstate },
     { "loadbin",       l_loadbin },
     { "loadbs",        l_loadbs },

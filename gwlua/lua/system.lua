@@ -239,7 +239,7 @@ return function( M )
     }
   end
   
-  M.init = function( background, keymap, keydown, keyup, timers )
+  M.init = function( background, keymap, keydown, keyup, timers, zoom )
     local msgs = {}
     
     for button, keys in pairs( keymap ) do
@@ -252,6 +252,7 @@ return function( M )
     background.picture = nil
     
     local state, newstate = {}, {}
+    local zoomed = false
     
     return function()
       system.inputstate( newstate )
@@ -276,6 +277,11 @@ return function( M )
           
           if button == 'start' then
             help:setVisible( state.start )
+          end
+          
+          if button == 'select' and pressed then
+            zoomed = not zoomed
+            system.setzoom( zoomed and zoom or nil )
           end
         end
       end

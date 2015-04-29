@@ -24,6 +24,9 @@ static struct retro_perf_callback perf_cb;
 
 static gwrom_t rom;
 static gwlua_t state;
+static int     offset;
+static int     soft_width;
+static int     soft_height;
 
 static struct retro_input_descriptor input_descriptors[] =
 {
@@ -83,12 +86,50 @@ int gwlua_set_fb( unsigned width, unsigned height )
   
   env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
   
+  offset = 0;
+  soft_width = width;
+  soft_height = height;
+  
   log_cb( RETRO_LOG_INFO, "gwmw resolution changed to:\n");
   log_cb( RETRO_LOG_INFO, "  width  = %u\n", width );
   log_cb( RETRO_LOG_INFO, "  height = %u\n", height );
   log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", width );
   
   return 0;
+}
+
+void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height )
+{
+  struct retro_game_geometry geometry;
+  
+  if ( x0 >= 0 )
+  {
+    geometry.base_width = width;
+    geometry.base_height = height;
+    soft_width = width;
+    soft_height = height;
+    offset = y0 * state->width + x0;
+  }
+  else
+  {
+    geometry.base_width = state->width;
+    geometry.base_height = state->height;
+    soft_width = state->width;
+    soft_height = state->height;
+    offset = 0;
+  }
+  
+  geometry.max_width = state->width;
+  geometry.max_height = state->height;
+  geometry.aspect_ratio = 0.0f;
+  
+  env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
+  
+  log_cb( RETRO_LOG_INFO, "zoom:\n");
+  log_cb( RETRO_LOG_INFO, "  x0     = %d\n", x0 );
+  log_cb( RETRO_LOG_INFO, "  y0     = %d\n", y0 );
+  log_cb( RETRO_LOG_INFO, "  width  = %d\n", width );
+  log_cb( RETRO_LOG_INFO, "  height = %d\n", height );
 }
 
 void gwlua_vlog( const char* format, va_list args )
@@ -302,7 +343,7 @@ void retro_run()
   gwlua_tick( &state, perf_cb.get_time_usec() );
   
   rl_sprites_begin();
-  video_cb( state.screen, state.width, state.height, state.width * sizeof( uint16_t ) );
+  video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
   rl_sprites_end();
   
   audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );

@@ -95,7 +95,8 @@ const char* gwlua_load_value( gwlua_t* state, const char* key, int* type );
 void        gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type );
 
 /* control */
-int gwlua_set_fb( unsigned width, unsigned height );
+int  gwlua_set_fb( unsigned width, unsigned height );
+void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height );
 
 /* log */
 void gwlua_vlog( const char* format, va_list args );
