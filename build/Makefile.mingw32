@@ -31,7 +31,7 @@ AS  = as
 # Extensions
 
 OBJEXT = .mingw32.o
-SOEXT  = .mingw32.dll
+SOEXT  = .dll
 
 ################
 # Platform setup
