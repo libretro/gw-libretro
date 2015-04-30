@@ -1,0 +1,115 @@
+DEBUG = 0
+LOG_PERFORMANCE = 1
+
+
+
+CORE_DIR      = ..
+INCDIRS       = -I$(NDK)/platforms/android-3/arch-arm/usr/include
+SOURCES_C     =
+SOURCES_CXX   =
+SOURCES_LUA_C =
+LUA_FILES     =
+PNG_FILES     =
+
+include Makefile.common
+
+
+
+CC  = $(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-gcc
+CXX = $(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-g++
+AS  = $(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-as
+
+
+
+OBJEXT = .android_arm_v5te.o
+SOEXT  = .android_arm_v5te.so
+TARGET = gw_libretro$(SOEXT)
+
+
+
+PLATDEFS     = -DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST -Dl_getlocaledecpoint\(\)=\(\'.\'\)
+PLATCFLAGS   = -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -march=armv5te -mtune=xscale -msoft-float -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security
+PLATCXXFLAGS = -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -march=armv5te -mtune=xscale -msoft-float -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security
+PLATLDFLAGS  = -shared --sysroot=$(NDK)/platforms/android-3/arch-arm -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm
+
+
+
+RETRODEFS     = -D__LIBRETRO__
+RETROCFLAGS   =
+RETROCXXFLAGS =
+RETROLDFLAGS  =
+
+
+
+COREDEFS     = -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free
+CORECFLAGS   = -Wall --std=c99
+CORECXXFLAGS = -Wall
+CORELDFLAGS  =
+
+
+
+DEFINES  = $(PLATDEFS) $(RETRODEFS) $(COREDEFS)
+CFLAGS   = $(PLATCFLAGS) $(RETROCFLAGS) $(CORECFLAGS) $(DEFINES) $(INCDIRS)
+CXXFLAGS = $(PLATCXXFLAGS) $(RETROCXXFLAGS) $(CORECXXFLAGS) $(DEFINES) $(INCDIRS)
+LDFLAGS  = $(PLATLDFLAGS) $(RETROLDFLAGS) $(CORELDFLAGS) -shared
+
+
+
+ifeq ($(DEBUG), 1)
+	CFLAGS   += -O0 -g
+	CXXFLAGS += -O0 -g
+  LDFLAGS  += -g
+else
+	CFLAGS   += -O3 -DNDEBUG
+	CXXFLAGS += -O3 -DNDEBUG
+endif
+
+ifeq ($(LOG_PERFORMANCE), 1)
+	CFLAGS   += -DLOG_PERFORMANCE
+	CXXFLAGS += -DLOG_PERFORMANCE
+endif
+
+
+
+HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
+OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT)) $(SOURCES_LUA_C:.c=$(OBJEXT)) $(CORE_DIR)/android/missing$(OBJEXT)
+
+%$(OBJEXT): %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(DEFINES) $(INCDIRS)
+
+%$(OBJEXT): %.c
+	$(CC) -c -o $@ $< $(CFLAGS) $(DEFINES) $(INCDIRS)
+
+%$(OBJEXT): %.S
+	$(AS) -c -o $@ $< $(CFLAGS) $(DEFINES) $(INCDIRS)
+
+%.h: %.lua
+	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
+
+%.h: %.png
+	retroluxury/etc/luai/luai retroluxury/etc/rlrle.lua $<
+	xxd -i $(basename $<).rle | sed "s/unsigned/const unsigned/g" > $@
+	rm -f $(basename $<).rle
+
+all: $(TARGET)
+
+$(TARGET): $(HEADERS) $(OBJS)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+
+$(CORE_DIR)/gwlua/functions.c: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
+	touch $@
+
+$(CORE_DIR)/gwlua/entries.c: $(CORE_DIR)/gwlua/entries.gperf
+	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
+
+clean-objs:
+	rm -f $(OBJS)
+
+clean: clean-objs
+	rm -f $(TARGET)
+
+dist-clean: clean
+	rm -f $(HEADERS)
+	rm -f $(CORE_DIR)/gwlua/entries.c
+
+.PHONY: $(TARGET) clean-objs clean dist-clean

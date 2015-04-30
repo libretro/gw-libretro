@@ -226,7 +226,7 @@ else
 
 endif
 
-CORE_DIR := .
+CORE_DIR := ..
 
 ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
@@ -270,7 +270,7 @@ include Makefile.common
 HEADERS = $(LUA:.lua=.h) $(PNG:.png=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
-INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
+INCDIRS += $(EXTRA_INCLUDES)
 
 %.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
