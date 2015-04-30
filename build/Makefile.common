@@ -1,12 +1,12 @@
-INCDIRS += -I$(CORE_DIR) \
-           -I$(CORE_DIR)/src \
-           -I$(CORE_DIR)/gwrom \
-           -I$(CORE_DIR)/gwlua \
-           -I$(CORE_DIR)/bzip2 \
-           -I$(CORE_DIR)/lua/src \
-           -I$(CORE_DIR)/retroluxury/src
+INCLUDES += -I$(CORE_DIR) \
+            -I$(CORE_DIR)/src \
+            -I$(CORE_DIR)/gwrom \
+            -I$(CORE_DIR)/gwlua \
+            -I$(CORE_DIR)/bzip2 \
+            -I$(CORE_DIR)/lua/src \
+            -I$(CORE_DIR)/retroluxury/src
 
-SOURCES_C += $(CORE_DIR)/src/libretro.c
+SOURCES_C   += $(CORE_DIR)/src/libretro.c
 SOURCES_CXX += $(CORE_DIR)/src/constcast.cpp
 
 SOURCES_C += $(CORE_DIR)/gwrom/gwrom.c
