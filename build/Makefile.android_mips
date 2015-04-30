@@ -15,9 +15,9 @@ include Makefile.common
 
 
 
-CC  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-gcc
-CXX = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-g++
-AS  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-as
+CC  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-gcc
+CXX = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-g++
+AS  = $(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/linux-x86/bin/mipsel-linux-android-as
 
 
 

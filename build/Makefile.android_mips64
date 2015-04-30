@@ -15,9 +15,9 @@ include Makefile.common
 
 
 
-CC  = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-gcc
-CXX = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-g++
-AS  = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-as
+CC  = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86/bin/mips64el-linux-android-gcc
+CXX = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86/bin/mips64el-linux-android-g++
+AS  = $(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86/bin/mips64el-linux-android-as
 
 
 

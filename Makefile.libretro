@@ -1,0 +1,5 @@
+all:
+	cd build && make -f Makefile.libretro
+
+clean:
+	cd build && make -f Makefile.libretro clean

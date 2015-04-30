@@ -116,12 +116,15 @@ dist-clean: clean
 .PHONY: $(TARGET) clean-objs clean dist-clean
 ]]
 
+local host = 'linux-x86'
+--local host = 'windows-x86_64'
+
 local platforms = {
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm64_v8a = {
-    CC            = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/bin/aarch64-linux-android-gcc',
-    CXX           = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/bin/aarch64-linux-android-g++',
-    AS            = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/bin/aarch64-linux-android-as',
+    CC            = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/' .. host .. '/bin/aarch64-linux-android-gcc',
+    CXX           = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/' .. host .. '/bin/aarch64-linux-android-g++',
+    AS            = '$(NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/' .. host .. '/bin/aarch64-linux-android-as',
     EXT           = 'android_arm64_v8a',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-21/arch-arm64/usr/include',
@@ -132,9 +135,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_x86_64 = {
-    CC            = '$(NDK)/toolchains/x86_64-4.9/prebuilt/windows-x86_64/bin/x86_64-linux-android-gcc',
-    CXX           = '$(NDK)/toolchains/x86_64-4.9/prebuilt/windows-x86_64/bin/x86_64-linux-android-g++',
-    AS            = '$(NDK)/toolchains/x86_64-4.9/prebuilt/windows-x86_64/bin/x86_64-linux-android-as',
+    CC            = '$(NDK)/toolchains/x86_64-4.9/prebuilt/' .. host .. '/bin/x86_64-linux-android-gcc',
+    CXX           = '$(NDK)/toolchains/x86_64-4.9/prebuilt/' .. host .. '/bin/x86_64-linux-android-g++',
+    AS            = '$(NDK)/toolchains/x86_64-4.9/prebuilt/' .. host .. '/bin/x86_64-linux-android-as',
     EXT           = 'android_x86_64',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-21/arch-x86_64/usr/include',
@@ -145,9 +148,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_mips64 = {
-    CC            = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-gcc',
-    CXX           = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-g++',
-    AS            = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/windows-x86_64/bin/mips64el-linux-android-as',
+    CC            = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/' .. host .. '/bin/mips64el-linux-android-gcc',
+    CXX           = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/' .. host .. '/bin/mips64el-linux-android-g++',
+    AS            = '$(NDK)/toolchains/mips64el-linux-android-4.9/prebuilt/' .. host .. '/bin/mips64el-linux-android-as',
     EXT           = 'android_mips64',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-21/arch-mips64/usr/include',
@@ -158,9 +161,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm_v7a = {
-    CC            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-gcc',
-    CXX           = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-g++',
-    AS            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-as',
+    CC            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-gcc',
+    CXX           = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-g++',
+    AS            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-as',
     EXT           = 'android_arm_v7a',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-3/arch-arm/usr/include',
@@ -171,9 +174,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm_v5te = {
-    CC            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-gcc',
-    CXX           = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-g++',
-    AS            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/windows-x86_64/bin/arm-linux-androideabi-as',
+    CC            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-gcc',
+    CXX           = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-g++',
+    AS            = '$(NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-as',
     EXT           = 'android_arm_v5te',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-3/arch-arm/usr/include',
@@ -184,9 +187,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_x86 = {
-    CC            = '$(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-gcc',
-    CXX           = '$(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-g++',
-    AS            = '$(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-as',
+    CC            = '$(NDK)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-gcc',
+    CXX           = '$(NDK)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-g++',
+    AS            = '$(NDK)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-as',
     EXT           = 'android_x86',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-9/arch-x86/usr/include',
@@ -197,9 +200,9 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_mips = {
-    CC            = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-gcc',
-    CXX           = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-g++',
-    AS            = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/windows-x86_64/bin/mipsel-linux-android-as',
+    CC            = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/' .. host .. '/bin/mipsel-linux-android-gcc',
+    CXX           = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/' .. host .. '/bin/mipsel-linux-android-g++',
+    AS            = '$(NDK)/toolchains/mipsel-linux-android-4.8/prebuilt/' .. host .. '/bin/mipsel-linux-android-as',
     EXT           = 'android_mips',
     SO            = 'so',
     PLAT_INCDIR   = '$(NDK)/platforms/android-9/arch-mips/usr/include',

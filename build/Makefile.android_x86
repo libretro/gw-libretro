@@ -15,9 +15,9 @@ include Makefile.common
 
 
 
-CC  = $(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-gcc
-CXX = $(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-g++
-AS  = $(NDK)/toolchains/x86-4.8/prebuilt/windows-x86_64/bin/i686-linux-android-as
+CC  = $(NDK)/toolchains/x86-4.8/prebuilt/linux-x86/bin/i686-linux-android-gcc
+CXX = $(NDK)/toolchains/x86-4.8/prebuilt/linux-x86/bin/i686-linux-android-g++
+AS  = $(NDK)/toolchains/x86-4.8/prebuilt/linux-x86/bin/i686-linux-android-as
 
 
 
