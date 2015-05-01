@@ -186,7 +186,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   linux_x86 = {
-    HEADERMSG     = '',
+    HEADERMSG     = 'apt-get install g++-multilib libc6-dev-i386',
     CC            = 'gcc',
     CXX           = 'g++',
     AS            = 'as',
@@ -214,7 +214,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86 = {
-    HEADERMSG     = 'apt-get install mingw-w64, edit /usr/share/mingw-w64/include/_mingw.h and remove extern from __forceinline',
+    HEADERMSG     = 'apt-get install mingw-w64',
     CC            = 'i686-w64-mingw32-gcc',
     CXX           = 'i686-w64-mingw32-g++',
     AS            = 'i686-w64-mingw32-as',
@@ -228,7 +228,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86_64 = {
-    HEADERMSG     = 'apt-get install mingw-w64, edit /usr/share/mingw-w64/include/_mingw.h and remove extern from __forceinline',
+    HEADERMSG     = 'apt-get install mingw-w64',
     CC            = 'x86_64-w64-mingw32-gcc',
     CXX           = 'x86_64-w64-mingw32-g++',
     AS            = 'x86_64-w64-mingw32-as',
