@@ -1,5 +1,5 @@
 ##############
-# Download mingw-w64-bin_x86_64-linux_20131228.tar.bz2 from http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Automated%20Builds/, unpack somewhere, and set MINGW64 to it
+# apt-get install mingw-w64
 
 #############
 # User config
@@ -23,9 +23,9 @@ include Makefile.common
 #################
 # Toolchain setup
 
-CC  = $(MINGW64)/bin/x86_64-w64-mingw32-gcc
-CXX = $(MINGW64)/bin/x86_64-w64-mingw32-g++
-AS  = $(MINGW64)/bin/x86_64-w64-mingw32-as
+CC  = x86_64-w64-mingw32-gcc
+CXX = x86_64-w64-mingw32-g++
+AS  = x86_64-w64-mingw32-as
 
 ############
 # Extensions

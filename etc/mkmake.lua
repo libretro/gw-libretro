@@ -214,10 +214,10 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86 = {
-    HEADERMSG     = 'Download mingw-w32-bin_x86_64-linux_20131227.tar.bz2 from http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Automated%20Builds/, unpack somewhere, and set MINGW32 to it',
-    CC            = '$(MINGW32)/bin/i686-w64-mingw32-gcc',
-    CXX           = '$(MINGW32)/bin/i686-w64-mingw32-g++',
-    AS            = '$(MINGW32)/bin/i686-w64-mingw32-as',
+    HEADERMSG     = 'apt-get install mingw-w64',
+    CC            = 'i686-w64-mingw32-gcc',
+    CXX           = 'i686-w64-mingw32-g++',
+    AS            = 'i686-w64-mingw32-as',
     EXT           = 'windows_x86',
     SO            = 'dll',
     PLAT_INCDIR   = '',
@@ -228,10 +228,10 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86_64 = {
-    HEADERMSG     = 'Download mingw-w64-bin_x86_64-linux_20131228.tar.bz2 from http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Automated%20Builds/, unpack somewhere, and set MINGW64 to it',
-    CC            = '$(MINGW64)/bin/x86_64-w64-mingw32-gcc',
-    CXX           = '$(MINGW64)/bin/x86_64-w64-mingw32-g++',
-    AS            = '$(MINGW64)/bin/x86_64-w64-mingw32-as',
+    HEADERMSG     = 'apt-get install mingw-w64',
+    CC            = 'x86_64-w64-mingw32-gcc',
+    CXX           = 'x86_64-w64-mingw32-g++',
+    AS            = 'x86_64-w64-mingw32-as',
     EXT           = 'windows_x86_64',
     SO            = 'dll',
     PLAT_INCDIR   = '',
