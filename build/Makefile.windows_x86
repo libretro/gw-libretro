@@ -1,5 +1,5 @@
 ##############
-# apt-get install mingw-w64
+# apt-get install mingw-w64, edit /usr/share/mingw-w64/include/_mingw.h and remove extern from __forceinline
 
 #############
 # User config
