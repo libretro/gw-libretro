@@ -1,5 +1,5 @@
 ##############
-# 
+# Install tdm-gcc (http://tdm-gcc.tdragon.net/)
 
 #############
 # User config
@@ -37,8 +37,8 @@ SOEXT  = .mingw32.dll
 # Platform setup
 
 PLATDEFS     = 
-PLATCFLAGS   = -m32 -fpic -fstrict-aliasing
-PLATCXXFLAGS = -m32 -fpic -fstrict-aliasing
+PLATCFLAGS   = -m64 -fpic -fstrict-aliasing
+PLATCXXFLAGS = -m64 -fpic -fstrict-aliasing
 PLATLDFLAGS  = -shared -lm
 
 ################

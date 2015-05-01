@@ -250,7 +250,21 @@ local platforms = {
     SO            = 'dll',
     PLAT_INCDIR   = '',
     PLAT_DEFS     = '',
-    PLAT_CFLAGS   = '-fpic -fstrict-aliasing',
+    PLAT_CFLAGS   = '-m32 -fpic -fstrict-aliasing',
+    PLAT_CXXFLAGS = '${PLAT_CFLAGS}',
+    PLAT_LDFLAGS  = '-shared -lm'
+  },
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  mingw64 = {
+    HEADERMSG     = 'Install tdm-gcc (http://tdm-gcc.tdragon.net/)',
+    CC            = 'gcc',
+    CXX           = 'g++',
+    AS            = 'as',
+    EXT           = 'mingw32',
+    SO            = 'dll',
+    PLAT_INCDIR   = '',
+    PLAT_DEFS     = '',
+    PLAT_CFLAGS   = '-m64 -fpic -fstrict-aliasing',
     PLAT_CXXFLAGS = '${PLAT_CFLAGS}',
     PLAT_LDFLAGS  = '-shared -lm'
   },
