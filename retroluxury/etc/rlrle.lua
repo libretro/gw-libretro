@@ -154,15 +154,24 @@ end
 
 local function main( args )
   if #args == 0 then
-    io.write( 'usage: luai rle.lua [ options ] <image>\n' )
-    io.write( '--transp r g b   makes the given color transparent\n' )
-    io.write( '--tl             makes the color at (0,0) transparent\n' )
-    io.write( '--bl             makes the color at (0,height-1) transparent\n' )
-    io.write( '--tr             makes the color at (width-1,0) transparent\n' )
-    io.write( '--br             makes the color at (width-1,height-1) transparent\n' )
-    io.write( '--margin x       sets the pixel limit on RLE runs on a row\n' )
-    io.write( '                 (must be equal to RL_BACKGRND_MARGIN)\n' )
-    
+    io.write[[
+RLE-encodes an image to a format ready to be used with rl_image_create. The
+--margin argument should be given, and must be the same as the value of the
+RL_BACKGRND_MARGIN when retroluxury was compiled. If it's not given, the image
+is still valid, but it must be entirely contained within the background
+boundaries when blit.
+
+Usage: luai rlrle.lua [ options ] <image>
+--transp r g b   makes the given color transparent
+--tl             makes the color at (0,0) transparent
+--bl             makes the color at (0,height-1) transparent
+--tr             makes the color at (width-1,0) transparent
+--br             makes the color at (width-1,height-1) transparent
+--margin x       sets the pixel limit on RLE runs on a row
+                 (must be equal to RL_BACKGRND_MARGIN)
+
+]]
+
     return 0
   end
   

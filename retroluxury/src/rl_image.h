@@ -1,7 +1,6 @@
 #ifndef RL_IMAGE_H
 #define RL_IMAGE_H
 
-#include <rl_backgrnd.h>
 #include <rl_userdata.h>
 
 #include <stdint.h>
@@ -37,6 +36,6 @@ void rl_image_blit_nobg( const rl_image_t* image, int x, int y );
 /* Blits an image to the given background, saving overwritten pixels in bg. */
 uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg );
 /* Erases an image from the given background, restoring overwritten pixels from bg. */
-void rl_image_unblit( const rl_image_t* image, int x, int y, uint16_t* bg );
+void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg );
 
 #endif /* RL_IMAGE_H */

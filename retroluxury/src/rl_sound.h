@@ -31,8 +31,10 @@ void rl_sound_stop( int index );
 
 void rl_sound_stop_all( void );
 
+#ifdef RL_OGG_VORBIS
 int  rl_sound_play_ogg( const void* data, size_t size, int repeat, rl_soundstop_t stop_cb );
 void rl_sound_stop_ogg( void );
+#endif
 
 const int16_t* rl_sound_mix( void );
 

@@ -22,8 +22,11 @@ SOURCES_C += $(CORE_DIR)/gwlua/timer.c
 
 SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_backgrnd.c
 SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_image.c
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_map.c
 SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_sound.c
 SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_sprite.c
+SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_tile.c
+#SOURCES_C += $(CORE_DIR)/retroluxury/src/rl_version.c
 
 SOURCES_C += $(CORE_DIR)/bzip2/blocksort.c
 SOURCES_C += $(CORE_DIR)/bzip2/huffman.c

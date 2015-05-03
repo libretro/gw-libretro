@@ -29,6 +29,9 @@ value must be used when rle-encoding images with rlrle.lua.
 #define RL_OGG_INCREMENT 32768
 #endif
 
+/* Undef to remove ogg-vorbis support. */
+#undef RL_OGG_VORBIS
+
 /* The number of userdata entries in other structures. */
 #ifndef RL_USERDATA_COUNT
 #define RL_USERDATA_COUNT 1
