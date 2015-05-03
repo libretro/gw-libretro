@@ -65,13 +65,15 @@ static struct retro_input_descriptor input_descriptors[] =
 
 const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", %p )\n", __FUNCTION__, state, key, type );
   return NULL;
 }
 
 void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p, \"%s\", \"%s\", %d )\n", __FUNCTION__, state, key, value, type );
+  (void)state;
+  (void)key;
+  (void)value;
+  (void)type;
 }
 
 int gwlua_set_fb( unsigned width, unsigned height )
@@ -89,11 +91,6 @@ int gwlua_set_fb( unsigned width, unsigned height )
   offset = 0;
   soft_width = width;
   soft_height = height;
-  
-  log_cb( RETRO_LOG_INFO, "gwmw resolution changed to:\n");
-  log_cb( RETRO_LOG_INFO, "  width  = %u\n", width );
-  log_cb( RETRO_LOG_INFO, "  height = %u\n", height );
-  log_cb( RETRO_LOG_INFO, "  pitch  = %u\n", width );
   
   return 0;
 }
@@ -124,12 +121,6 @@ void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height )
   geometry.aspect_ratio = 0.0f;
   
   env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
-  
-  log_cb( RETRO_LOG_INFO, "zoom:\n");
-  log_cb( RETRO_LOG_INFO, "  x0     = %d\n", x0 );
-  log_cb( RETRO_LOG_INFO, "  y0     = %d\n", y0 );
-  log_cb( RETRO_LOG_INFO, "  width  = %d\n", width );
-  log_cb( RETRO_LOG_INFO, "  height = %d\n", height );
 }
 
 void gwlua_vlog( const char* format, va_list args )
@@ -145,8 +136,6 @@ void gwlua_vlog( const char* format, va_list args )
 
 void retro_get_system_info( struct retro_system_info* info )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, info );
-  
   info->library_name = "Game & Watch";
   info->library_version = "1.0";
   info->need_fullpath = false;
@@ -156,8 +145,6 @@ void retro_get_system_info( struct retro_system_info* info )
 
 void retro_set_environment( retro_environment_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
-  
   env_cb = cb;
   
   static const struct retro_variable vars[] = {
@@ -181,14 +168,11 @@ void retro_set_environment( retro_environment_t cb )
 
 unsigned retro_api_version()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
   return RETRO_API_VERSION;
 }
 
 void retro_init()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
-  
   struct retro_log_callback log;
   
   if ( env_cb( RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log ) )
@@ -205,10 +189,11 @@ void retro_init()
 }
 
 void* constcast( const void* ptr );
+extern const char* gitbanner;
 
 bool retro_load_game( const struct retro_game_info* info )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, info );
+  log_cb( RETRO_LOG_ERROR, "\n%s", gitbanner );
   
   if ( !perf_cb.get_time_usec )
   {
@@ -245,49 +230,43 @@ bool retro_load_game( const struct retro_game_info* info )
 
 size_t retro_get_memory_size( unsigned id )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %u )\n", __FUNCTION__, id );
+  (void)id;
   return 0;
 }
 
 void* retro_get_memory_data( unsigned id )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %u )\n", __FUNCTION__, id );
+  (void)id;
   return NULL;
 }
 
 void retro_set_video_refresh( retro_video_refresh_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
   video_cb = cb;
 }
 
 void retro_set_audio_sample( retro_audio_sample_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
+  (void)cb;
 }
 
 void retro_set_audio_sample_batch( retro_audio_sample_batch_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
   audio_cb = cb;
 }
 
 void retro_set_input_state( retro_input_state_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
   input_state_cb = cb;
 }
 
 void retro_set_input_poll( retro_input_poll_t cb )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, cb );
   input_poll_cb = cb;
 }
 
 void retro_get_system_av_info( struct retro_system_av_info* info )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p )\n", __FUNCTION__, info );
-  
   info->geometry.base_width = state.width;
   info->geometry.base_height = state.height;
   info->geometry.max_width = state.width;
@@ -295,21 +274,10 @@ void retro_get_system_av_info( struct retro_system_av_info* info )
   info->geometry.aspect_ratio = 0.0f;
   info->timing.fps = 60.0;
   info->timing.sample_rate = 44100.0;
-  
-  log_cb( RETRO_LOG_INFO, "Set retro_system_av_info to:\n" );
-  log_cb( RETRO_LOG_INFO, "  base_width   = %u\n", info->geometry.base_width );
-  log_cb( RETRO_LOG_INFO, "  base_height  = %u\n", info->geometry.base_height );
-  log_cb( RETRO_LOG_INFO, "  max_width    = %u\n", info->geometry.max_width );
-  log_cb( RETRO_LOG_INFO, "  max_height   = %u\n", info->geometry.max_height );
-  log_cb( RETRO_LOG_INFO, "  aspect_ratio = %f\n", info->geometry.aspect_ratio );
-  log_cb( RETRO_LOG_INFO, "  fps          = %f\n", info->timing.fps );
-  log_cb( RETRO_LOG_INFO, "  sample_rate  = %f\n", info->timing.sample_rate );
 }
 
 void retro_run()
 {
-  //log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
-  
   static const struct { unsigned retro; int gw; } map[] =
   {
     { RETRO_DEVICE_ID_JOYPAD_UP,     GWLUA_UP },
@@ -360,7 +328,6 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
 {
   (void)port;
   (void)device;
-  log_cb( RETRO_LOG_DEBUG, "%s( %u, %u )\n", __FUNCTION__, port, device );
 }
 
 void retro_reset()
@@ -370,47 +337,49 @@ void retro_reset()
 
 size_t retro_serialize_size()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
   return 0;
 }
 
 bool retro_serialize( void* data, size_t size )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p, %u )\n", __FUNCTION__, data, size );
+  (void)data;
+  (void)size;
   return false;
 }
 
 bool retro_unserialize( const void* data, size_t size )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %p, %u )\n", __FUNCTION__, data, size );
+  (void)data;
+  (void)size;
   return false;
 }
 
 void retro_cheat_reset()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
 }
 
 void retro_cheat_set( unsigned a, bool b, const char* c )
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %u, %s, \"%s\" )\n", __FUNCTION__, a, b ? "true" : "false", c );
+  (void)a;
+  (void)b;
+  (void)c;
 }
 
 bool retro_load_game_special(unsigned a, const struct retro_game_info* b, size_t c)
 {
-  log_cb( RETRO_LOG_DEBUG, "%s( %u, %p, %u )\n", __FUNCTION__, a, b, c );
+  (void)a;
+  (void)b;
+  (void)c;
   return false;
 }
 
 void retro_unload_game()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
   gwlua_destroy( &state );
   gwrom_destroy( &rom );
 }
 
 unsigned retro_get_region()
 {
-  log_cb( RETRO_LOG_DEBUG, "%s()\n", __FUNCTION__ );
   return RETRO_REGION_NTSC;
 }
