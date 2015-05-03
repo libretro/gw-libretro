@@ -252,7 +252,7 @@ ifeq ($(LOG_PERFORMANCE), 1)
 endif
 
 
-DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DGITHASH=\"`git rev-parse HEAD`\"
+DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DGW_GIT_HASH=\"`git rev-parse HEAD`\"
 
 CFLAGS   += $(fpic) $(DEFINES)
 CFLAGS   += -Wall --std=c99

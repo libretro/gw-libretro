@@ -189,11 +189,11 @@ void retro_init()
 }
 
 void* constcast( const void* ptr );
-extern const char* gitbanner;
+extern const char* gitstamp;
 
 bool retro_load_game( const struct retro_game_info* info )
 {
-  log_cb( RETRO_LOG_ERROR, "\n%s", gitbanner );
+  log_cb( RETRO_LOG_ERROR, "\n%s", gitstamp );
   
   if ( !perf_cb.get_time_usec )
   {

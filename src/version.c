@@ -1,12 +1,13 @@
-const char* gitbanner =
+const char* gitstamp =
   "+------------------------------------------+\n"
+  "|               GW-LIBRETRO                |\n"
   "|    ____    _   _   ___   _      ____     |\n"
   "|   | __ )  | | | | |_ _| | |    |  _ \\    |\n"
   "|   |  _ \\  | | | |  | |  | |    | | | |   |\n"
   "|   | |_) | | |_| |  | |  | |__  | |_| |   |\n"
   "|   |____/   \\___/  |___| |____| |____/    |\n"
   "|                                          |\n"
-  "| " GITHASH " |\n"
+  "| " GW_GIT_HASH " |\n"
   "+------------------------------------------+\n";
 
-const char* githash = GITHASH;
+const char* githash = GW_GIT_HASH;
