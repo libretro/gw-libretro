@@ -1,4 +1,4 @@
-const char* rl_gitstamp  =
+const char* rl_gitstamp =
   "+------------------------------------------+\n"
   "|               RETROLUXURY                |\n"
   "|    ____    _   _   ___   _      ____     |\n"
@@ -7,7 +7,7 @@ const char* rl_gitstamp  =
   "|   | |_) | | |_| |  | |  | |__  | |_| |   |\n"
   "|   |____/   \\___/  |___| |____| |____/    |\n"
   "|                                          |\n"
-  "| " GITHASH " |\n"
+  "| 2deca58337d29d2f9bae4dd140d7c7b3cb12d0c9 |\n"
   "+------------------------------------------+\n";
 
-const char* rl_githash = GITHASH;
+const char* rl_githash = "2deca58337d29d2f9bae4dd140d7c7b3cb12d0c9";
