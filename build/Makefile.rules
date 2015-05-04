@@ -36,6 +36,9 @@ $(CORE_DIR)/gwlua/functions.c: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 $(CORE_DIR)/gwlua/entries.c: $(CORE_DIR)/gwlua/entries.gperf
 	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
 
+$(CORE_DIR)/src/version.c: FORCE
+	cat etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+
 clean-objs:
 	rm -f $(OBJS)
 
@@ -46,4 +49,4 @@ dist-clean: clean
 	rm -f $(HEADERS)
 	rm -f $(CORE_DIR)/gwlua/entries.c
 
-.PHONY: $(TARGET) clean-objs clean dist-clean
+.PHONY: clean-objs clean dist-clean FORCE

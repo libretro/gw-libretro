@@ -306,10 +306,13 @@ else
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
-gwlua/functions.o: gwlua/entries.c
+$(CORE_DIR)/gwlua/functions.o: gwlua/entries.c
 
-gwlua/entries.c: gwlua/entries.gperf
+$(CORE_DIR)/gwlua/entries.c: gwlua/entries.gperf
 	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
+
+$(CORE_DIR)/src/version.c: FORCE
+	cat etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)
@@ -318,5 +321,5 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(TARGET)
 
-.PHONY: $(TARGET) clean clean-objs
+.PHONY: clean clean-objs FORCE
 endif
