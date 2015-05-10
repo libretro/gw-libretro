@@ -58,6 +58,62 @@ rl_image_t* rl_image_create( const void* data, size_t size )
   return NULL;
 }
 
+rl_imageset_t* rl_imageset_create( const void* data, size_t size )
+{
+  union
+  {
+    const void*     restrict v;
+    const uint8_t*  restrict u8;
+    const uint16_t* restrict u16;
+    const uint32_t* restrict u32;
+  }
+  ptr;
+  
+  ptr.v = data;
+  
+  int num_images = ne16( *ptr.u16++ );
+  
+  rl_imageset_t* imageset = (rl_imageset_t*)rl_malloc( sizeof( rl_imageset_t ) + num_images * sizeof( rl_image_t* ) );
+  
+  if ( imageset )
+  {
+    imageset->num_images = num_images;
+    
+    for ( int i = 0; i < num_images; i++ )
+    {
+      size_t image_size = ne32( *ptr.u32++ );
+      imageset->images[ i ] = rl_image_create( ptr.v, image_size );
+      
+      if ( !imageset->images[ i ] )
+      {
+        for ( int j = i - 1; j >= 0; --j )
+        {
+          rl_image_destroy( (void*)imageset->images[ j ] );
+        }
+        
+        rl_free( imageset );
+        return NULL;
+      }
+      
+      ptr.u8 += image_size;
+    }
+    
+    return imageset;
+  }
+  
+  return NULL;
+}
+
+void rl_imageset_destroy( const rl_imageset_t* imageset )
+{
+  for ( int i = imageset->num_images - 1; i >= 0; --i )
+  {
+    rl_image_destroy( imageset->images[ i ] );
+  }
+  
+  rl_free( (void*)imageset );
+}
+
 void rl_image_blit_nobg( const rl_image_t* image, int x, int y )
 {
   int x0 = 0;

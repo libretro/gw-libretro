@@ -25,7 +25,7 @@ static int luamain( lua_State* L )
   
   lua_newtable( L );
   
-  for ( i = 2; i < argc; i++ )
+  for ( i = 1; i < argc; i++ )
   {
     lua_pushstring( L, argv[ i ] );
     lua_rawseti( L, -2, i - 1 );

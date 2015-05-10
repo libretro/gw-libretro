@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -157,13 +160,95 @@ static int l_split( lua_State* L )
   return 3;
 }
 
+static int l_scandir( lua_State* L )
+{
+  const char* name = luaL_checkstring( L, 1 );
+  DIR* dir = opendir( name );
+  
+  if ( dir )
+  {
+    struct dirent* entry;
+    int ndx = 1;
+    
+    lua_createtable( L, 0, 0 );
+    
+    while ( ( entry = readdir( dir ) ) != NULL )
+    {
+      lua_pushfstring( L, "%s%c%s", name, SEPARATOR, entry->d_name );
+      lua_rawseti( L, -2, ndx++ );
+    }
+    
+    closedir( dir );
+    return 1;
+  }
+  
+  lua_pushstring( L, strerror( errno ) );
+  return lua_error( L );
+}
+
+static void pushtime( lua_State* L, time_t* time )
+{
+  struct tm* tm = gmtime( time );
+  char buf[ 256 ];
+  sprintf( buf, "%04d-%02d-%02dT%02d:%02d:%02dZ", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec );
+  lua_pushstring( L, buf );
+}
+
+static int l_stat( lua_State* L )
+{
+  static const struct { unsigned flag; const char* name; } modes[] =
+  {
+    //{ S_IFSOCK, "sock" },
+    //{ S_IFLNK,  "link" },
+    { S_IFREG,  "file" },
+    { S_IFBLK,  "block" },
+    { S_IFDIR,  "dir" },
+    { S_IFCHR,  "char" },
+    { S_IFIFO,  "fifo" },
+  };
+  
+  const char* name = luaL_checkstring( L, 1 );
+  struct stat buf;
+  int i;
+  
+  if ( stat( name, &buf ) == 0 )
+  {
+    lua_createtable( L, 0, 0 );
+    
+    lua_pushinteger( L, buf.st_size );
+    lua_setfield( L, -2, "size" );
+    
+    pushtime( L, &buf.st_atime );
+    lua_setfield( L, -2, "atime" );
+    
+    pushtime( L, &buf.st_mtime );
+    lua_setfield( L, -2, "mtime" );
+    
+    pushtime( L, &buf.st_ctime );
+    lua_setfield( L, -2, "ctime" );
+    
+    for ( i = 0; i < sizeof( modes ) / sizeof( modes[ 0 ] ); i++ )
+    {
+      lua_pushboolean( L, ( buf.st_mode & S_IFMT ) == modes[ i ].flag );
+      lua_setfield( L, -2, modes[ i ].name );
+    }
+    
+    return 1;
+  }
+  
+  lua_pushstring( L, strerror( errno ) );
+  return lua_error( L );
+}
+
 LUAMOD_API int luaopen_path( lua_State* L )
 {
   static const luaL_Reg statics[] =
   {
     { "realpath", l_realpath },
     //{ "sanitize", l_sanitize },
-    { "split", l_split },
+    { "split",    l_split },
+    { "scandir",  l_scandir },
+    { "stat",     l_stat },
     { NULL, NULL }
   };
 

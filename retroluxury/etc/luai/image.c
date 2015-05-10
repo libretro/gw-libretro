@@ -284,6 +284,8 @@ static int l_color2alpha( lua_State* L )
   return 1;
 }
 
+#define MAX( a, b ) ( a > b ? a : b )
+
 static int l_blit( lua_State* L )
 {
   image_t* source = check( L, 1 );
@@ -318,12 +320,11 @@ static int l_blit( lua_State* L )
         int dg = ( dc >> 8 ) & 255;
         int db = ( dc >> 16 ) & 255;
         
-        int a = ( sa * sa + da * ( 255 - sa ) ) / 255;
         int r = ( sr * sa + dr * ( 255 - sa ) ) / 255;
         int g = ( sg * sa + dg * ( 255 - sa ) ) / 255;
         int b = ( sb * sa + db * ( 255 - sa ) ) / 255;
         
-        dest->pixels[ yy * dest->width + xx ] = a << 24 | b << 16 | g << 8 | r;
+        dest->pixels[ yy * dest->width + xx ] = MAX( sa, da ) << 24 | b << 16 | g << 8 | r;
       }
       
       xx++;

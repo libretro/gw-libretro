@@ -64,6 +64,58 @@ static int compare( const void* e1, const void* e2 )
   return c1 - c2;
 }
 
+void rl_sprites_render( void )
+{
+  spt_t* sptptr = sprites;
+  const spt_t* endptr = sprites + num_sprites;
+  
+  if ( sptptr < endptr )
+  {
+    do
+    {
+      sptptr->sprite->flags &= ~RL_SPRITE_TEMP_INV;
+      sptptr->sprite->flags |= sptptr->sprite->image == NULL;
+      sptptr++;
+    }
+    while ( sptptr < endptr );
+  }
+  
+  qsort( (void*)sprites, num_sprites, sizeof( spt_t ), compare );
+  
+  rl_sprite_t guard;
+  guard.flags = RL_SPRITE_UNUSED;
+  sprites[ num_sprites ].sprite = &guard; /* guard */
+  
+  sptptr = sprites;
+  
+  /* Iterate over active and visible sprites and blit them */
+  /* flags & 0x0007U == 0 */
+  if ( sptptr->sprite->flags == 0 )
+  {
+    do
+    {
+      rl_image_blit_nobg( sptptr->sprite->image, x0 + sptptr->sprite->x, y0 + sptptr->sprite->y );
+      sptptr++;
+    }
+    while ( sptptr->sprite->flags == 0 );
+  }
+  
+  num_visible = sptptr - sprites;
+  
+  /* Jump over active but invisible sprites */
+  /* flags & 0x0004U == 0x0000U */
+  if ( ( sptptr->sprite->flags & RL_SPRITE_UNUSED ) == 0 )
+  {
+    do
+    {
+      sptptr++;
+    }
+    while ( ( sptptr->sprite->flags & RL_SPRITE_UNUSED ) == 0 );
+  }
+  
+  num_sprites = sptptr - sprites;
+}
+
 void rl_sprites_begin( void )
 {
   spt_t* sptptr = sprites;

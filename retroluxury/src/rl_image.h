@@ -26,10 +26,23 @@ typedef struct
 }
 rl_image_t;
 
+typedef struct
+{
+  int num_images;
+  
+  const rl_image_t* images[ 0 ];
+}
+rl_imageset_t;
+
 /* Creates an image given the RLE-encoded data produced by rlrle. */
 rl_image_t* rl_image_create( const void* data, size_t size );
 /* Destroys an image. */
-#define rl_image_destroy( image ) do { rl_free( image ); } while ( 0 )
+#define rl_image_destroy( image ) do { rl_free( (void*)image ); } while ( 0 )
+
+/* Creates an image set. */
+rl_imageset_t* rl_imageset_create( const void* data, size_t size );
+/* Destroyes an image set. */
+void rl_imageset_destroy( const rl_imageset_t* imageset );
 
 /* Blits an image to the given background. */
 void rl_image_blit_nobg( const rl_image_t* image, int x, int y );

@@ -1,6 +1,8 @@
 local image = require 'image'
 local path = require 'path'
 
+local rleimage
+
 local xml = [===[
 local function prettyPrint( node, file, ident )
   file = file or io.stdout
@@ -334,6 +336,9 @@ local function newwriter()
     prependu32 = function( self, x )
       table.insert( self.content, 1, string.char( ( x >> 24 ) & 255, ( x >> 16 ) & 255, ( x >> 8 ) & 255, x & 255 ) )
     end,
+    append = function( self, bytes )
+      self.content[ #self.content + 1 ] = bytes
+    end,
     save = function( self, filename )
       local file, err = io.open( filename, 'wb' )
       if not file then error( err ) end
@@ -343,13 +348,16 @@ local function newwriter()
     size = function( self, filename )
       self.content = { table.concat( self.content ) }
       return #self.content[ 1 ]
+    end,
+    getcontent = function( self )
+      self.content = { table.concat( self.content ) }
+      return self.content[ 1 ]
     end
   }
 end
 
 local function compile( map, layers, coll )
   local built = { tiles = {}, images = {}, layer0 = {}, layers = {} }
-  local imgset = {}
   local out = newwriter()
   
   -- build layer 0 and the tileset
@@ -359,12 +367,13 @@ local function compile( map, layers, coll )
     for i = 1, #layers[ 1 ] do
       for _, layer in ipairs( map.layers ) do
         if layer.name == layers[ 1 ][ i ] then
-          names[ layers[ 1 ][ i ] ] = layer
+          names[ layer.name ] = layer
         end
       end
     end
     
     local png = render( map, names )
+    local tileset = {}
     
     for y = 0, png:getHeight() - 1, map.tileheight do
       built.layer0[ y // map.tileheight + 1 ] = {}
@@ -372,41 +381,104 @@ local function compile( map, layers, coll )
       for x = 0, png:getWidth() - 1, map.tilewidth do
         local sub = png:sub( x, y, x + 31, y + 31 )
         
-        if not imgset[ sub:getHash() ] then
+        if not tileset[ sub:getHash() ] then
           built.tiles[ #built.tiles + 1 ] = sub
-          imgset[ sub:getHash() ] = #built.tiles - 1
+          tileset[ sub:getHash() ] = #built.tiles - 1
         end
         
-        built.layer0[ y // map.tileheight + 1 ][ x // map.tilewidth + 1 ] = imgset[ sub:getHash() ]
+        built.layer0[ y // map.tileheight + 1 ][ x // map.tilewidth + 1 ] = tileset[ sub:getHash() ]
       end
     end
-    
-    -- rl_map_t
-    out:writeu16( map.width )
-    out:writeu16( map.height )
-    out:writeu16( 1 ) -- layer count
-    out:writeu16( 0 ) -- pad
-    
-    -- rl_tileset_t
-    out:writeu32( map.tilewidth * map.tileheight * 2 * #built.tiles + 6 ) -- total tileset size
-    out:writeu16( map.tilewidth )
-    out:writeu16( map.tileheight )
-    out:writeu16( #built.tiles )
-    
-    for _, tile in ipairs( built.tiles ) do
-      for y = 0, map.tileheight - 1 do
-        for x = 0, map.tilewidth - 1 do
-          local r, g, b = image.split( tile:getPixel( x, y ) )
-          r, g, b = r * 31 // 255, g * 63 // 255, b * 31 // 255
-          out:writeu16( ( r << 11 ) | ( g << 5 ) | b )
+  end
+  
+  -- build the other layers and the imageset
+  do
+    for l = 2, #layers do
+      local names = {}
+      
+      for i = 1, #layers[ l ] do
+        for _, layer in ipairs( map.layers ) do
+          if layer.name == layers[ l ][ i ] then
+            names[ layer.name ] = layer
+          end
+        end
+      end
+      
+      local png = render( map, names )
+      local imageset = {}
+      
+      local indices = {}
+      built.layers[ l - 1 ] = indices
+      
+      for y = 0, png:getHeight() - 1, map.tileheight do
+        indices[ y // map.tileheight + 1 ] = {}
+        
+        for x = 0, png:getWidth() - 1, map.tilewidth do
+          local sub = png:sub( x, y, x + 31, y + 31 )
+          
+          if not sub:invisible() then
+            if not imageset[ sub:getHash() ] then
+              built.images[ #built.images + 1 ] = sub
+              imageset[ sub:getHash() ] = #built.images
+            end
+            
+            indices[ y // map.tileheight + 1 ][ x // map.tilewidth + 1 ] = imageset[ sub:getHash() ]
+          else
+            indices[ y // map.tileheight + 1 ][ x // map.tilewidth + 1 ] = 0
+          end
         end
       end
     end
+  end
+  
+  -- rl_map_t
+  out:writeu16( map.width )
+  out:writeu16( map.height )
+  out:writeu16( 1 + #built.layers ) -- layer count
+  
+  -- rl_tileset_t
+  out:writeu32( map.tilewidth * map.tileheight * 2 * #built.tiles + 6 ) -- total tileset size
+  out:writeu16( map.tilewidth )
+  out:writeu16( map.tileheight )
+  out:writeu16( #built.tiles )
+  
+  for _, tile in ipairs( built.tiles ) do
+    for y = 0, map.tileheight - 1 do
+      for x = 0, map.tilewidth - 1 do
+        local r, g, b = image.split( tile:getPixel( x, y ) )
+        r, g, b = r * 31 // 255, g * 63 // 255, b * 31 // 255
+        out:writeu16( ( r << 11 ) | ( g << 5 ) | b )
+      end
+    end
+  end
+  
+  -- rl_imageset_t
+  do
+    local o = newwriter()
+    o:writeu16( #built.images )
     
-    -- rl_layer0
+    for _, image in ipairs( built.images ) do
+      local rle = rleimage( image, 32 ):get()
+      o:writeu32( #rle )
+      o:append( rle )
+    end
+    
+    out:writeu32( o:size() )
+    out:append( o:getcontent() )
+  end
+  
+  -- rl_layer0
+  for y = 1, map.height do
+    for x = 1, map.width do
+      out:writeu16( built.layer0[ y ][ x ] )
+    end
+  end
+  
+  -- rl_layern
+  for _, layer in ipairs( built.layers ) do
     for y = 1, map.height do
       for x = 1, map.width do
-        out:writeu16( built.layer0[ y ][ x ] )
+        out:writeu16( layer[ y ][ x ] )
       end
     end
   end
@@ -448,6 +520,12 @@ Commands:
 ]]
 
     return 0
+  end
+  
+  do
+    local dir, _, _ = path.split( path.realpath( args[ 0 ] ) )
+    local ok
+    ok, rleimage = loadfile( dir .. path.separator .. 'rlrle.lua' )()
   end
   
   local filename = path.realpath( args[ 1 ] )

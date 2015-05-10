@@ -226,6 +226,11 @@ void rl_sound_stop_ogg( void )
     stb_vorbis_close( ogg_stream );
     rl_free( ogg_alloc.alloc_buffer );
     
+    if ( ogg_stop_cb )
+    {
+      ogg_stop_cb( NULL );
+    }
+    
     ogg_stream = NULL;
   }
 }

@@ -13,5 +13,10 @@ all: libretroluxury.a
 libretroluxury.a: $(OBJS)
 	ar rcs $@ $+
 
+rl_version.c: FORCE
+	cat ../etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+
 clean:
 	rm -f libretroluxury.a $(OBJS)
+
+.PHONY: clean FORCE
