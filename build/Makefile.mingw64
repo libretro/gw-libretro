@@ -30,8 +30,8 @@ AS  = as
 ############
 # Extensions
 
-OBJEXT = .mingw32.o
-SOEXT  = .mingw32.dll
+OBJEXT = .mingw64.o
+SOEXT  = .mingw64.dll
 
 ################
 # Platform setup
@@ -39,7 +39,7 @@ SOEXT  = .mingw32.dll
 PLATDEFS     = 
 PLATCFLAGS   = -m64 -fpic -fstrict-aliasing
 PLATCXXFLAGS = -m64 -fpic -fstrict-aliasing
-PLATLDFLAGS  = -shared -lm
+PLATLDFLAGS  = -m64 -shared -lm
 
 ################
 # libretro setup

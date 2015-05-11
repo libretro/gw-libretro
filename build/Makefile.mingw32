@@ -39,7 +39,7 @@ SOEXT  = .mingw32.dll
 PLATDEFS     = 
 PLATCFLAGS   = -m32 -fpic -fstrict-aliasing
 PLATCXXFLAGS = -m32 -fpic -fstrict-aliasing
-PLATLDFLAGS  = -shared -lm
+PLATLDFLAGS  = -m32 -shared -lm
 
 ################
 # libretro setup

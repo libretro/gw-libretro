@@ -252,7 +252,7 @@ local platforms = {
     PLAT_DEFS     = '',
     PLAT_CFLAGS   = '-m32 -fpic -fstrict-aliasing',
     PLAT_CXXFLAGS = '${PLAT_CFLAGS}',
-    PLAT_LDFLAGS  = '-shared -lm'
+    PLAT_LDFLAGS  = '-m32 -shared -lm'
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   mingw64 = {
@@ -260,13 +260,13 @@ local platforms = {
     CC            = 'gcc',
     CXX           = 'g++',
     AS            = 'as',
-    EXT           = 'mingw32',
+    EXT           = 'mingw64',
     SO            = 'dll',
     PLAT_INCDIR   = '',
     PLAT_DEFS     = '',
     PLAT_CFLAGS   = '-m64 -fpic -fstrict-aliasing',
     PLAT_CXXFLAGS = '${PLAT_CFLAGS}',
-    PLAT_LDFLAGS  = '-shared -lm'
+    PLAT_LDFLAGS  = '-m64 -shared -lm'
   },
 }
 
