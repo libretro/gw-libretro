@@ -64,7 +64,7 @@ static int compare( const void* e1, const void* e2 )
   return c1 - c2;
 }
 
-void rl_sprites_render( void )
+void rl_sprites_blit_nobg( void )
 {
   spt_t* sptptr = sprites;
   const spt_t* endptr = sprites + num_sprites;
@@ -116,7 +116,7 @@ void rl_sprites_render( void )
   num_sprites = sptptr - sprites;
 }
 
-void rl_sprites_begin( void )
+void rl_sprites_blit( void )
 {
   spt_t* sptptr = sprites;
   const spt_t* endptr = sprites + num_sprites;
@@ -170,7 +170,7 @@ void rl_sprites_begin( void )
   num_sprites = sptptr - sprites;
 }
 
-void rl_sprites_end( void )
+void rl_sprites_unblit( void )
 {
   spt_t* sptptr = sprites + num_visible - 1;
   

@@ -311,9 +311,9 @@ void retro_run()
   
   gwlua_tick( &state, perf_cb.get_time_usec() );
   
-  rl_sprites_begin();
+  rl_sprites_blit();
   video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
-  rl_sprites_end();
+  rl_sprites_unblit();
   
   audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }

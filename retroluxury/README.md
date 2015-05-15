@@ -10,15 +10,15 @@ On top of that, **retroluxury** provides higher level functions to deal with spr
 
 The background is a 2D array of 16-bit pixels which represent what is seen on the screen. It's usually called **framebuffer**.
 
-#### `int rl_backgrnd_create( int width, int height )`
+* `int rl_backgrnd_create( int width, int height )`
 
 Creates a framebuffer of `width` by `height` 16-bit pixels. Returns `0` on success or `-1` on error (which can only mean a memory allocation error for now.)
 
-#### `void rl_backgrnd_destroy( void )`
+* `void rl_backgrnd_destroy( void )`
 
 Releases the memory allocated by the `rl_backgrnd_create` function.
 
-#### `void rl_backgrnd_clear( uint16_t color )`
+* `void rl_backgrnd_clear( uint16_t color )`
 
 Clears the entire framebuffer to the given color. The 16-bit color can be calculated from 8-bit red, green and blue values with the following code:
 
@@ -28,13 +28,13 @@ Clears the entire framebuffer to the given color. The 16-bit color can be calcul
     uint16_t color = ( r << 11 ) | ( g << 5 ) | b;
 
 
-#### `void rl_backgrnd_scroll( int dx, int dy )`
+* `void rl_backgrnd_scroll( int dx, int dy )`
 
 Scrolls the framebuffer by the given pixels. `dx` scrolls horizontally, and `dy` scrolls vertically. `rl_backgrnd_scroll( 0, -1 )` scrolls the framebuffer one pixel up.
 
 `rl_backgrnd_scroll` doesn't do anything with lines "created" by the scroll. I.e., if you scroll the framebuffer one pixel left, the last column on the right will contain garbagge. It's up to the application to draw meaningful pixels in these places after a scroll.
 
-#### `uint16_t* rl_backgrnd_fb( int* width, int* height )`
+* `uint16_t* rl_backgrnd_fb( int* width, int* height )`
 
 Returns a pointer to the top-left pixel of the framebuffer, along with its width and height. Note that the framebuffer can have lines greater than `width` pixels (usually called *pitch*.) To calculate how much pixels to add to a pointer to the framebuffer in order to go one line down, use `width + RL_BACKGRND_MARGIN`.
 
@@ -44,31 +44,31 @@ Images are collections of [run-length encoded](http://en.wikipedia.org/wiki/Run-
 
 Images have per-pixel transparency of 0, 25, 50, 75 and 100%.
 
-#### `rl_image_t* rl_image_create( const void* data, size_t size )`
+* `rl_image_t* rl_image_create( const void* data, size_t size )`
 
 Creates and returns an image based on the given data. This data can be created with the `rlrle.lua` tool.
 
-#### `rl_image_destroy( image )` (macro)
+* `rl_image_destroy( image )` (macro)
 
 Frees the given image.
 
-#### `rl_imageset_t* rl_imageset_create( const void* data, size_t size )`
+* `rl_imageset_t* rl_imageset_create( const void* data, size_t size )`
 
 Creates a collection of images (imageset) from the given data.
 
-#### `void rl_imageset_destroy( const rl_imageset_t* imageset )`
+* `void rl_imageset_destroy( const rl_imageset_t* imageset )`
 
 Frees the given imageset.
 
-#### `void rl_image_blit_nobg( const rl_image_t* image, int x, int y )`
+* `void rl_image_blit_nobg( const rl_image_t* image, int x, int y )`
 
 Drawn an image to the framebuffer at position (x, y). `rl_image_blit_nobg` doesn't save overwritten pixels on the framebuffer, so it's kind of a permanent operation, which will be visible on the screen until you overwrite the image with something else, i.e. by clearing the framebuffer.
 
-#### `uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg )`
+* `uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg )`
 
 Save as `rl_image_blit_nobg`, but saves overwritten pixels on the framebuffer to the `bg` pointer. Make sure you allocate at least `image->used * sizeof(uint16_t)` bytes to `bg`.
 
-#### `void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg )`
+* `void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg )`
 
 Restores the framebuffer as it was before the image was drawn. The `bg` argument should be the same as the `rl_image_blit` call.
 
@@ -76,35 +76,35 @@ Restores the framebuffer as it was before the image was drawn. The `bg` argument
 
 Tiles are similar to images, but they are always a rectangular block of 100% opaque pixels.
 
-#### `rl_tileset_t* rl_tileset_create( const void* data, size_t size )`
+* `rl_tileset_t* rl_tileset_create( const void* data, size_t size )`
 
 Creates a tileset (a collection of tiles having the same width and height) from the given data. Each tile is identified by its 0-based index in the tileset.
 
-#### `rl_tileset_destroy( tileset)` (macro)
+* `rl_tileset_destroy( tileset)` (macro)
 
 Destroys the tileset.
 
-#### `void rl_tileset_blit_nobg( const rl_tileset_t* tileset, int index, int x, int y )`
+* `void rl_tileset_blit_nobg( const rl_tileset_t* tileset, int index, int x, int y )`
 
 Similar to `rl_image_blit_nobg`, but draws the tile identified by `index` in the given tileset.
 
-#### `uint16_t* rl_tileset_blit( const rl_tileset_t* tileset, int index, int x, int y, uint16_t* bg )`
+* `uint16_t* rl_tileset_blit( const rl_tileset_t* tileset, int index, int x, int y, uint16_t* bg )`
 
 Similar to `rl_image_blit`.
 
-#### `void rl_tileset_unblit( const rl_tileset_t* tileset, int x, int y, const uint16_t* bg )`
+* `void rl_tileset_unblit( const rl_tileset_t* tileset, int x, int y, const uint16_t* bg )`
 
 Similar to `rl_image_unblit`.
 
-#### `void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, int y )`
+* `void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, int y )`
 
 Similar to `rl_image_blit_nobg`, but draws a rectangular array of `width` times `height` pixels located at `pixels`.
 
-#### `uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, int y, uint16_t* bg )`
+* `uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, int y, uint16_t* bg )`
 
 Similar to `rl_image_blit`.
 
-#### `void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )`
+* `void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )`
 
 Similar to `rl_image_unblit`.
 
@@ -114,51 +114,92 @@ Similar to `rl_image_unblit`.
 
 Sounds are just PCM data which are mixed toghether. The `RL_MAX_VOICES` macro defines at compile time how much sounds can be played at the same time (usually called *voices*.) One Ogg Vorbis file can be played in addition to the voices.
 
-#### `void rl_sound_init( void )`
+* `void rl_sound_init( void )`
 
 Initializes internal data.
 
-#### `void rl_sound_done( void )`
+* `void rl_sound_done( void )`
 
 Stops all sounds and releases all memory used by the sound system.
 
-#### `rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo )`
+* `rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo )`
 
-Creates a sound from the given data. The data is just `size / 2` signed 16-bit PCM data. If `stereo` is `true`, the sound is stereo and data is [Interleave](http://en.wikipedia.org/wiki/Interleave_sequence), with 16-bits for the left channel followed by 16-bits for the right channel and so forth: LRLRLR...
+Creates a sound from the given data. The data is just `size / 2` signed 16-bit PCM data. If `stereo` is `true`, the sound is stereo and data is [interleaved](http://en.wikipedia.org/wiki/Interleave_sequence), with 16-bits for the left channel followed by 16-bits for the right channel and so forth: LRLRLR...
 
-#### `rl_sound_destroy( sound )` (macro)
+* `rl_sound_destroy( sound )` (macro)
 
 Frees the given sound. Do **not** free a sound that's still playing.
 
-#### `int rl_sound_play( const rl_sound_t* sound, int repeat, rl_soundstop_t stop_cb )`
+* `int rl_sound_play( const rl_sound_t* sound, int repeat, rl_soundstop_t stop_cb )`
 
 Plays a sound. If `repeat` is true, the sound will be repeated *ad infinitum* or until manually stopped. If `stop_cb` is not `NULL`, it'll be called when the sound stops, either because of calls to `rl_sound_stop` or `rl_sound_stop_all` or because it ended naturally.
 
 The returned integer is an internal voice identifier which can be used in calls to `rl_sound_stop`.
 
-#### `void rl_sound_stop( int index )`
+* `void rl_sound_stop( int index )`
 
 Stops a sound (voice) being played.
 
-#### `void rl_sound_stop_all( void )`
+* `void rl_sound_stop_all( void )`
 
 Mutes all voices. The Ogg Vorbis music is not affected.
 
-#### `int rl_sound_play_ogg( const void* data, size_t size, int repeat, rl_soundstop_t stop_cb )`
+* `int rl_sound_play_ogg( const void* data, size_t size, int repeat, rl_soundstop_t stop_cb )`
 
 Starts playing the Ogg Vorbis file contained in `data`. If `repeat` is true, the music will restart automatically. If `stop_cb` is not `NULL`, it'll be called when the music either finishes or `rl_sound_stop_ogg` is called.
 
-#### `void rl_sound_stop_ogg( void )`
+* `void rl_sound_stop_ogg( void )`
 
 Interrupts the Ogg Vorbis music.
 
-#### `const int16_t* rl_sound_mix( void )`
+* `const int16_t* rl_sound_mix( void )`
 
 Mixes all the active voices and the Ogg Vorbis music, if any, and returns a pointer to the stereo, 16-bit PCM audio data buffer that can be sent directly to a properly configured audio device. The data buffer has `RL_SAMPLES_PER_FRAME` stereo samples, meaning `RL_SAMPLES_PER_FRAME * 2` samples, which equals to `RL_SAMPLES_PER_FRAME * 2 * 2` bytes.
 
 ### Sprites
 
-TODO
+Sprites are just images with a spatial position, a layer index for depth sorting, and a visibility flag. They are blit/unblit as a group.
+
+If you redraw the entire framebuffer every frame, you should:
+
+1. Draw the framebuffer
+1. Call `rl_sprites_blit_nobg`
+1. Present the framebuffer
+
+If your background is fixed, or if you update it instead of redrawing it completely, you should:
+
+1. Update the framebuffer
+1. Call `rl_sprites_blit`
+1. Present the framebuffer
+1. Call `rl_sprites_unblit`
+
+* `void rl_sprite_init( void )`
+
+Initializes internal data.
+
+* `rl_sprite_t* rl_sprite_create( void )`
+
+Creates a sprite. The `image` field of the sprite must be initialized before any sprites are drawn, either to a valid image or to NULL (in which case the sprite is invisible.)
+
+* `rl_sprite_destroy( sprite ) (macro)`
+
+Frees a sprite.
+
+* `void rl_sprites_translate( int x0, int y0 )`
+
+Translates all sprites.
+
+* `void rl_sprites_blit_nobg( void )`
+
+Blits all sprites without saving the background. Use this when the background is redrawn every frame.
+
+* `void rl_sprites_blit( void )`
+
+Blits all sprites saving their background. The `RL_BG_SAVE_SIZE` config macro defines the size of the scratch memory that will be used to save the sprites' backgrounds, so you may need to adjust its value if you blit too many sprites.
+
+* `void rl_sprites_unblit( void )`
+
+Unblits all sprites.
 
 ### Maps
 

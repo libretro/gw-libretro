@@ -356,9 +356,83 @@ local function newwriter()
   }
 end
 
-local function compile( map, layers, coll )
+local function list_cmd( args )
+  local map =  loadtmx( args[ 1 ] )
+  local layers = false
+  local tilesets = false
+  
+  for i = 3, #args do
+    if args[ i ] == '--layers' then
+      layers = true
+    elseif args[ i ] == '--tilesets' then
+      tilesets = true
+    else
+      error( 'unknown argument to list: ' .. args[ i ] )
+    end
+  end
+  
+  if not layers and not tilesets then
+    layers, tilesets = true, true
+  end
+  
+  if layers then
+    for i, layer in ipairs( map.layers ) do
+      io.write( string.format( 'Layer %d: %s\n', i, layer.name ) )
+    end
+  end
+  
+  if tilesets then
+    for i, tileset in ipairs( map.tilesets ) do
+      io.write( string.format( 'Tileset %d: %s\n', i, tileset.name ) )
+    end
+  end
+end
+
+local function render_cmd( args )
+  local map =  loadtmx( args[ 1 ] )
+  local layers = {}
+  
+  for i = 3, #args do
+    layers[ args[ i ] ] = true
+  end
+  
+  if not next( layers ) then
+    for i, layer in ipairs( map.layers ) do
+      layers[ layer.name ] = true
+    end
+  end
+  
+  local dir, name, ext = path.split( args[ 1 ] )
+  render( map, layers ):save( dir .. path.separator .. name .. '.png' )
+end
+
+local function compile_cmd( args )
+  local map =  loadtmx( args[ 1 ] )
+  local layers = {}
+  local coll, limit
+  
+  do
+    local i = 3
+    
+    while i <= #args do
+      if args[ i ] == '--coll' then
+        coll = split( args[ i + 1 ], '+' )
+        i = i + 2
+      elseif args[ i ] == '--margin' then
+        limit = tonumber( args[ i + 1 ] )
+        i = i + 2
+      else
+        layers[ #layers + 1 ] = split( args[ i ], '+' )
+        i = i + 1
+      end
+    end
+  end
+  
+  if #layers == 0 then
+    error( 'the built map must have at least one layer' )
+  end
+  
   local built = { tiles = {}, images = {}, layer0 = {}, layers = {} }
-  local out = newwriter()
   
   -- build layer 0 and the tileset
   do
@@ -431,59 +505,113 @@ local function compile( map, layers, coll )
     end
   end
   
-  -- rl_map_t
-  out:writeu16( map.width )
-  out:writeu16( map.height )
-  out:writeu16( 1 + #built.layers ) -- layer count
+  -- output file name
+  local filename
+  
+  do
+    local dir, name, ext = path.split( args[ 1 ] )
+    filename = dir .. path.separator .. name
+  end
   
   -- rl_tileset_t
-  out:writeu32( map.tilewidth * map.tileheight * 2 * #built.tiles + 6 ) -- total tileset size
-  out:writeu16( map.tilewidth )
-  out:writeu16( map.tileheight )
-  out:writeu16( #built.tiles )
-  
-  for _, tile in ipairs( built.tiles ) do
-    for y = 0, map.tileheight - 1 do
-      for x = 0, map.tilewidth - 1 do
-        local r, g, b = image.split( tile:getPixel( x, y ) )
-        r, g, b = r * 31 // 255, g * 63 // 255, b * 31 // 255
-        out:writeu16( ( r << 11 ) | ( g << 5 ) | b )
+  do
+    local out = newwriter()
+    
+    out:writeu16( map.tilewidth )
+    out:writeu16( map.tileheight )
+    out:writeu16( #built.tiles )
+    
+    for _, tile in ipairs( built.tiles ) do
+      for y = 0, map.tileheight - 1 do
+        for x = 0, map.tilewidth - 1 do
+          local r, g, b = image.split( tile:getPixel( x, y ) )
+          r, g, b = r * 31 // 255, g * 63 // 255, b * 31 // 255
+          out:writeu16( ( r << 11 ) | ( g << 5 ) | b )
+        end
       end
     end
+    
+    out:save( filename .. '.tls' )
   end
   
   -- rl_imageset_t
   do
-    local o = newwriter()
-    o:writeu16( #built.images )
+    local out = newwriter()
+    
+    out:writeu16( #built.images )
     
     for _, image in ipairs( built.images ) do
-      local rle = rleimage( image, 32 ):get()
-      o:writeu32( #rle )
-      o:append( rle )
+      local rle = rleimage( image, limit ):get()
+      out:writeu32( #rle )
+      out:append( rle )
     end
     
-    out:writeu32( o:size() )
-    out:append( o:getcontent() )
+    out:save( filename .. '.ims' )
   end
   
-  -- rl_layer0
-  for y = 1, map.height do
-    for x = 1, map.width do
-      out:writeu16( built.layer0[ y ][ x ] )
-    end
-  end
-  
-  -- rl_layern
-  for _, layer in ipairs( built.layers ) do
+  -- rl_map_t
+  do
+    local out = newwriter()
+    
+    out:writeu16( map.width )
+    out:writeu16( map.height )
+    out:writeu16( 1 + #built.layers ) -- layer count
+    
+    -- map flags
+    local flags = 0
+    flags = flags | ( coll and 1 or 0 ) -- has collision bits
+    
+    out:writeu16( flags )
+    
+    -- rl_layer0
     for y = 1, map.height do
       for x = 1, map.width do
-        out:writeu16( layer[ y ][ x ] )
+        out:writeu16( built.layer0[ y ][ x ] )
       end
     end
+    
+    -- rl_layern
+    for _, layer in ipairs( built.layers ) do
+      for y = 1, map.height do
+        for x = 1, map.width do
+          out:writeu16( layer[ y ][ x ] )
+        end
+      end
+    end
+    
+    -- collision bits
+    if coll then
+      local bits, bit = 0, 1
+      
+      for y = 1, map.height do
+        for x = 1, map.width do
+          for i = 1, #coll do
+            for _, layer in ipairs( map.layers ) do
+              if layer.name == coll[ i ] then
+                if layer.tiles[ y ][ x ] ~= 0 then
+                  bits = bits | bit
+                  break
+                end
+              end
+            end
+          end
+          
+          if bit == 0x80000000 then
+            out:writeu32( bits )
+            bits, bit = 0, 1
+          else
+            bit = bit << 1
+          end
+        end
+      end
+      
+      if bit ~= 1 then
+        out:writeu32( bits )
+      end
+    end
+    
+    out:save( filename .. '.map' )
   end
-  
-  return out
 end
 
 return function( args )
@@ -510,12 +638,22 @@ Usage: rlmap <mapname.tmx> command args...
 
 Commands:
 
-  list [--layers] [--tilesets]          lists the map\'s layers and/or tilesets
+  list                                  lists the map\'s layers and/or tilesets
+       [--layers]                       lists only layers
+       [--tilesets]                     lists only tilesets
 
-  render [layername...]                 renders the map as a PNG image
+  render                                renders the map as a PNG image
+         [layername...]                 names of the layers to render
 
-  compile --coll layermame              compiles the map as a .map file
-          layername[+layername]...
+  compile                               compiles the map as a .map file
+          --margin x                    sets the pixel limit on RLE runs on a row
+                                        (must be equal to RL_BACKGRND_MARGIN)
+          --coll layermame              sets the layer that contains collision
+                                        data (any tile means block)
+          layername[+layername]...      first set of layers, that will be
+                                        merged into layer 0
+          layername[+layername]...      second set of layers, that will be
+                                        merged into layer 1 (and so forth)
 
 ]]
 
@@ -523,79 +661,23 @@ Commands:
   end
   
   do
-    local dir, _, _ = path.split( path.realpath( args[ 0 ] ) )
+    local dir, _, _ = path.split( args[ 0 ] )
     local ok
     ok, rleimage = loadfile( dir .. path.separator .. 'rlrle.lua' )()
   end
   
-  local filename = path.realpath( args[ 1 ] )
-  local map =  loadtmx( filename )
+  args[ 1 ] = path.realpath( args[ 1 ] )
   
-  if args[ 2 ] == 'list' then
-    local layers = false
-    local tilesets = false
-    
-    for i = 3, #args do
-      if args[ i ] == '--layers' then
-        layers = true
-      elseif args[ i ] == '--tilesets' then
-        tilesets = true
-      else
-        error( 'unknown argument to list: ' .. args[ i ] )
-      end
-    end
-    
-    if not layers and not tilesets then
-      layers, tilesets = true, true
-    end
-    
-    if layers then
-      for i, layer in ipairs( map.layers ) do
-        io.write( string.format( 'Layer %d: %s\n', i, layer.name ) )
-      end
-    end
-    
-    if tilesets then
-      for i, tileset in ipairs( map.tilesets ) do
-        io.write( string.format( 'Tileset %d: %s\n', i, tileset.name ) )
-      end
-    end
-  elseif args[ 2 ] == 'render' then
-    local layers = {}
-    
-    for i = 3, #args do
-      layers[ args[ i ] ] = true
-    end
-    
-    if not next( layers ) then
-      for i, layer in ipairs( map.layers ) do
-        layers[ layer.name ] = true
-      end
-    end
-    
-    local dir, name, ext = path.split( filename )
-    render( map, layers ):save( dir .. path.separator .. name .. '.png' )
-  elseif args[ 2 ] == 'compile' then
-    local layers = {}
-    local coll = nil
-    local ii = 3
-    
-    if args[ 3 ] == '--coll' then
-      coll = split( args[ 4 ], '+' )
-      ii = 5
-    end
-    
-    for i = ii, #args do
-      layers[ i - ii + 1 ] = split( args[ i ], '+' )
-    end
-    
-    if #layers == 0 then
-      error( 'the built map must have at least one layer' )
-    end
-    
-    local out = compile( map, layers, coll )
-    local dir, name, ext = path.split( filename )
-    out:save( dir .. path.separator .. name .. '.map' )
+  local commands = {
+    list    = list_cmd,
+    render  = render_cmd,
+    compile = compile_cmd
+  }
+  
+  local cmd = commands[ args[ 2 ] ]
+  
+  if cmd then
+    cmd( args )
   else
     error( 'unknown command: ' .. args[ 2 ] )
   end

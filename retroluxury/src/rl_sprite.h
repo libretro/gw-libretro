@@ -38,9 +38,9 @@ rl_sprite_t* rl_sprite_create( void );
 
 void rl_sprites_translate( int x0, int y0 );
 
-void rl_sprites_render( void );
+void rl_sprites_blit_nobg( void );
 
-void rl_sprites_begin( void );
-void rl_sprites_end( void );
+void rl_sprites_blit( void );
+void rl_sprites_unblit( void );
 
 #endif /* RL_SPRITE_H */

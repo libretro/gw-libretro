@@ -126,6 +126,8 @@ local function rleimage( png, limit, transp )
   local rows = {}
   local used = 0
   
+  limit = limit or 1e10
+  
   for y = 0, height - 1 do
     local row, u =  rlerow( png, y, limit, transp )
     rows[ y ] = row
@@ -162,6 +164,7 @@ is still valid, but it must be entirely contained within the background
 boundaries when blit.
 
 Usage: luai rlrle.lua [ options ] <image>
+
 --transp r g b   makes the given color transparent
 --tl             makes the color at (0,0) transparent
 --bl             makes the color at (0,height-1) transparent
@@ -204,7 +207,7 @@ Usage: luai rlrle.lua [ options ] <image>
     transp = rgbto16( image.split( png:getPixel( png:getWidth() - 1, png:getHeight() - 1 ) ) )
   end
   
-  local rle = rleimage( png, limit or 1e10 , transp )
+  local rle = rleimage( png, limit, transp )
   local dir, name, ext = path.split( name )
   rle:save( dir .. path.separator .. name .. '.rle' )
   return 0

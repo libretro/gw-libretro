@@ -1,5 +1,5 @@
-CFLAGS = -O3 -I ~/lua-5.3.0/src -Wall
-LFLAGS = -L ~/lua-5.3.0/src
+CFLAGS = -m32 -O3 -I ~/lua-5.3.0/src -Wall
+LFLAGS = -m32 -L ~/lua-5.3.0/src
 
 %.o: %.c
 	gcc $(CFLAGS) -I. -c -o $@ $<

@@ -7,7 +7,7 @@ const char* rl_gitstamp =
   "|   | |_) | | |_| |  | |  | |__  | |_| |   |\n"
   "|   |____/   \\___/  |___| |____| |____/    |\n"
   "|                                          |\n"
-  "| 9ff3b982d64cb8569d98ce12c3366612e383a5b5 |\n"
+  "| b2d41ac7f058af9758d856db38bb3390861f0452 |\n"
   "+------------------------------------------+\n";
 
-const char* rl_githash = "9ff3b982d64cb8569d98ce12c3366612e383a5b5";
+const char* rl_githash = "b2d41ac7f058af9758d856db38bb3390861f0452";

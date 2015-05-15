@@ -1,9 +1,13 @@
+#include <stdlib.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
 #include "image.h"
 #include "path.h"
+
+char __cdecl *realpath( const char *__restrict__ name, char *__restrict__ resolved );
 
 static int luamain( lua_State* L )
 {
@@ -25,7 +29,15 @@ static int luamain( lua_State* L )
   
   lua_newtable( L );
   
-  for ( i = 1; i < argc; i++ )
+  {
+    char  buffer[ _MAX_PATH ];
+    char* resolved = realpath( argv[ 1 ], buffer );
+    
+    lua_pushstring( L, resolved ? resolved : argv[ 1 ] );
+    lua_rawseti( L, -2, 0 );
+  }
+  
+  for ( i = 2; i < argc; i++ )
   {
     lua_pushstring( L, argv[ i ] );
     lua_rawseti( L, -2, i - 1 );

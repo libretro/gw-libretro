@@ -155,7 +155,6 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   state->width = state->height = 0;
   state->screen = NULL;
   state->help = 0;
-  state->seed = 1;
   state->now = now;
   memset( (void*)state->input, 0, sizeof( state->input ) );
   state->tick_ref = LUA_NOREF;

@@ -123,24 +123,19 @@ static int l_stopsounds( lua_State* L )
 
 static int l_randomize( lua_State* L )
 {
-  gwlua_t* state = get_state( L );
-  state->seed = time( NULL );
+  rl_srand( time( NULL ) );
   return 0;
 }
 
 static int l_random( lua_State* L )
 {
-  gwlua_t* state = get_state( L );
-  state->seed = 6364136223846793005ULL * state->seed + 1;
-  double frac = ( state->seed >> 11 ) / 9007199254740992.0;
-  
   if ( lua_isnumber( L, 1 ) )
   {
-    lua_pushinteger( L, (int64_t)( frac * lua_tointeger( L, 1 ) ) );
+    lua_pushinteger( L, rl_random( 0, lua_tointeger( L, 1 ) - 1 ) );
   }
   else
   {
-    lua_pushnumber( L, frac );
+    lua_pushnumber( L, rl_rand() / 4294967296.0 );
   }
   
   return 1;

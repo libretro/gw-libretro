@@ -9,7 +9,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-_CRTIMP char __cdecl *realpath( const char *__restrict__ name, char *__restrict__ resolved );
+char __cdecl *realpath( const char *__restrict__ name, char *__restrict__ resolved );
 
 #define SEPARATOR '/'
 #define OTHER_SEP '\\'

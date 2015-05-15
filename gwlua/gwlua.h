@@ -72,7 +72,6 @@ struct gwlua_t
   /* control */
   lua_State* L;
   int help;
-  uint64_t seed;
   int64_t now;
   
   /* input */
