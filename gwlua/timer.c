@@ -24,7 +24,7 @@ static int l_tick( lua_State* L )
 {
   gwlua_timer_t* self = l_check( L, 1 );
   
-  if ( self->is_enabled && self->callback_ref != LUA_NOREF && self->state->now >= self->expiration )
+  if ( self->is_enabled && self->callback_ref != LUA_NOREF && self->interval && self->state->now >= self->expiration )
   {
     self->expiration = self->interval + self->state->now;
     
