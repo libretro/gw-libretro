@@ -217,6 +217,7 @@ void gwlua_tick( gwlua_t* state, int64_t now )
   
   gwlua_ref_get( state->L, state->tick_ref );
   l_pcall( state->L, 0, 0 );
+  lua_gc( state->L, LUA_GCSTEP, 0 );
 }
 
 /*---------------------------------------------------------------------------*/
