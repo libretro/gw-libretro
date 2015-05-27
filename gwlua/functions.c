@@ -1,5 +1,7 @@
 #include <gwlua.h>
 
+#include <rl_rand.h>
+
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
