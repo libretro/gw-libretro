@@ -14,6 +14,17 @@ static void dummy_log( enum retro_log_level level, const char* fmt, ... )
   (void)fmt;
 }
 
+#define SRAM_MAX 8
+
+typedef struct
+{
+  char types[ SRAM_MAX ];
+  char keys[ SRAM_MAX ][ 32 ];
+  char values[ SRAM_MAX ][ 64 ];
+  char count;
+}
+sram_t;
+
 retro_log_printf_t log_cb = dummy_log;
 retro_environment_t env_cb;
 static retro_video_refresh_t video_cb;
@@ -22,8 +33,10 @@ static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 static struct retro_perf_callback perf_cb;
 
+static int     init;
 static gwrom_t rom;
 static gwlua_t state;
+static sram_t  sram;
 static int     offset;
 static int     soft_width;
 static int     soft_height;
@@ -65,15 +78,34 @@ static struct retro_input_descriptor input_descriptors[] =
 
 const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 {
+  for ( int i = 0; i < sram.count; i++ )
+  {
+    if ( !strcmp( sram.keys[ i ], key ) )
+    {
+      *type = sram.types[ i ];
+      return sram.values[ i ];
+    }
+  }
+  
   return NULL;
 }
 
 void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type )
 {
-  (void)state;
-  (void)key;
-  (void)value;
-  (void)type;
+  if ( sram.count < SRAM_MAX )
+  {
+    int ndx = sram.count++;
+    
+    sram.types[ ndx ] = type;
+    
+    strncpy( sram.keys[ ndx ], key, sizeof( sram.keys[ ndx ] ) );
+    sram.keys[ ndx ][ sizeof( sram.keys[ ndx ] ) - 1 ] = 0;
+    
+    strncpy( sram.values[ ndx ], value, sizeof( sram.values[ ndx ] ) );
+    sram.values[ ndx ][ sizeof( sram.values[ ndx ] ) - 1 ] = 0;
+  }
+  
+  /* TODO: return an error when SRAM is full */
 }
 
 int gwlua_set_fb( unsigned width, unsigned height )
@@ -210,35 +242,29 @@ bool retro_load_game( const struct retro_game_info* info )
     return false;
   }
   
-  env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
-  
   int res = gwrom_init( &rom, constcast( info->data ), info->size, GWROM_COPY_ALWAYS );
   
   if ( res != GWROM_OK )
   {
     log_cb( RETRO_LOG_ERROR, "Error initializing the rom: ", gwrom_error_message( res ) );
+    init = -1;
     return false;
   }
   
-  if ( gwlua_create( &state, &rom, perf_cb.get_time_usec() ) )
-  {
-    log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
-    return false;
-  }
-  
+  env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
+  memset( (void*)&state, 0, sizeof( state ) );
+  init = 0;
   return true;
 }
 
 size_t retro_get_memory_size( unsigned id )
 {
-  (void)id;
-  return 0;
+  return id == RETRO_MEMORY_SAVE_RAM ? sizeof( sram ) : 0;
 }
 
 void* retro_get_memory_data( unsigned id )
 {
-  (void)id;
-  return NULL;
+  return id == RETRO_MEMORY_SAVE_RAM ? (void*)&sram : NULL;
 }
 
 void retro_set_video_refresh( retro_video_refresh_t cb )
@@ -301,6 +327,29 @@ void retro_run()
   
   input_poll_cb();
   
+  if ( init == 0 )
+  {
+    /* Initialize game */
+    if ( gwlua_create( &state, &rom, perf_cb.get_time_usec() ) )
+    {
+      log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
+      init = -1;
+      return;
+    }
+    
+    struct retro_system_av_info info;
+    retro_get_system_av_info( &info );
+    env_cb( RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info );
+    
+    init = 1;
+  }
+  else if ( init == -1 )
+  {
+    /* Error, return */
+    return;
+  }
+  
+  /* Run game */
   unsigned id;
   
   for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )

@@ -12,11 +12,11 @@ function M.treginifile:create()
 end
 
 function M.treginifile:readinteger( arg1, key, value )
-  return system.loadvalue( key ) or value
+  return system.loadvalue( key:lower() ) or value
 end
 
 function M.treginifile:writeinteger( arg1, key, value)
-  system.savevalue( key, value )
+  system.savevalue( key:lower(), value )
 end
 
 return M
