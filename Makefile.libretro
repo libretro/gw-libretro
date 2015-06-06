@@ -262,12 +262,12 @@ CXXFLAGS += -Wall
 
 LDFLAGS +=
 
-LUA =
-PNG =
+LUA_FILES =
+PNG_FILES =
 
 include build/Makefile.common
 
-HEADERS = $(LUA:.lua=.h) $(PNG:.png=.h)
+HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
 INCDIRS += $(EXTRA_INCLUDES) $(INCLUDES)
@@ -306,9 +306,9 @@ else
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
-$(CORE_DIR)/gwlua/functions.o: gwlua/entries.c
+$(CORE_DIR)/gwlua/functions.o: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 
-$(CORE_DIR)/gwlua/entries.c: gwlua/entries.gperf
+$(CORE_DIR)/gwlua/entries.c: $(CORE_DIR)/gwlua/entries.gperf
 	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
 
 $(CORE_DIR)/src/version.c: FORCE
