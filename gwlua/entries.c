@@ -1,5 +1,5 @@
-/* C code produced by gperf version 3.0.1 */
-/* Command-line: 'C:\\MinGW\\bin\\gperf.exe' -c -C -l -L C -t -7 -m 100 -I --output-file=gwlua/entries.c gwlua/entries.gperf  */
+/* C code produced by gperf version 3.0.4 */
+/* Command-line: gperf -c -C -l -L C -t -7 -m 100 -I --output-file=gwlua/entries.c gwlua/entries.gperf  */
 /* Computed positions: -k'1-2,10-11' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -99,6 +99,9 @@ hash (str, len)
 
 #ifdef __GNUC__
 __inline
+#if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
+__attribute__ ((__gnu_inline__))
+#endif
 #endif
 const struct binary_t *
 in_word_set (str, len)
