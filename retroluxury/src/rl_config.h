@@ -11,7 +11,7 @@ value must be used when rle-encoding images with rlrle.lua.
 
 /* The maximum *total* number of sprites. */
 #ifndef RL_MAX_SPRITES
-#define RL_MAX_SPRITES 512
+#define RL_MAX_SPRITES 1024
 #endif
 
 /* The maximum number of saved pixels when blitting sprites. */
