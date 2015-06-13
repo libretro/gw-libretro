@@ -72,7 +72,6 @@ static int l_gc( lua_State* L )
 {
   rl_sprite_t* self = *(rl_sprite_t**)lua_touserdata( L, 1 );
   rl_sprite_destroy( self );
-  gwlua_free( self );
   return 0;
 }
 
