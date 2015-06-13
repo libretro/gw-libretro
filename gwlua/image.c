@@ -186,7 +186,7 @@ static int l_new( lua_State* L )
   
   if ( !*self )
   {
-    return luaL_error( L, "out of memory" );
+    return luaL_error( L, "sprite limit reached" );
   }
   
   ( *self )->layer = 100;
