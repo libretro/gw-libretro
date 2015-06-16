@@ -2,4 +2,3 @@
 *.dll
 *.so
 *~
-version.c
