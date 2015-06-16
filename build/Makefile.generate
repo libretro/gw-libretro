@@ -17,12 +17,9 @@ HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
 %.c: %.gperf
 	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
 
-all: $(HEADERS) $(CORE_DIR)/gwlua/entries.c $(CORE_DIR)/src/version.c
-
-$(CORE_DIR)/src/version.c: FORCE
-	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+all: $(HEADERS) $(CORE_DIR)/gwlua/entries.c
 
 clean:
-	rm -f $(HEADERS) $(CORE_DIR)/gwlua/entries.c $(CORE_DIR)/src/version.c
+	rm -f $(HEADERS) $(CORE_DIR)/gwlua/entries.c
 
-.PHONY: clean FORCE
+.PHONY: clean
