@@ -251,7 +251,7 @@ ifeq ($(LOG_PERFORMANCE), 1)
 endif
 
 
-DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DGW_GIT_HASH=\"`git rev-parse HEAD`\"
+DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free
 
 CFLAGS   += $(fpic) $(DEFINES)
 CFLAGS   += -Wall --std=c99
@@ -280,14 +280,6 @@ INCDIRS += $(EXTRA_INCLUDES) $(INCLUDES)
 %.o: %.S
 	$(CC_AS) -c -o $@ $< $(CFLAGS) $(INCDIRS)
 
-%.h: %.lua
-	xxd -i $< | sed "s/unsigned/const unsigned/g" > $@
-
-%.h: %.png
-	retroluxury/etc/luai/luai retroluxury/etc/rlrle.lua $<
-	xxd -i $(basename $<).rle | sed "s/unsigned/const unsigned/g" > $@
-	rm -f $(basename $<).rle
-
 ifeq ($(platform), theos_ios)
 COMMON_FLAGS := -DIOS $(COMMON_DEFINES) $(INCLUDES) -I$(THEOS_INCLUDE_PATH) -Wno-error
 $(LIBRARY_NAME)_CFLAGS += $(CFLAGS) $(COMMON_FLAGS)
@@ -306,9 +298,6 @@ else
 endif
 
 $(CORE_DIR)/gwlua/functions.o: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
-
-$(CORE_DIR)/gwlua/entries.c: $(CORE_DIR)/gwlua/entries.gperf
-	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
 
 $(CORE_DIR)/src/version.c: FORCE
 	cat etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@

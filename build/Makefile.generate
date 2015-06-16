@@ -1,0 +1,29 @@
+CORE_DIR      = ..
+INCLUDES      = ${PLAT_INCDIR}
+SOURCES_C     =
+SOURCES_CXX   =
+SOURCES_LUA_C =
+LUA_FILES     =
+PNG_FILES     =
+
+include Makefile.common
+
+HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
+
+%.h: %.lua
+	xxd -i $< | sed "s/unsigned/const unsigned/g" | sed "s/ _*/ /g" > $@
+
+%.h: %.png
+	$(CORE_DIR)/retroluxury/etc/luai/luai $(CORE_DIR)/retroluxury/etc/rlrle.lua $<
+	xxd -i $(basename $<).rle | sed "s/unsigned/const unsigned/g" | sed "s/ _*/ /g" > $@
+	rm -f $(basename $<).rle
+
+%.c: %.gperf
+	gperf -c -C -l -L C -t -7 -m 100 -I --output-file=$@ $<
+
+all: $(HEADERS) $(CORE_DIR)/gwlua/entries.c
+
+clean:
+	rm -f $(HEADERS) $(CORE_DIR)/gwlua/entries.c
+
+.PHONY: clean
