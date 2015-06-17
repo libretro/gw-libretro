@@ -88,6 +88,7 @@ local host = 'linux-x86_64'
 local platforms = {
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm64_v8a = {
+    MAKEFILE      = 'Makefile.android_arm64_v8a',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/aarch64-linux-android-4.9/prebuilt/' .. host .. '/bin/aarch64-linux-android-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/aarch64-linux-android-4.9/prebuilt/' .. host .. '/bin/aarch64-linux-android-g++',
@@ -102,6 +103,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_x86_64 = {
+    MAKEFILE      = 'Makefile.android_x86_64',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/x86_64-4.9/prebuilt/' .. host .. '/bin/x86_64-linux-android-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/x86_64-4.9/prebuilt/' .. host .. '/bin/x86_64-linux-android-g++',
@@ -116,6 +118,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_mips64 = {
+    MAKEFILE      = 'Makefile.android_mips64',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/mips64el-linux-android-4.9/prebuilt/' .. host .. '/bin/mips64el-linux-android-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/mips64el-linux-android-4.9/prebuilt/' .. host .. '/bin/mips64el-linux-android-g++',
@@ -130,11 +133,12 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm_v7a = {
+    MAKEFILE      = 'Makefile.armeabi-v7a',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-g++',
     AS            = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-as',
-    EXT           = 'android_arm_v7a',
+    EXT           = 'armeabi-v7a',
     SO            = 'so',
     PLAT_INCDIR   = '-I$(NDK_ROOT_DIR)/platforms/android-3/arch-arm/usr/include',
     PLAT_DEFS     = '-DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST -Dl_getlocaledecpoint\\(\\)=\\(\\\'.\\\'\\)',
@@ -144,11 +148,12 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_arm_v5te = {
+    MAKEFILE      = 'Makefile.armeabi',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-g++',
     AS            = '$(NDK_ROOT_DIR)/toolchains/arm-linux-androideabi-4.8/prebuilt/' .. host .. '/bin/arm-linux-androideabi-as',
-    EXT           = 'android_arm_v5te',
+    EXT           = 'armeabi',
     SO            = 'so',
     PLAT_INCDIR   = '-I$(NDK_ROOT_DIR)/platforms/android-3/arch-arm/usr/include',
     PLAT_DEFS     = '-DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST -Dl_getlocaledecpoint\\(\\)=\\(\\\'.\\\'\\)',
@@ -158,11 +163,12 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_x86 = {
+    MAKEFILE      = 'Makefile.x86',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-g++',
     AS            = '$(NDK_ROOT_DIR)/toolchains/x86-4.8/prebuilt/' .. host .. '/bin/i686-linux-android-as',
-    EXT           = 'android_x86',
+    EXT           = 'x86',
     SO            = 'so',
     PLAT_INCDIR   = '-I$(NDK_ROOT_DIR)/platforms/android-9/arch-x86/usr/include',
     PLAT_DEFS     = '-DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST -Dl_getlocaledecpoint\\(\\)=\\(\\\'.\\\'\\)',
@@ -172,6 +178,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   android_mips = {
+    MAKEFILE      = 'Makefile.android_mips',
     HEADERMSG     = 'Download android-ndk-r10d-linux-x86_64.bin from https://developer.android.com/tools/sdk/ndk/index.html, unpack somewhere, and set NDK_ROOT_DIR to it',
     CC            = '$(NDK_ROOT_DIR)/toolchains/mipsel-linux-android-4.8/prebuilt/' .. host .. '/bin/mipsel-linux-android-gcc',
     CXX           = '$(NDK_ROOT_DIR)/toolchains/mipsel-linux-android-4.8/prebuilt/' .. host .. '/bin/mipsel-linux-android-g++',
@@ -186,6 +193,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   linux_x86 = {
+    MAKEFILE      = 'Makefile.linux_x86',
     HEADERMSG     = 'apt-get install g++-multilib libc6-dev-i386',
     CC            = 'gcc',
     CXX           = 'g++',
@@ -200,6 +208,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   linux_x86_64 = {
+    MAKEFILE      = 'Makefile.linux_x86_64',
     HEADERMSG     = '',
     CC            = 'gcc',
     CXX           = 'g++',
@@ -214,6 +223,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86 = {
+    MAKEFILE      = 'Makefile.windows_x86',
     HEADERMSG     = 'apt-get install mingw-w64',
     CC            = 'i686-w64-mingw32-gcc',
     CXX           = 'i686-w64-mingw32-g++',
@@ -228,6 +238,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   windows_x86_64 = {
+    MAKEFILE      = 'Makefile.windows_x86_64',
     HEADERMSG     = 'apt-get install mingw-w64',
     CC            = 'x86_64-w64-mingw32-gcc',
     CXX           = 'x86_64-w64-mingw32-g++',
@@ -242,6 +253,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   mingw32 = {
+    MAKEFILE      = 'Makefile.mingw32',
     HEADERMSG     = '',
     CC            = 'gcc',
     CXX           = 'g++',
@@ -256,6 +268,7 @@ local platforms = {
   },
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   mingw64 = {
+    MAKEFILE      = 'Makefile.mingw64',
     HEADERMSG     = 'Install tdm-gcc (http://tdm-gcc.tdragon.net/)',
     CC            = 'gcc',
     CXX           = 'g++',
@@ -284,7 +297,7 @@ for plat, defs in pairs( platforms ) do
     end
   until equal
   
-  local file, err = io.open( 'Makefile.' .. plat, 'w' )
+  local file, err = io.open( defs.MAKEFILE, 'wb' )
   if not file then error( err ) end
   
   file:write( templ )
