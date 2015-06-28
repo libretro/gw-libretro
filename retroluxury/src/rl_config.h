@@ -16,7 +16,7 @@ value must be used when rle-encoding images with rlrle.lua.
 
 /* The maximum number of saved pixels when blitting sprites. */
 #ifndef RL_BG_SAVE_SIZE
-#define RL_BG_SAVE_SIZE ( 192 * 1024 )
+#define RL_BG_SAVE_SIZE ( 384 * 1024 )
 #endif
 
 /* The maximum number of simultaneous *playing* sounds. */
