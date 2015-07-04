@@ -283,7 +283,7 @@ static int l_setbackground( lua_State* L )
   
   if ( rl_backgrnd_create( width, bg->height ) )
   {
-    return luaL_error( L, "out of memory" );
+    return luaL_error( L, "out of memory allocating the background framebuffer" );
   }
   
   int x0 = ( width - bg->width ) / 2;

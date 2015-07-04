@@ -119,7 +119,7 @@ static int l_create( lua_State* L )
   
   if ( !bs )
   {
-    return luaL_error( L, "out of memory" );
+    return luaL_error( L, "out of memory allocating the bs reader" );
   }
   
   if ( lua_load( L, bsread, bs, "main.lua", "t" ) != LUA_OK )
