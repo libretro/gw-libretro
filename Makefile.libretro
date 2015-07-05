@@ -251,7 +251,7 @@ ifeq ($(LOG_PERFORMANCE), 1)
 endif
 
 
-DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free
+DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO
 
 CFLAGS   += $(fpic) $(DEFINES)
 CFLAGS   += -Wall --std=c99
