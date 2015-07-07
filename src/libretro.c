@@ -253,7 +253,7 @@ bool retro_load_game( const struct retro_game_info* info )
   
   env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
   memset( (void*)&state, 0, sizeof( state ) );
-  state.width = state.height = 1;
+  state.width = state.height = 128;
   init = 0;
   return true;
 }
