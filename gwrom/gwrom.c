@@ -351,7 +351,7 @@ typedef union
     CAUTION: things stored in user_flags are *not* persistent!
     */
     void* user_data;
-  };
+  } s;
   
   char fill[ 512 ];
 }
@@ -369,10 +369,10 @@ static int identify_tar_v7( const void* data, size_t size )
   char* end = (char*)data + size - 512;
   
   /* iterate over the entries and do a basic chack on each on of them */
-  while ( (char*)entry <= end && entry->name[ 0 ] )
+  while ( (char*)entry <= end && entry->s.name[ 0 ] )
   {
     char* endptr;
-    long entry_size = strtol( entry->size, &endptr, 8 );
+    long entry_size = strtol( entry->s.size, &endptr, 8 );
     
     /* Check for a valid entry size */
     if ( *endptr != 0 || errno == ERANGE )
@@ -380,7 +380,7 @@ static int identify_tar_v7( const void* data, size_t size )
       return GWROM_INVALID_ROM;
     }
     
-    char* name = entry->name;
+    char* name = entry->s.name;
     char* endname = name + 100;
     
     /* Check for a valid entry name */
@@ -428,13 +428,13 @@ static int init_tar_v7( gwrom_t* gwrom )
 {
   entry_tar_v7* entry = (entry_tar_v7*)gwrom->data;
   
-  while ( entry->name[ 0 ] )
+  while ( entry->s.name[ 0 ] )
   {
-    long entry_size = strtol( entry->size, NULL, 8 );
+    long entry_size = strtol( entry->s.size, NULL, 8 );
     
     /* zero user space */
-    entry->user_flags = 0;
-    entry->user_data = NULL;
+    entry->s.user_flags = 0;
+    entry->s.user_data = NULL;
     
     /* go to the next entry */
     entry_size = ( entry_size + 511 ) / 512 + 1;
@@ -448,17 +448,17 @@ static int find_tar_v7( gwrom_entry_t* file, gwrom_t* gwrom, const char* file_na
 {
   entry_tar_v7* entry = (entry_tar_v7*)gwrom->data;
   
-  while ( entry->name[ 0 ] )
+  while ( entry->s.name[ 0 ] )
   {
-    long entry_size = strtol( entry->size, NULL, 8 );
+    long entry_size = strtol( entry->s.size, NULL, 8 );
     
-    if ( !strcmp( entry->name, file_name ) )
+    if ( !strcmp( entry->s.name, file_name ) )
     {
       /* found the entry, fill in gwrom_entry_t* */
-      file->name = entry->name;
+      file->name = entry->s.name;
       file->data = (void*)( entry + 1 );
       file->size = entry_size;
-      file->user_flags = &entry->user_flags;
+      file->user_flags = &entry->s.user_flags;
       
       return GWROM_OK;
     }
@@ -476,15 +476,15 @@ static void iterate_tar_v7( gwrom_t* gwrom, int (*callback)( gwrom_entry_t*, gwr
   entry_tar_v7* entry = (entry_tar_v7*)gwrom->data;
   gwrom_entry_t file;
   
-  while ( entry->name[ 0 ] )
+  while ( entry->s.name[ 0 ] )
   {
-    long entry_size = strtol( entry->size, NULL, 8 );
+    long entry_size = strtol( entry->s.size, NULL, 8 );
     
-    file.name = entry->name;
+    file.name = entry->s.name;
     file.data = (void*)( entry + 1 );
     file.size = entry_size;
-    file.user_flags = &entry->user_flags;
-    file.user_data = &entry->user_data;
+    file.user_flags = &entry->s.user_flags;
+    file.user_data = &entry->s.user_data;
     
     if ( !callback( &file, gwrom ) )
     {
