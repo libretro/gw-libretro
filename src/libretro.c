@@ -60,7 +60,7 @@ static struct retro_input_descriptor input_descriptors[] =
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
   // TODO: Is this needed?
-  { 255, 255, 255, 255, "" }
+  { 255, 255, 255, 255, NULL }
 };
 
 #ifdef LOG_PERFORMANCE
