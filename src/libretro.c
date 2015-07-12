@@ -349,6 +349,11 @@ void retro_run()
     /* Error, return */
     return;
   }
+  else
+  {
+    /* erase sprites here to avoid blank screenshots */
+    rl_sprites_unblit();
+  }
   
   /* Run game */
   unsigned id;
@@ -360,11 +365,9 @@ void retro_run()
   }
   
   gwlua_tick( &state, perf_cb.get_time_usec() );
-  
   rl_sprites_blit();
-  video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
-  rl_sprites_unblit();
   
+  video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
   audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }
 
