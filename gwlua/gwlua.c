@@ -165,6 +165,7 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   if ( l_pcall( state->L, 1, 0 ) )
   {
     lua_close( state->L );
+    state->L = NULL;
     return -1;
   }
   
@@ -173,7 +174,11 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
 
 void gwlua_destroy( gwlua_t* state )
 {
-  lua_close( state->L );
+  if ( state->L )
+  {
+    lua_close( state->L );
+    state->L = NULL;
+  }
 }
 
 int gwlua_reset( gwlua_t* state )
