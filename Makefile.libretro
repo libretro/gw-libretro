@@ -300,7 +300,7 @@ endif
 $(CORE_DIR)/gwlua/functions.o: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 
 $(CORE_DIR)/src/version.c: FORCE
-	cat etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)
