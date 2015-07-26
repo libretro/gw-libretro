@@ -10,13 +10,8 @@ LOG_PERFORMANCE = 1
 ####################################
 # Variable setup for Makefile.common
 
-CORE_DIR      = ..
-INCLUDES      = 
-SOURCES_C     =
-SOURCES_CXX   =
-SOURCES_LUA_C =
-LUA_FILES     =
-PNG_FILES     =
+CORE_DIR  = ..
+INCLUDES  = 
 
 include Makefile.common
 
@@ -26,6 +21,7 @@ include Makefile.common
 CC  = gcc
 CXX = g++
 AS  = as
+AR  = ar
 
 ############
 # Extensions
@@ -36,10 +32,12 @@ SOEXT  = .linux_x86_64.so
 ################
 # Platform setup
 
-PLATDEFS     = 
-PLATCFLAGS   = -m64 -fpic -fstrict-aliasing
-PLATCXXFLAGS = -m64 -fpic -fstrict-aliasing
-PLATLDFLAGS  = -m64 -shared -lm
+STATIC_LINKING = 0
+PLATFORM       = unix
+PLATDEFS       = 
+PLATCFLAGS     = -m64 -fpic -fstrict-aliasing
+PLATCXXFLAGS   = -m64 -fpic -fstrict-aliasing
+PLATLDFLAGS    = -m64 -shared -lm
 
 ################
 # libretro setup

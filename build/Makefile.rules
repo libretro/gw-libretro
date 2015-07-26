@@ -1,4 +1,8 @@
-TARGET = gw_libretro$(SOEXT)
+ifeq ($(STATIC_LINKING), 1)
+  TARGET = libgw_libretro_$(PLATFORM).a
+else
+  TARGET = gw_libretro$(SOEXT)
+endif
 
 DEFINES  += -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO
 CFLAGS   += -Wall --std=c99
@@ -20,7 +24,11 @@ OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT)) $(SOURCES_LUA_
 all: $(TARGET)
 
 $(TARGET): $(HEADERS) $(OBJS)
+ifeq ($(STATIC_LINKING), 1)
+	$(AR) rcs $@ $(OBJS)
+else
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+endif
 
 $(CORE_DIR)/gwlua/functions.c: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 	touch $@

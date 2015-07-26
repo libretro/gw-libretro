@@ -1,5 +1,5 @@
 ##############
-# Install tdm-gcc (http://tdm-gcc.tdragon.net/)
+# Install MSYS2
 
 #############
 # User config
@@ -10,13 +10,8 @@ LOG_PERFORMANCE = 1
 ####################################
 # Variable setup for Makefile.common
 
-CORE_DIR      = ..
-INCLUDES      = 
-SOURCES_C     =
-SOURCES_CXX   =
-SOURCES_LUA_C =
-LUA_FILES     =
-PNG_FILES     =
+CORE_DIR  = ..
+INCLUDES  = 
 
 include Makefile.common
 
@@ -26,20 +21,23 @@ include Makefile.common
 CC  = gcc
 CXX = g++
 AS  = as
+AR  = ar
 
 ############
 # Extensions
 
-OBJEXT = .mingw64.o
-SOEXT  = .mingw64.dll
+OBJEXT = .mingw32.o
+SOEXT  = .mingw32.dll
 
 ################
 # Platform setup
 
-PLATDEFS     = 
-PLATCFLAGS   = -m64 -fpic -fstrict-aliasing
-PLATCXXFLAGS = -m64 -fpic -fstrict-aliasing
-PLATLDFLAGS  = -m64 -shared -lm
+STATIC_LINKING = 0
+PLATFORM       = win
+PLATDEFS       = 
+PLATCFLAGS     = -m64 -fpic -fstrict-aliasing
+PLATCXXFLAGS   = -m64 -fpic -fstrict-aliasing
+PLATLDFLAGS    = -shared -lm
 
 ################
 # libretro setup
