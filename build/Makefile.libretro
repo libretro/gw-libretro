@@ -1,3 +1,6 @@
+ifeq ($(platform),android-armeabi-v7a)
+include Makefile.armeabi-v7a
+else
 TARGET_NAME := gw
 
 LOG_PERFORMANCE = 1
@@ -36,19 +39,20 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 endif
 
 CC_AS ?= $(CC)
+CORE_DIR := .
 
 # Unix
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=build/link.T -Wl,-no-undefined
+	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T -Wl,-no-undefined
 
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
-	LDFLAGS += -shared -Wl,--version-script=libretro/link.T
+	LDFLAGS += -shared -Wl,--version-script=$(CORE_DIR)/link.T
 	fpic = -fPIC
-	SHARED := -shared -Wl,-version-script=build/link.T -Wl,-no-undefined
+	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T -Wl,-no-undefined
 
 # OS X
 else ifeq ($(platform), osx)
@@ -98,7 +102,7 @@ else ifeq ($(platform), theos_ios)
 else ifeq ($(platform), qnx)
 	TARGET := $(TARGET_NAME)_libretro_qnx.so
 	fpic := -fPIC
-	SHARED := -lcpp -lm -shared -Wl,-version-script=build/link.T
+	SHARED := -lcpp -lm -shared -Wl,-version-script=$(CORE_DIR)/link.T
 	CC = qcc -Vgcc_ntoarmv7le
 	CC_AS = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
@@ -188,7 +192,7 @@ else ifeq ($(platform), wii)
 else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=build/link.T
+	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T
 	CC = gcc
 	CC_AS = gcc
 	CXX = g++
@@ -219,13 +223,12 @@ else
 	CC = gcc
 	CC_AS = gcc
 	CXX = g++
-	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=build/link.T
+	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(CORE_DIR)/link.T
 	LIBS += -lshlwapi
 	HAVE_WIN32_MSX_MANAGER = 1
 
 endif
 
-CORE_DIR := .
 
 ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
@@ -270,7 +273,7 @@ LDFLAGS +=
 LUA_FILES =
 PNG_FILES =
 
-include build/Makefile.common
+include $(CORE_DIR)/Makefile.common
 
 HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
@@ -303,10 +306,10 @@ else
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
-$(CORE_DIR)/gwlua/functions.o: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
+$(CORE_EMU_DIR)/gwlua/functions.o: $(CORE_EMU_DIR)/gwlua/entries.c $(HEADERS)
 
-$(CORE_DIR)/src/version.c: FORCE
-	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+$(CORE_EMU_DIR)/src/version.c: FORCE
+	cat $(CORE_EMU_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)
@@ -316,4 +319,5 @@ clean:
 	rm -f $(TARGET)
 
 .PHONY: clean clean-objs FORCE
+endif
 endif
