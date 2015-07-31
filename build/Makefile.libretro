@@ -1,5 +1,17 @@
 ifeq ($(platform),android-armeabi-v7a)
 include Makefile.armeabi-v7a
+else ifeq ($(platform),android-armeabi)
+include Makefile.armeabi
+else ifeq ($(platform),android-arm64_v8a)
+include Makefile.android_arm64_v8a
+else ifeq ($(platform),android-mips64)
+include Makefile.android_mips64
+else ifeq ($(platform),android-mips)
+include Makefile.android_mips
+else ifeq ($(platform),android-x86_64)
+include Makefile.android_x86_64
+else ifeq ($(platform),android-x86)
+include Makefile.android_x86
 else
 TARGET_NAME := gw
 
