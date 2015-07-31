@@ -11,10 +11,10 @@ LOG_PERFORMANCE = 1
 ####################################
 # Variable setup for Makefile.common
 
-CORE_DIR  = ..
+CORE_DIR  = .
 INCLUDES  = ${PLAT_INCDIR}
 
-include Makefile.common
+include $(CORE_DIR)/Makefile.common
 
 #################
 # Toolchain setup
