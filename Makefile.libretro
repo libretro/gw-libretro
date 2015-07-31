@@ -254,7 +254,13 @@ endif
 DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO
 
 CFLAGS   += $(fpic) $(DEFINES)
-CFLAGS   += -Wall --std=c99
+CFLAGS   += -Wall
+
+ifeq ($(platform), qnx)
+CFLAGS   += -Wc,-std=c99
+else
+CFLAGS   += --std=c99
+endif
 
 CXXFLAGS += $(fpic) $(DEFINES)
 CXXFLAGS += -Wall
