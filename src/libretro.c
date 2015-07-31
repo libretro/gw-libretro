@@ -165,6 +165,19 @@ void gwlua_vlog( const char* format, va_list args )
 }
 
 /*---------------------------------------------------------------------------*/
+/* compatibility functions */
+
+#ifdef __CELLOS_LV2__
+
+char* getenv( const char* name )
+{
+  (void)name;
+  return NULL;
+}
+
+#endif
+
+/*---------------------------------------------------------------------------*/
 
 void retro_get_system_info( struct retro_system_info* info )
 {
