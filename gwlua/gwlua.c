@@ -137,6 +137,20 @@ static int l_create( lua_State* L )
 
 int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
 {
+  static const luaL_Reg lualibs[] =
+  {
+    { "_G", luaopen_base },
+    { LUA_LOADLIBNAME, luaopen_package },
+    { LUA_COLIBNAME, luaopen_coroutine },
+    { LUA_TABLIBNAME, luaopen_table },
+    // { LUA_IOLIBNAME, luaopen_io }, // remove because of tmpfile
+    // { LUA_OSLIBNAME, luaopen_os }, // remove because of system
+    { LUA_STRLIBNAME, luaopen_string },
+    { LUA_MATHLIBNAME, luaopen_math },
+    { LUA_UTF8LIBNAME, luaopen_utf8 },
+    { LUA_DBLIBNAME, luaopen_debug },
+  };
+
   state->L = lua_newstate( l_alloc, NULL );
   
   if ( !state->L )
@@ -149,7 +163,13 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   lua_setglobal( state->L, "_DEBUG" );
 #endif
   
-  luaL_openlibs( state->L );
+  int i;
+  
+  for ( i = 0; i < sizeof( lualibs ) / sizeof( lualibs[ 0 ] ); i++ )
+  {
+    luaL_requiref( state->L, lualibs[ i ].name, lualibs[ i ].func, 1 );
+    lua_pop( state->L, 1 );
+  }
   
   state->rom = rom;
   state->width = state->height = 0;

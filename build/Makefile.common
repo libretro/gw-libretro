@@ -62,14 +62,11 @@ SOURCES_LUA_C += $(CORE_DIR)/lua/src/lbaselib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lbitlib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lcorolib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/ldblib.c
-SOURCES_LUA_C += $(CORE_DIR)/lua/src/liolib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lmathlib.c
-SOURCES_LUA_C += $(CORE_DIR)/lua/src/loslib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lstrlib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/ltablib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/lutf8lib.c
 SOURCES_LUA_C += $(CORE_DIR)/lua/src/loadlib.c
-SOURCES_LUA_C += $(CORE_DIR)/lua/src/linit.c
 
 LUA_FILES += $(CORE_DIR)/gwlua/lua/class.lua
 LUA_FILES += $(CORE_DIR)/gwlua/lua/classes.lua
