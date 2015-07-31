@@ -4,7 +4,7 @@ else
   TARGET = gw_libretro$(SOEXT)
 endif
 
-DEFINES  += -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO
+DEFINES  += -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO -Dl_getlocaledecpoint\(\)=\(\'.\'\)
 CFLAGS   += -Wall --std=c99
 CXXFLAGS += -Wall
 LDFLAGS  +=
