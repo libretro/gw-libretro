@@ -11,7 +11,7 @@ LOG_PERFORMANCE = 1
 ####################################
 # Variable setup for Makefile.common
 
-CORE_DIR  = .
+CORE_DIR  ?= .
 INCLUDES  = ${PLAT_INCDIR}
 
 include $(CORE_DIR)/Makefile.common
@@ -76,7 +76,7 @@ endif
 ###############
 # Include rules
 
-include Makefile.rules
+include $(CORE_DIR)/Makefile.rules
 ]]
 
 local host = 'linux-x86_64'
