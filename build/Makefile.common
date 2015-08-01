@@ -11,6 +11,7 @@ INCLUDES += -I$(CORE_EMU_DIR) \
 SOURCES_C   += $(CORE_EMU_DIR)/src/libretro.c
 SOURCES_C   += $(CORE_EMU_DIR)/src/version.c
 SOURCES_CXX += $(CORE_EMU_DIR)/src/constcast.cpp
+SOURCES_C   += $(CORE_EMU_DIR)/src/missing.c
 
 SOURCES_C += $(CORE_EMU_DIR)/gwrom/gwrom.c
 

@@ -1,3 +1,5 @@
+#ifdef ANDROID
+
 // http://en.wikipedia.org/wiki/Linear_congruential_generator
 static unsigned int s_seed;
 
@@ -8,3 +10,5 @@ int rand(void) {
 void srand(unsigned int seed) {
   s_seed = seed;
 }
+
+#endif

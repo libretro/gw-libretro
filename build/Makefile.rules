@@ -10,7 +10,7 @@ CXXFLAGS += -Wall
 LDFLAGS  +=
 
 HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
-OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT)) $(SOURCES_LUA_C:.c=$(OBJEXT)) $(CORE_DIR)/android/missing$(OBJEXT)
+OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT)) $(SOURCES_LUA_C:.c=$(OBJEXT))
 
 %$(OBJEXT): %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(DEFINES) $(INCLUDES)
