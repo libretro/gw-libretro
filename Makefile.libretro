@@ -13,7 +13,7 @@ include $(CORE_DIR)/Makefile.android_mips
 else ifeq ($(platform),android-x86_64)
 include $(CORE_DIR)/Makefile.android_x86_64
 else ifeq ($(platform),android-x86)
-include $(CORE_DIR)/Makefile.android_x86
+include $(CORE_DIR)/Makefile.x86
 else
 TARGET_NAME := gw
 
