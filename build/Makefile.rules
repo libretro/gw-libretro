@@ -1,5 +1,5 @@
 ifeq ($(STATIC_LINKING), 1)
-  TARGET = libgw_libretro_$(PLATFORM).a
+  TARGET = libgw_libretro_$(platform).a
 else
   TARGET = gw_libretro$(SOEXT)
 endif
@@ -30,11 +30,11 @@ else
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
 endif
 
-$(CORE_SRC_DIR)/gwlua/functions.c: $(CORE_SRC_DIR)/gwlua/entries.c $(HEADERS)
+$(CORE_DIR)/gwlua/functions.c: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 	touch $@
 
-$(CORE_SRC_DIR)/src/version.c: FORCE
-	cat $(CORE_SRC_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+$(CORE_DIR)/src/version.c: FORCE
+	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)
