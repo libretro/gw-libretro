@@ -78,14 +78,14 @@ CC_AS ?= $(CC)
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T -Wl,-no-undefined
+	SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
 
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
-	LDFLAGS += -shared -Wl,--version-script=$(CORE_DIR)/link.T
+	LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T
 	fpic = -fPIC
-	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T -Wl,-no-undefined
+	SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
 
 # OS X
 else ifeq ($(platform), osx)
@@ -132,7 +132,7 @@ else ifeq ($(platform), theos_ios)
 else ifeq ($(platform), qnx)
 	TARGET := $(TARGET_NAME)_libretro_qnx.so
 	fpic := -fPIC
-	SHARED := -lcpp -lm -shared -Wl,-version-script=$(CORE_DIR)/link.T
+	SHARED := -lcpp -lm -shared -Wl,-version-script=$(BUILD_DIR)/link.T
 	CC = qcc -Vgcc_ntoarmv7le
 	CC_AS = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
@@ -222,7 +222,7 @@ else ifeq ($(platform), wii)
 else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=$(CORE_DIR)/link.T
+	SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T
 	CC = gcc
 	CC_AS = gcc
 	CXX = g++
@@ -253,7 +253,7 @@ else
 	CC = gcc
 	CC_AS = gcc
 	CXX = g++
-	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(CORE_DIR)/link.T
+	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(BUILD_DIR)/link.T
 	LIBS += -lshlwapi
 	HAVE_WIN32_MSX_MANAGER = 1
 
@@ -303,7 +303,7 @@ LDFLAGS +=
 LUA_FILES =
 PNG_FILES =
 
-include $(CORE_DIR)/Makefile.common
+include $(BUILD_DIR)/Makefile.common
 
 HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
