@@ -70,11 +70,23 @@ ifeq ($(shell uname -a),)
 	system_platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
 	system_platform = osx
+	arch = intel
+ifeq ($(shell uname -p),powerpc)
+	arch = ppc
+endif
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
 	system_platform = win
 endif
 
 CC_AS ?= $(CC)
+
+ifeq ($(ARCHFLAGS),)
+ifeq ($(archs),ppc)
+   ARCHFLAGS = -arch ppc -arch ppc64
+else
+   ARCHFLAGS = -arch i386 -arch x86_64
+endif
+endif
 
 # Unix
 ifneq (,$(findstring unix,$(platform)))
@@ -305,6 +317,13 @@ CXXFLAGS += $(fpic) $(DEFINES)
 CXXFLAGS += -Wall
 
 LDFLAGS +=
+
+ifeq ($(platform), osx)
+ifndef ($(NOUNIVERSAL))
+   CFLAGS += $(ARCHFLAGS)
+   LFLAGS += $(ARCHFLAGS)
+endif
+endif
 
 LUA_FILES =
 PNG_FILES =
