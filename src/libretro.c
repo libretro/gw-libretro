@@ -31,7 +31,6 @@ static retro_video_refresh_t video_cb;
 static retro_audio_sample_batch_t audio_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
-static struct retro_perf_callback perf_cb;
 
 static int     init;
 static gwrom_t rom;
@@ -62,16 +61,6 @@ static struct retro_input_descriptor input_descriptors[] =
   // TODO: Is this needed?
   { 255, 255, 255, 255, NULL }
 };
-
-#ifdef LOG_PERFORMANCE
-#define RETRO_PERFORMANCE_INIT(name)  static struct retro_perf_counter name = {#name}; if (!name.registered) perf_cb.perf_register(&(name))
-#define RETRO_PERFORMANCE_START(name) perf_cb.perf_start(&(name))
-#define RETRO_PERFORMANCE_STOP(name)  perf_cb.perf_stop(&(name))
-#else
-#define RETRO_PERFORMANCE_INIT(name)
-#define RETRO_PERFORMANCE_START(name)
-#define RETRO_PERFORMANCE_STOP(name)
-#endif
 
 /*---------------------------------------------------------------------------*/
 /* gwlua user-defined functions */
@@ -224,13 +213,6 @@ void retro_init()
   {
     log_cb = log.log;
   }
-  
-  // Always get the perf interface because we need it for the timers
-  if ( !env_cb( RETRO_ENVIRONMENT_GET_PERF_INTERFACE, &perf_cb ) )
-  {
-    perf_cb.get_time_usec = NULL;
-    log_cb( RETRO_LOG_WARN, "Could not get the perf interface\n" );
-  }
 }
 
 void* constcast( const void* ptr );
@@ -240,12 +222,6 @@ extern const char* rl_gitstamp;
 bool retro_load_game( const struct retro_game_info* info )
 {
   log_cb( RETRO_LOG_ERROR, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
-  
-  if ( !perf_cb.get_time_usec )
-  {
-    log_cb( RETRO_LOG_ERROR, "Core needs the perf interface\n" );
-    return false;
-  }
   
   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
   
@@ -344,7 +320,7 @@ void retro_run()
   if ( init == 0 )
   {
     /* Initialize game */
-    if ( gwlua_create( &state, &rom, perf_cb.get_time_usec() ) )
+    if ( gwlua_create( &state, &rom ) )
     {
       log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
       init = -1;
@@ -377,7 +353,7 @@ void retro_run()
     gwlua_set_button( &state, map[ id ].gw, pressed != 0 );
   }
   
-  gwlua_tick( &state, perf_cb.get_time_usec() );
+  gwlua_tick( &state );
   rl_sprites_blit();
   
   video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
@@ -386,9 +362,6 @@ void retro_run()
 
 void retro_deinit()
 {
-#ifdef LOG_PERFORMANCE
-  perf_cb.perf_log();
-#endif
 }
 
 void retro_set_controller_port_device( unsigned port, unsigned device )

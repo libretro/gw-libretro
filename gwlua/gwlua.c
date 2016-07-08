@@ -135,7 +135,7 @@ static int l_create( lua_State* L )
   return 0;
 }
 
-int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
+int gwlua_create( gwlua_t* state, gwrom_t* rom )
 {
   static const luaL_Reg lualibs[] =
   {
@@ -175,7 +175,7 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now )
   state->width = state->height = 0;
   state->screen = NULL;
   state->help = 0;
-  state->now = now;
+  state->now = 0;
   memset( (void*)state->input, 0, sizeof( state->input ) );
   state->tick_ref = LUA_NOREF;
   
@@ -204,9 +204,8 @@ void gwlua_destroy( gwlua_t* state )
 int gwlua_reset( gwlua_t* state )
 {
   gwrom_t* rom = state->rom;
-  int64_t now = state->now;
   gwlua_destroy( state );
-  return gwlua_create( state, rom, now );
+  return gwlua_create( state, rom );
 }
 
 /*---------------------------------------------------------------------------*/
@@ -236,9 +235,9 @@ void gwlua_set_button( gwlua_t* state, int button, int pressed )
 
 /*---------------------------------------------------------------------------*/
 
-void gwlua_tick( gwlua_t* state, int64_t now )
+void gwlua_tick( gwlua_t* state )
 {
-  state->now = now;
+  state->now += 16666;
   
   gwlua_ref_get( state->L, state->tick_ref );
   l_pcall( state->L, 0, 0 );

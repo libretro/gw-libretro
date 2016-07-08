@@ -103,12 +103,12 @@ void gwlua_vlog( const char* format, va_list args );
 /*---------------------------------------------------------------------------*/
 /* api */
 
-int  gwlua_create( gwlua_t* state, gwrom_t* rom, int64_t now );
+int  gwlua_create( gwlua_t* state, gwrom_t* rom );
 void gwlua_destroy( gwlua_t* state );
 int  gwlua_reset( gwlua_t* state );
 
 void gwlua_set_button( gwlua_t* state, int button, int pressed );
-void gwlua_tick( gwlua_t* state, int64_t now );
+void gwlua_tick( gwlua_t* state );
 
 void gwlua_ref_create( lua_State* L, int index, int* ref );
 void gwlua_ref_destroy( lua_State* L, int* ref );
