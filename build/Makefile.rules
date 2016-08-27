@@ -1,5 +1,5 @@
 ifeq ($(STATIC_LINKING), 1)
-  TARGET = gw_libretro_$(platform).a
+  TARGET = gw_libretro$(LIBEXT)
 else
   TARGET = gw_libretro$(SOEXT)
 endif
