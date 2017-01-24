@@ -210,9 +210,7 @@ void retro_init()
   struct retro_log_callback log;
   
   if ( env_cb( RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log ) )
-  {
     log_cb = log.log;
-  }
 }
 
 void* constcast( const void* ptr );
@@ -221,16 +219,20 @@ extern const char* rl_gitstamp;
 
 bool retro_load_game( const struct retro_game_info* info )
 {
-  log_cb( RETRO_LOG_ERROR, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
-  
   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+
+  if (!info)
+     return false;
   
   if ( !env_cb( RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt ) )
   {
     log_cb( RETRO_LOG_ERROR, "RGB565 is not supported\n" );
     return false;
   }
+
   
+  log_cb( RETRO_LOG_INFO, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
+
   int res = gwrom_init( &rom, constcast( info->data ), info->size, GWROM_COPY_ALWAYS );
   
   if ( res != GWROM_OK )
