@@ -612,8 +612,12 @@ int gwrom_init( gwrom_t* gwrom, void* data, size_t size, uint32_t flags )
 
 void gwrom_destroy( gwrom_t* gwrom )
 {
+   if (!gwrom)
+      return;
+
   /* calls the destroy method */
-  gwrom->destroy( gwrom );
+  if (gwrom->destroy)
+     gwrom->destroy( gwrom );
   
   /* free data */
   if ( gwrom->flags & GWROM_FREE_DATA )
