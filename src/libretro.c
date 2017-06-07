@@ -171,7 +171,7 @@ char* getenv( const char* name )
 void retro_get_system_info( struct retro_system_info* info )
 {
   info->library_name = "Game & Watch";
-  info->library_version = "1.0";
+  info->library_version = "1.1";
   info->need_fullpath = false;
   info->block_extract = false;
   info->valid_extensions = "mgw";
