@@ -179,6 +179,8 @@ static int l_tostring( lua_State* L )
 
 static int l_new( lua_State* L )
 {
+  static uint16_t layer = 16384;
+
   rl_sprite_t** self = (rl_sprite_t**)lua_newuserdata( L, sizeof( rl_sprite_t* ) );
   
   *self = rl_sprite_create();
@@ -188,7 +190,7 @@ static int l_new( lua_State* L )
     return luaL_error( L, "sprite limit reached" );
   }
   
-  ( *self )->layer = 100;
+  ( *self )->layer = layer--;
   
   if ( luaL_newmetatable( L, "image" ) != 0 )
   {
