@@ -290,6 +290,16 @@ else ifeq ($(platform), gcw0)
 	CFLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
 	CXXFLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
 
+# CTR (3DS)
+else ifeq ($(platform), ctr)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
+	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
+	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
+	STATIC_LINKING = 1
+	CFLAGS += -D_3DS
+	CXXFLAGS += -D_3DS
+
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
