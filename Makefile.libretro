@@ -300,6 +300,16 @@ else ifeq ($(platform), ctr)
 	CFLAGS += -D_3DS
 	CXXFLAGS += -D_3DS
 
+# Vita
+else ifeq ($(platform), vita)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = arm-vita-eabi-gcc$(EXE_EXT)
+	CXX = arm-vita-eabi-g++$(EXE_EXT)
+	AR = arm-vita-eabi-ar$(EXE_EXT)
+	STATIC_LINKING = 1
+	CFLAGS += -DVITA
+	CXXFLAGS += -DVITA
+
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
