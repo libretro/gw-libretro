@@ -8,6 +8,8 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
+static uint16_t s_layer;
+
 static int l_pic_index( lua_State* L )
 {
   const char* key = luaL_checkstring( L, 2 );
@@ -179,8 +181,6 @@ static int l_tostring( lua_State* L )
 
 static int l_new( lua_State* L )
 {
-  static uint16_t layer = 16384;
-
   rl_sprite_t** self = (rl_sprite_t**)lua_newuserdata( L, sizeof( rl_sprite_t* ) );
   
   *self = rl_sprite_create();
@@ -190,7 +190,7 @@ static int l_new( lua_State* L )
     return luaL_error( L, "sprite limit reached" );
   }
   
-  ( *self )->layer = layer--;
+  ( *self )->layer = s_layer--;
   
   if ( luaL_newmetatable( L, "image" ) != 0 )
   {
@@ -220,4 +220,6 @@ void register_image( lua_State* L, gwlua_t* state )
   
   lua_pushlightuserdata( L, (void*)state );
   luaL_setfuncs( L, statics, 1 );
+
+  s_layer = 16384;
 }
