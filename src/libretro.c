@@ -65,15 +65,27 @@ static struct retro_input_descriptor input_descriptors[] =
 /*---------------------------------------------------------------------------*/
 /* gwlua user-defined functions */
 
-const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
+static int find_key( const char* key )
 {
   for ( int i = 0; i < sram.count; i++ )
   {
     if ( !strcmp( sram.keys[ i ], key ) )
     {
-      *type = sram.types[ i ];
-      return sram.values[ i ];
+      return i;
     }
+  }
+  
+  return -1;
+}
+
+const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
+{
+  int i = find_key( key );
+
+  if ( i != -1 )
+  {
+    *type = sram.types[ i ];
+    return sram.values[ i ];
   }
   
   return NULL;
@@ -81,20 +93,27 @@ const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 
 void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type )
 {
-  if ( sram.count < SRAM_MAX )
+  int i = find_key( key );
+
+  if ( i == -1 )
   {
-    int ndx = sram.count++;
-    
-    sram.types[ ndx ] = type;
-    
-    strncpy( sram.keys[ ndx ], key, sizeof( sram.keys[ ndx ] ) );
-    sram.keys[ ndx ][ sizeof( sram.keys[ ndx ] ) - 1 ] = 0;
-    
-    strncpy( sram.values[ ndx ], value, sizeof( sram.values[ ndx ] ) );
-    sram.values[ ndx ][ sizeof( sram.values[ ndx ] ) - 1 ] = 0;
+    if ( sram.count == SRAM_MAX )
+    {
+      /* TODO: return an error when SRAM is full */
+      log_cb( RETRO_LOG_ERROR, "Out of space writing <%s, %s> to SRAM\n", key, value );
+      return;
+    }
+
+    i = sram.count++;
   }
+
+  sram.types[ i ] = type;
   
-  /* TODO: return an error when SRAM is full */
+  strncpy( sram.keys[ i ], key, sizeof( sram.keys[ i ] ) );
+  sram.keys[ i ][ sizeof( sram.keys[ i ] ) - 1 ] = 0;
+  
+  strncpy( sram.values[ i ], value, sizeof( sram.values[ i ] ) );
+  sram.values[ i ][ sizeof( sram.values[ i ] ) - 1 ] = 0;
 }
 
 int gwlua_set_fb( unsigned width, unsigned height )
