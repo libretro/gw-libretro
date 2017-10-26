@@ -176,7 +176,7 @@ return function( M )
       spt.left = x
       spt.top = y
       spt.visible = false
-      spt.layer = 200
+      spt.layer = 30001
       
       x = x + spt.width - 1
     end
@@ -216,7 +216,7 @@ return function( M )
     snes_spt.top = snes_y
     snes_spt.picture = snes.picture
     snes_spt.visible = false
-    snes_spt.layer = 199
+    snes_spt.layer = 30000
     
     local text = {}
     
