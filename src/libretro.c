@@ -190,7 +190,7 @@ char* getenv( const char* name )
 void retro_get_system_info( struct retro_system_info* info )
 {
   info->library_name = "Game & Watch";
-  info->library_version = "1.2";
+  info->library_version = "1.3";
   info->need_fullpath = false;
   info->block_extract = false;
   info->valid_extensions = "mgw";
@@ -211,6 +211,7 @@ void retro_set_environment( retro_environment_t cb )
   };
   
   static const struct retro_controller_info ports[] = {
+    { controllers, 1 },
     { controllers, 1 },
     { NULL, 0 }
   };
@@ -371,7 +372,10 @@ void retro_run()
   for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
   {
     int16_t pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-    gwlua_set_button( &state, map[ id ].gw, pressed != 0 );
+    gwlua_set_button( &state, 0, map[ id ].gw, pressed != 0 );
+
+    pressed = input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
+    gwlua_set_button( &state, 1, map[ id ].gw, pressed != 0 );
   }
   
   gwlua_tick( &state );

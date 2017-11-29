@@ -51,6 +51,13 @@ typedef struct gwlua_t gwlua_t;
 
 typedef struct
 {
+  rl_sound_t* data;
+  int loop;
+}
+gwlua_sound_t;
+
+typedef struct
+{
   gwlua_t* state;
   
   int64_t interval;
@@ -75,7 +82,7 @@ struct gwlua_t
   int64_t now;
   
   /* input */
-  char input[ GWLUA_START + 1 ];
+  char input[ 2 ][ GWLUA_START + 1 ];
   
   /* references */
   int tick_ref;
@@ -107,7 +114,7 @@ int  gwlua_create( gwlua_t* state, gwrom_t* rom );
 void gwlua_destroy( gwlua_t* state );
 int  gwlua_reset( gwlua_t* state );
 
-void gwlua_set_button( gwlua_t* state, int button, int pressed );
+void gwlua_set_button( gwlua_t* state, int port, int button, int pressed );
 void gwlua_tick( gwlua_t* state );
 
 void gwlua_ref_create( lua_State* L, int index, int* ref );

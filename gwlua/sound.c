@@ -11,8 +11,13 @@
 
 static int l_gc( lua_State* L )
 {
-  rl_sound_t* self = *(rl_sound_t**)lua_touserdata( L, 1 );
-  rl_sound_destroy( self );
+  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
+
+  if ( self->data != NULL )
+  {
+    rl_sound_destroy( self->data );
+  }
+
   return 0;
 }
 
@@ -24,7 +29,7 @@ static int l_index( lua_State* L )
 
 static int l_newindex( lua_State* L )
 {
-  rl_sound_t** self = (rl_sound_t**)lua_touserdata( L, 1 );
+  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
   const char* key = luaL_checkstring( L, 2 );
   const char* data;
   size_t len;
@@ -33,13 +38,17 @@ static int l_newindex( lua_State* L )
   {
   case 0x7c95915fU: // data
     data = luaL_checklstring( L, 3, &len );
-    *self = rl_sound_create( data, len, 0 );
+    self->data = rl_sound_create( data, len, 0 );
     
-    if ( !*self )
+    if ( !self->data )
     {
       return luaL_error( L, "out of memory creating the sound" );
     }
     
+    return 0;
+  
+  case 0x7c9a2f5fU: /* loop */
+    self->loop = lua_toboolean( L, 3 );
     return 0;
   }
 
@@ -48,16 +57,17 @@ static int l_newindex( lua_State* L )
 
 static int l_tostring( lua_State* L )
 {
-  rl_sound_t* self = *(rl_sound_t**)lua_touserdata( L, 1 );
+  gwlua_sound_t* self = (gwlua_sound_t*)lua_touserdata( L, 1 );
   lua_pushfstring( L, "sound@%p", self );
   return 1;
 }
 
 static int l_new( lua_State* L )
 {
-  rl_sound_t** self = (rl_sound_t**)lua_newuserdata( L, sizeof( rl_sound_t* ) );
+  gwlua_sound_t* self = (gwlua_sound_t*)lua_newuserdata( L, sizeof( gwlua_sound_t ) );
   
-  *self = NULL;
+  self->data = NULL;
+  self->loop = 0;
   
   if ( luaL_newmetatable( L, "sound" ) != 0 )
   {

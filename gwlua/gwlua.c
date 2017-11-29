@@ -210,25 +210,25 @@ int gwlua_reset( gwlua_t* state )
 
 /*---------------------------------------------------------------------------*/
 
-void gwlua_set_button( gwlua_t* state, int button, int pressed )
+void gwlua_set_button( gwlua_t* state, int port, int button, int pressed )
 {
   if ( button != GWLUA_START )
   {
-    state->input[ button ] = pressed;
+    state->input[ port ][ button ] = pressed;
   }
   else
   {
     if ( pressed )
     {
-      if ( !state->input[ GWLUA_START ] )
+      if ( !state->input[ port ][ GWLUA_START ] )
       {
-        state->input[ GWLUA_START ] = 1;
+        state->input[ port ][ GWLUA_START ] = 1;
         state->help = !state->help;
       }
     }
     else
     {
-      state->input[ GWLUA_START ] = 0;
+      state->input[ port ][ GWLUA_START ] = 0;
     }
   }
 }

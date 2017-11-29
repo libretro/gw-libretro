@@ -101,6 +101,7 @@
 #include "png/boxybold_7c.h"
 #include "png/boxybold_7d.h"
 #include "png/boxybold_7e.h"
+#include "png/hand.h"
 #include "png/snes.h"
 
 #define __inline
@@ -109,17 +110,53 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
+static int channels[ RL_MAX_VOICES ];
+
+static void soundstopped( const rl_sound_t* data )
+{
+  channels[ data->ud[ 0 ].i ] = -1;
+}
+
 static int l_playsound( lua_State* L )
 {
-  rl_sound_t* sound = *(rl_sound_t**)luaL_checkudata( L, 1, "sound" );
-  rl_sound_stop_all();
-  rl_sound_play( sound, lua_toboolean( L, 2 ), NULL );
+  gwlua_sound_t* sound = (gwlua_sound_t*)luaL_checkudata( L, 1, "sound" );
+  int channel = luaL_checkinteger( L, 2 );
+  int i;
+
+  if ( channel == -1 )
+  {
+    for ( i = 0; i < sizeof( channels ) / sizeof( channels[ 0 ] ); i++ )
+    {
+      if ( channels[ i ] == -1 )
+      {
+        channel = i;
+        break;
+      }
+    }
+  }
+  else if ( channels[ channel ] != -1 )
+  {
+    rl_sound_stop( channels[ channel ] );
+  }
+
+  channels[ channel ] = rl_sound_play( sound->data, sound->loop, soundstopped );
+  sound->data->ud[ 0 ].i = channel;
   return 0;
 }
 
 static int l_stopsounds( lua_State* L )
 {
-  rl_sound_stop_all();
+  int channel = luaL_checkinteger( L, 1 );
+
+  if ( channel == -1 )
+  {
+    rl_sound_stop_all();
+  }
+  else if ( channels[ channel ] != -1 )
+  {
+    rl_sound_stop( channels[ channel ] );
+  }
+
   return 0;
 }
 
@@ -349,7 +386,8 @@ static const char* button_name( int button )
 static int l_inputstate( lua_State* L )
 {
   gwlua_t* state = get_state( L );
-  int i;
+  char name[ 32 ];
+  int i, p;
   
   if ( lua_type( L, 1 ) == LUA_TTABLE )
   {
@@ -360,10 +398,15 @@ static int l_inputstate( lua_State* L )
     lua_createtable( L, 0, 17 );
   }
   
-  for ( i = 1; i < sizeof( state->input ) / sizeof( state->input[ 0 ] ); i++ )
+  for ( p = 0; p < 2; p++ )
   {
-    lua_pushboolean( L, state->input[ i ] );
-    lua_setfield( L, -2, button_name( i ) );
+    for ( i = 1; i < sizeof( state->input[ 0 ] ) / sizeof( state->input[ 0 ][ 0 ] ); i++ )
+    {
+      snprintf( name, sizeof( name ), "%s%s", button_name( i ), p == 0 ? "" : "/2" );
+
+      lua_pushboolean( L, state->input[ p ][ i ] );
+      lua_setfield( L, -2, name );
+    }
   }
   
   return 1;
@@ -379,7 +422,7 @@ static int l_loadbin( lua_State* L )
   
   if ( found )
   {
-    entry.data = found->data;
+    entry.data = (void*)found->data;
     entry.size = found->size;
   }
   else
@@ -433,6 +476,20 @@ static int l_loadbs( lua_State* L )
   return 0;
 }
 
+static int logmsg( const char* format, ... )
+{
+  va_list args;
+  va_start(args, format);
+  gwlua_vlog( format, args );
+  va_end(args);
+  return 0;
+}
+
+static int l_log( lua_State* L )
+{
+  return logmsg( "%s\n", luaL_optstring( L, 1, "" ) );
+}
+
 void register_image( lua_State* L, gwlua_t* state );
 void register_sound( lua_State* L, gwlua_t* state );
 void register_timer( lua_State* L, gwlua_t* state );
@@ -456,8 +513,11 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "inputstate",    l_inputstate },
     { "loadbin",       l_loadbin },
     { "loadbs",        l_loadbs },
+    { "log",           l_log },
     { NULL, NULL }
   };
+
+  int i;
   
   lua_newtable( L );
   
@@ -493,4 +553,9 @@ void register_functions( lua_State* L, gwlua_t* state )
   lua_setglobal( L, "system" );
   
   // --
+
+  for ( i = 0; i < sizeof( channels ) / sizeof( channels[ 0 ] ); i++)
+  {
+    channels[ i ] = -1;
+  }
 }

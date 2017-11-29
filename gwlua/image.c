@@ -95,6 +95,14 @@ static int l_index( lua_State* L )
   case 0x7c97e438U: // hint
     lua_pushliteral( L, "" );
     return 1;
+  
+  case 0x7c9a03b0U: // left
+    lua_pushinteger( L, self->x );
+    return 1;
+    
+  case 0x0b88af18U: // top
+    lua_pushinteger( L, self->y );
+    return 1;
     
   case 0x10a3b0a5U: // width
     lua_pushinteger( L, self->image ? self->image->width : 0 );

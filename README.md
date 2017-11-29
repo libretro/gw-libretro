@@ -6,4 +6,13 @@ It runs simulators converted from source code for the games available at [MADrig
 
 The converted games are available at [libretro's buildbot site](http://bot.libretro.com/assets/cores/Handheld%20Electronic%20Game/). Unpack the zip and read the README.txt for instructions.
 
-The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg) and the [Boxy Bold](http://opengameart.org/content/boxy-bold-font) font used in **gw-libretro** are released under the [CC0](http://creativecommons.org/publicdomain/zero/1.0/).
+The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg), the [hand cursor](https://commons.wikimedia.org/wiki/File:Pointing_hand_cursor_vector.svg), and the [Boxy Bold](http://opengameart.org/content/boxy-bold-font) font used in **gw-libretro** are released under the [CC0](http://creativecommons.org/publicdomain/zero/1.0/).
+
+## Changelog
+
+### 1.3
+
+* Implemented a menu system to avoid weird buttom mappings. Now only the buttons used to play the game are mapped to the controller, all other buttons are accessed via the Select (cycle options) and Start (perform action) buttons.
+* Added proper credits in the controller help overlay.
+* Fixed sounds not looping in Galaxy II, Motor Cross, and Tron.
+* Fixed the transparency settings of some images. It fixes some artifacts around the buttons and some backgrounds having the wrong color.
