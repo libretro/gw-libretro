@@ -494,6 +494,9 @@ void register_image( lua_State* L, gwlua_t* state );
 void register_sound( lua_State* L, gwlua_t* state );
 void register_timer( lua_State* L, gwlua_t* state );
 
+extern const char* gw_version;
+extern const char* gw_githash;
+
 void register_functions( lua_State* L, gwlua_t* state )
 {
   static const luaL_Reg statics[] =
@@ -527,6 +530,12 @@ void register_functions( lua_State* L, gwlua_t* state )
   
   lua_pushlightuserdata( L, (void*)state );
   luaL_setfuncs( L, statics, 1 );
+
+  lua_pushstring( L, gw_version );
+  lua_setfield( L, -2, "GW_VERSIONSTR" );
+  
+  lua_pushstring( L, gw_githash );
+  lua_setfield( L, -2, "GW_GITHASH" );
   
   // module
   

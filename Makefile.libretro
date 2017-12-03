@@ -401,12 +401,9 @@ PNG_FILES =
 include $(BUILD_DIR)/Makefile.common
 
 HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
-OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
+OBJS += $(SOURCES_C:.c=.o)
 
 INCDIRS += $(EXTRA_INCLUDES) $(INCLUDES)
-
-%.o: %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
@@ -428,13 +425,13 @@ $(TARGET): $(HEADERS) $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
-	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
 $(CORE_DIR)/gwlua/functions.o: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 
 $(CORE_DIR)/src/version.c: FORCE
-	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+	cat $(CORE_DIR)/etc/version.c.templ | sed s/VERSION/1.4.0/g | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)

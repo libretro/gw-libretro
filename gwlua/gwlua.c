@@ -9,58 +9,6 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#if 0
-static void dump_stack( lua_State* L, const char* title )
-{
-  printf( "================================\n%s\n", title );
-  int top = lua_gettop( L );
-  int i;
-  
-  for ( i = 1; i <= top; i++ )
-  {
-    printf( "%2d %3d ", i, i - top - 1 );
-    
-    lua_pushvalue( L, i );
-    
-    switch ( lua_type( L, -1 ) )
-    {
-    case LUA_TNIL:
-      printf( "nil\n" );
-      break;
-    case LUA_TNUMBER:
-      printf( "%e\n", lua_tonumber( L, -1 ) );
-      break;
-    case LUA_TBOOLEAN:
-      printf( "%s\n", lua_toboolean( L, -1 ) ? "true" : "false" );
-      break;
-    case LUA_TSTRING:
-      printf( "\"%s\"\n", lua_tostring( L, -1 ) );
-      break;
-    case LUA_TTABLE:
-      printf( "table\n" );
-      break;
-    case LUA_TFUNCTION:
-      printf( "function\n" );
-      break;
-    case LUA_TUSERDATA:
-      printf( "userdata\n" );
-      break;
-    case LUA_TTHREAD:
-      printf( "thread\n" );
-      break;
-    case LUA_TLIGHTUSERDATA:
-      printf( "light userdata\n" );
-      break;
-    default:
-      printf( "?\n" );
-      break;
-    }
-  }
-  
-  lua_settop( L, top );
-}
-#endif
-
 static void* l_alloc( void* ud, void* ptr, size_t osize, size_t nsize )
 {
   (void)ud;

@@ -10,6 +10,15 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.4.0
+
+* Removed the `constcast.cpp` aberration, the core is now pure C.
+* Added the core version to `version.c.templ`.
+* Exposed core version to Lua code (helps to add new features and fixes in a backwards compatible way):
+  * `system.GW_VERSIONSTR`, a string containing the full version, i.e. `"1.4.0"`
+  * `system.GW_VERSION`, a number containing the full version as `major << 16 | minor << 8 | patch`, i.e. `0x010400`
+  * `system.GW_MAJOR`, `system.GW_MINOR`, and `system.GW_PATCH`
+
 ### 1.3
 
 * Implemented a menu system to avoid weird buttom mappings. Now only the buttons used to play the game are mapped to the controller, all other buttons are accessed via the Select (cycle options) and Start (perform action) buttons.

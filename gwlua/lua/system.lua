@@ -1,6 +1,13 @@
 local cache = {}
 
 return function( M )
+  local major, minor, patch = M.GW_VERSIONSTR:match( '(%d+)%.(%d+)%.(%d+)' )
+  
+  M.GW_MAJOR = major + 0
+  M.GW_MINOR = minor + 0
+  M.GW_PATCH = patch + 0
+  M.GW_VERSION = M.GW_MAJOR << 16 | M.GW_MINOR << 8 | M.GW_PATCH
+
   M.loadunit = function( name )
     local entry = name .. '.lua'
     local unit = cache[ entry ]

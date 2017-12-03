@@ -6,14 +6,10 @@ endif
 
 DEFINES  += -Drl_malloc=malloc -Drl_free=free -Dgwlua_malloc=malloc -Dgwlua_realloc=realloc -Dgwlua_free=free -Dgwrom_malloc=malloc -Dgwrom_free=free -DBZ_NO_STDIO -Dl_getlocaledecpoint\(\)=\(\'.\'\)
 CFLAGS   += -Wall --std=c99
-CXXFLAGS += -Wall
 LDFLAGS  +=
 
 HEADERS = $(LUA_FILES:.lua=.h) $(PNG_FILES:.png=.h)
-OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT)) $(SOURCES_LUA_C:.c=$(OBJEXT))
-
-%$(OBJEXT): %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(DEFINES) $(INCLUDES)
+OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_LUA_C:.c=$(OBJEXT))
 
 %$(OBJEXT): %.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(DEFINES) $(INCLUDES)
@@ -27,14 +23,14 @@ $(TARGET): $(HEADERS) $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
-	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 endif
 
 $(CORE_DIR)/gwlua/functions.c: $(CORE_DIR)/gwlua/entries.c $(HEADERS)
 	touch $@
 
 $(CORE_DIR)/src/version.c: FORCE
-	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+	cat $(CORE_DIR)/etc/version.c.templ | sed s/VERSION/1.4.0/g | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
 
 clean-objs:
 	rm -f $(OBJS)
