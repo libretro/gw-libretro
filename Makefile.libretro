@@ -94,7 +94,7 @@ endif
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
+	SHARED := -lm -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
 
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
