@@ -18,10 +18,11 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
   * `system.GW_VERSIONSTR`, a string containing the full version, i.e. `"1.4.0"`
   * `system.GW_VERSION`, a number containing the full version as `major << 16 | minor << 8 | patch`, i.e. `0x010400`
   * `system.GW_MAJOR`, `system.GW_MINOR`, and `system.GW_PATCH`
+* Fixed Galaxy II, Motor Cross, and Tron throwing errors when used with previous versions of the core.
 
 ### 1.3
 
-* Implemented a menu system to avoid weird buttom mappings. Now only the buttons used to play the game are mapped to the controller, all other buttons are accessed via the Select (cycle options) and Start (perform action) buttons.
+* Implemented a menu system to avoid weird button mappings. Now only the buttons used to play the game are mapped to the controller, all other buttons are accessed via the Select (cycle options) and Start (perform action) buttons.
 * Added proper credits in the controller help overlay.
 * Fixed sounds not looping in Galaxy II, Motor Cross, and Tron.
 * Fixed the transparency settings of some images. It fixes some artifacts around the buttons and some backgrounds having the wrong color.
