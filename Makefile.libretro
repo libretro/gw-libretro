@@ -50,7 +50,7 @@ HAVE_COMPAT = 0
 
 SOURCES_C   :=
 SOURCES_CXX :=
-LIBS    :=
+LIBS    := -lm
 
 ifeq ($(platform),)
 	platform = unix
@@ -94,7 +94,7 @@ endif
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
-	SHARED := -lm -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
+	SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
 
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
