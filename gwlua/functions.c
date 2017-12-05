@@ -123,6 +123,11 @@ static int l_playsound( lua_State* L )
   int channel = luaL_checkinteger( L, 2 );
   int i;
 
+  if ( sound->data == NULL )
+  {
+    return luaL_error( L, "sound data not set" );
+  }
+
   if ( channel == -1 )
   {
     for ( i = 0; i < sizeof( channels ) / sizeof( channels[ 0 ] ); i++ )

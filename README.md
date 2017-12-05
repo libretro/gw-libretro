@@ -10,6 +10,10 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.5.1
+
+* Fixed a crash while trying to play a sound without associated data, now it errors with a stack trace.
+
 ### 1.5.0
 
 * Avoided buttons being pressed when the menu or the controller are active.
