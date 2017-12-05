@@ -41,6 +41,7 @@ voice_t;
 
 static int16_t audio_buffer[ RL_SAMPLES_PER_FRAME * 2 ];
 static voice_t voices[ RL_MAX_VOICES ];
+static int     active;
 
 #ifdef RL_OGG_VORBIS
 static stb_vorbis*      ogg_stream;
@@ -58,6 +59,8 @@ void rl_sound_init( void )
   {
     voices[ i ].sound = NULL;
   }
+
+  active = 1;
   
 #ifdef RL_OGG_VORBIS
   ogg_stream = NULL;
@@ -73,6 +76,21 @@ void rl_sound_done( void )
     rl_free( ogg_alloc.alloc_buffer );
   }
 #endif
+}
+
+void rl_sound_pause( void )
+{
+  active -= active != 0;
+}
+
+void rl_sound_resume( void )
+{
+  active++;
+}
+
+int rl_sound_is_active( void )
+{
+  return active != 0;
 }
 
 rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo )
@@ -383,8 +401,15 @@ again:
 const int16_t* rl_sound_mix( void )
 {
   int32_t buffer[ RL_SAMPLES_PER_FRAME * 2 ];
-  memset( buffer, 0, sizeof( buffer ) );
+
+  if ( !active )
+  {
+    memset( audio_buffer, 0, sizeof( audio_buffer ) );
+    return audio_buffer;
+  }
   
+  memset( buffer, 0, sizeof( buffer ) );
+
   voice_t* restrict voice = voices;
   const voice_t* restrict end   = voices + RL_MAX_VOICES;
   

@@ -23,6 +23,10 @@ typedef void ( *rl_soundstop_t )( const rl_sound_t* );
 void rl_sound_init( void );
 void rl_sound_done( void );
 
+void rl_sound_pause( void );
+void rl_sound_resume( void );
+int  rl_sound_is_active( void );
+
 rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo );
 #define     rl_sound_destroy( sound ) do { rl_free( sound ); } while ( 0 )
 

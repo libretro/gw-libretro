@@ -185,10 +185,16 @@ void gwlua_set_button( gwlua_t* state, int port, int button, int pressed )
 
 void gwlua_tick( gwlua_t* state )
 {
-  state->now += 16666;
-  
   gwlua_ref_get( state->L, state->tick_ref );
-  l_pcall( state->L, 0, 0 );
+  l_pcall( state->L, 0, 1 );
+
+  if ( lua_toboolean( state->L, -1 ) )
+  {
+    state->now += 16666;
+  }
+
+  lua_pop( state->L, 1 );
+
   lua_gc( state->L, LUA_GCSTEP, 0 );
 }
 

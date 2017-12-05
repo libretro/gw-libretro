@@ -160,6 +160,24 @@ static int l_stopsounds( lua_State* L )
   return 0;
 }
 
+static int l_pausesounds( lua_State* L )
+{
+  rl_sound_pause();
+  return 0;
+}
+
+static int l_resumesounds( lua_State* L )
+{
+  rl_sound_resume();
+  return 0;
+}
+
+static int l_issoundactive( lua_State* L )
+{
+  lua_pushboolean( L, rl_sound_is_active() );
+  return 1;
+}
+
 static int l_randomize( lua_State* L )
 {
   rl_srand( time( NULL ) );
@@ -503,6 +521,9 @@ void register_functions( lua_State* L, gwlua_t* state )
   {
     { "playsound",     l_playsound },
     { "stopsounds",    l_stopsounds },
+    { "pausesounds",   l_pausesounds },
+    { "resumesounds",  l_resumesounds },
+    { "issoundactive", l_issoundactive },
     { "randomize",     l_randomize },
     { "random",        l_random },
     { "round",         l_round },

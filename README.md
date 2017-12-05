@@ -10,6 +10,12 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.5.0
+
+* Avoided buttons being pressed when the menu or the controller are active.
+* Added ability to pause and resume audio playback.
+* Pause the timers and the audio when the game is not active.
+
 ### 1.4.0
 
 * Removed the `constcast.cpp` aberration, the core is now pure C.

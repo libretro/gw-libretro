@@ -248,16 +248,24 @@ return function( M )
     for button, pos in pairs( pos ) do
       text[ button ] = render( snes_x + pos[ 1 ], snes_y + pos[ 2 ], msgs[ button ] or '', pos[ 3 ] )
     end
+
+    local help = { active = false }
+
+    help.isactive = function( self )
+      return self.active
+    end
     
-    return {
-      setvisible = function( self, visible )
-        snes_spt.visible = visible
-        
-        for _, render in pairs( text ) do
-          render:setvisible( visible )
-        end
+    help.setvisible = function( self, visible )
+      snes_spt.visible = visible
+      
+      for _, render in pairs( text ) do
+        render:setvisible( visible )
       end
-    }
+
+      self.active = visible
+    end
+    
+    return help
   end
 
   local createmenu = function( keydown, keyup, zoom, width, options, help )
@@ -473,6 +481,16 @@ return function( M )
     end
     
     return function()
+      local gameactive = true
+      
+      if help:isactive() then
+        gameactive = false
+      end
+      
+      if menu and menu:isactive() then
+        gameactive = false
+      end
+
       system.inputstate( newstate )
       
       for button, pressed in pairs( newstate ) do
@@ -480,13 +498,15 @@ return function( M )
           local keys = keymap[ button ]
           
           if keys then
-            if pressed then
-              for _, key in ipairs( keys ) do
-                keydown( key )
-              end
-            else
-              for _, key in ipairs( keys ) do
-                keyup( key )
+            if gameactive then
+              if pressed then
+                for _, key in ipairs( keys ) do
+                  keydown( key )
+                end
+              else
+                for _, key in ipairs( keys ) do
+                  keyup( key )
+                end
               end
             end
           end
@@ -518,13 +538,21 @@ return function( M )
         end
       end
       
-      if menu and not menu:isactive() then
+      if gameactive then
+        if not system.issoundactive() then
+          system.resumesounds()
+        end
+
         for _, timer in ipairs( timers ) do
           timer:tick()
         end
+      else
+        if system.issoundactive() then
+          system.pausesounds()
+        end
       end
 
-      return state
+      return gameactive
     end
   end
 end
