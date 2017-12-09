@@ -1,8 +1,30 @@
 local unit1 = system.loadunit 'unit1'
 local forms = system.loadunit 'forms'
-local controls = system.loadunit 'controls'
 
-unit1.form1.oncreate()
+local keymap = {
+  left  = { forms.vk_left,  'Left' },
+  right = { forms.vk_right, 'Right' },
+  a     = { forms.vk_right, 'Right' },
+  l1    = { 49,             'Game A' },
+  r1    = { 50,             'Game B' },
+  l2    = { 51,             'Time' },
+  r2    = { 53,             'ACL' }
+}
+
+local menu = {
+  { unit1.form1.btn_game_a_down, 'Game A', 49 },
+  { unit1.form1.btn_game_b_down, 'Game B', 50 },
+  { unit1.form1.btn_time_down,   'Time',   51 },
+  { unit1.form1.btn_acl_down,    'ACL',    53 }
+}
+
+local timers = {
+  unit1.form1.timer_chance_time,
+  unit1.form1.timer_clock,
+  unit1.form1.timer_game,
+  unit1.form1.timer_game_over,
+  unit1.form1.timer_miss
+}
 
 unit1.pfs_chance.data = system.loadbin( 'Chance.pcm' )
 unit1.pfs_got.data = system.loadbin( 'Got.pcm' )
@@ -11,47 +33,18 @@ unit1.pfs_miss2.data = system.loadbin( 'Miss2.pcm' )
 unit1.pfs_miss3.data = system.loadbin( 'Miss3.pcm' )
 unit1.pfs_tick.data = system.loadbin( 'Tick.pcm' )
 
+unit1.form1.oncreate()
+
 unit1.bsound = true
 unit1.imode = 1
 unit1.form1.gam_set_mode()
 
-local width = unit1.form1.im_background.width
-local height = unit1.form1.im_background.height
-
-return system.init{
-  background = unit1.form1.im_background,
-  zoom = { 175, 103, 309, 193 },
-
-  controls = {
-    { unit1.form1.btn_game_a_top, 'Game A' },
-    { unit1.form1.btn_game_b_top, 'Game B' },
-    { unit1.form1.btn_time_top,   'Time' },
-    { unit1.form1.btn_acl_top,    'ACL' },
-    { unit1.form1.btn_left_down,  'Left',  { 'left' },       { forms.vk_left } },
-    { unit1.form1.btn_right_down, 'Right', { 'right', 'a' }, { forms.vk_right } },
-  },
-
-  timers = {
-    unit1.form1.timer_chance_time,
-    unit1.form1.timer_clock,
-    unit1.form1.timer_game,
-    unit1.form1.timer_game_over,
-    unit1.form1.timer_miss
-  },
-
-  onkey = function( key, pressed )
-    local handler = pressed and unit1.form1.onkeydown or unit1.form1.onkeyup
-    handler( nil, key, 0 )
-  end,
-
-  onbutton = function( button, pressed )
-    local handler = pressed and button.onmousedown or button.onmouseup
-    handler( nil, controls.mbleft, false, 0, 0 )
-  end,
-
-  onmouse = function( x, y, pressed )
-    local handler = pressed and unit1.form1.onkeydown or unit1.form1.onkeyup
-    local key = ( x < width // 2 ) and forms.vk_left or forms.vk_right
-    handler( nil, key, 0 )
-  end
-}
+return system.init(
+  unit1.form1.im_background,
+  keymap,
+  function( key ) unit1.form1.onkeydown( nil, key, 0 ) end,
+  function( key ) unit1.form1.onkeyup( nil, key, 0 ) end,
+  timers,
+  { 175, 103, 309, 193 },
+  menu
+)
