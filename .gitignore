@@ -5,6 +5,8 @@
 *~
 version.c
 
+games/_all
+games/_mgw
 games/**/*.mgw
 games/**/*.srm
 games/**/*.zip
