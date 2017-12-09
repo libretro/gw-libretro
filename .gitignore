@@ -4,3 +4,17 @@
 *.dylib
 *~
 version.c
+
+games/**/*.mgw
+games/**/*.srm
+games/**/*.zip
+games/**/*.bs
+games/**/bin
+games/**/data
+games/**/manual
+games/**/src
+games/**/mgw
+games/**/zip
+games/**/README.txt
+games/**/unit1.lua
+games/**/Makefile
