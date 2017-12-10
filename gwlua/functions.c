@@ -30,6 +30,7 @@
 #include "lua/sysutils.h"
 #include "lua/windows.h"
 
+#include "lua/compatinit.h"
 #include "lua/system.h"
 
 #include "png/boxybold_20.h"
@@ -111,6 +112,15 @@
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
 static int channels[ RL_MAX_VOICES ];
+
+static int logmsg( const char* format, ... )
+{
+  va_list args;
+  va_start(args, format);
+  gwlua_vlog( format, args );
+  va_end(args);
+  return 0;
+}
 
 static void soundstopped( const rl_sound_t* data )
 {
@@ -364,22 +374,28 @@ static int l_setzoom( lua_State* L )
   if ( lua_type( L, 1 ) == LUA_TTABLE )
   {
     lua_geti( L, 1, 1 );
-    int x0 = luaL_checkinteger( L, -1 );
+    state->zoom.x0 = luaL_checkinteger( L, -1 );
     lua_geti( L, 1, 2 );
-    int y0 = luaL_checkinteger( L, -1 );
+    state->zoom.y0 = luaL_checkinteger( L, -1 );
     lua_geti( L, 1, 3 );
-    int width = luaL_checkinteger( L, -1 );
+    state->zoom.w = luaL_checkinteger( L, -1 );
     lua_geti( L, 1, 4 );
-    int height = luaL_checkinteger( L, -1 );
-    
-    gwlua_zoom( state, x0, y0, width, height );
+    state->zoom.h = luaL_checkinteger( L, -1 );
   }
   else
   {
-    gwlua_zoom( state, -1, -1, -1, -1 );
+    state->zoom.x0 = state->zoom.y0 = state->zoom.w = state->zoom.h = -1;
   }
   
+  gwlua_zoom( state, state->zoom.x0, state->zoom.y0, state->zoom.w, state->zoom.h );
   return 0;
+}
+
+static int l_iszoomed( lua_State* L )
+{
+  gwlua_t* state = get_state( L );
+  lua_pushboolean( L, state->zoom.x0 != -1 );
+  return 1;
 }
 
 static const char* button_name( int button )
@@ -418,7 +434,7 @@ static int l_inputstate( lua_State* L )
   }
   else
   {
-    lua_createtable( L, 0, 17 );
+    lua_createtable( L, 0, 37 );
   }
   
   for ( p = 0; p < 2; p++ )
@@ -431,6 +447,26 @@ static int l_inputstate( lua_State* L )
       lua_setfield( L, -2, name );
     }
   }
+
+  if ( state->zoom.x0 == -1 )
+  {
+    lua_pushinteger( L, ( state->pointer.x + 32767 ) * state->width / 65534 );
+    lua_setfield( L, -2, "pointer_x" );
+    
+    lua_pushinteger( L, ( state->pointer.y + 32767 ) * state->height / 65534 );
+    lua_setfield( L, -2, "pointer_y" );
+  }
+  else
+  {
+    lua_pushinteger( L, state->zoom.x0 + ( state->pointer.x + 32767 ) * state->zoom.w / 65534 );
+    lua_setfield( L, -2, "pointer_x" );
+    
+    lua_pushinteger( L, state->zoom.y0 + ( state->pointer.y + 32767 ) * state->zoom.h / 65534 );
+    lua_setfield( L, -2, "pointer_y" );
+  }
+  
+  lua_pushboolean( L, state->pointer.pressed );
+  lua_setfield( L, -2, "pointer_pressed" );
   
   return 1;
 }
@@ -499,15 +535,6 @@ static int l_loadbs( lua_State* L )
   return 0;
 }
 
-static int logmsg( const char* format, ... )
-{
-  va_list args;
-  va_start(args, format);
-  gwlua_vlog( format, args );
-  va_end(args);
-  return 0;
-}
-
 static int l_log( lua_State* L )
 {
   return logmsg( "%s\n", luaL_optstring( L, 1, "" ) );
@@ -539,6 +566,7 @@ void register_functions( lua_State* L, gwlua_t* state )
     { "savevalue",     l_savevalue },
     { "setbackground", l_setbackground },
     { "setzoom",       l_setzoom },
+    { "iszoomed",      l_iszoomed },
     { "inputstate",    l_inputstate },
     { "loadbin",       l_loadbin },
     { "loadbs",        l_loadbs },

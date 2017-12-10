@@ -10,6 +10,14 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.6.0
+
+* Added support for mouse and touch screens.
+  * All buttons can be activated with clicks and taps
+  * Gameplay buttons can be activated even when the screen is zoomed
+  * Added help for hot zones when then screen is zoomed
+* Added `iszoomed` to `system`.
+
 ### 1.5.1
 
 * Fixed a crash while trying to play a sound without associated data, now it errors with a stack trace.

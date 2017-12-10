@@ -51,6 +51,14 @@ typedef struct gwlua_t gwlua_t;
 
 typedef struct
 {
+  rl_sprite_t* sprite;
+  int width, height;
+  int mousedown_ref, mouseup_ref;
+}
+gwlua_image_t;
+
+typedef struct
+{
   rl_sound_t* data;
   int loop;
 }
@@ -75,14 +83,26 @@ struct gwlua_t
   /* screen */
   int width, height;
   uint16_t* screen;
+
+  struct
+  {
+    int x0, y0, w, h;
+  }
+  zoom;
   
   /* control */
   lua_State* L;
-  int help;
   int64_t now;
   
   /* input */
   char input[ 2 ][ GWLUA_START + 1 ];
+
+  struct
+  {
+    int x, y;
+    char pressed;
+  }
+  pointer;
   
   /* references */
   int tick_ref;
@@ -115,6 +135,7 @@ void gwlua_destroy( gwlua_t* state );
 int  gwlua_reset( gwlua_t* state );
 
 void gwlua_set_button( gwlua_t* state, int port, int button, int pressed );
+void gwlua_set_pointer( gwlua_t* state, int x, int y, int pressed );
 void gwlua_tick( gwlua_t* state );
 
 void gwlua_ref_create( lua_State* L, int index, int* ref );

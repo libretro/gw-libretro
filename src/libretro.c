@@ -211,10 +211,17 @@ void retro_set_environment( retro_environment_t cb )
     // TODO: Is this needed?
     { NULL, 0 }
   };
-  
+
+  static const struct retro_controller_description pointers[] = {
+    { "Pointer", RETRO_DEVICE_POINTER },
+    // TODO: Is this needed?
+    { NULL, 0 }
+  };
+
   static const struct retro_controller_info ports[] = {
     { controllers, 1 },
     { controllers, 1 },
+    { pointers, 1 },
     { NULL, 0 }
   };
   
@@ -369,15 +376,21 @@ void retro_run()
   
   /* Run game */
   unsigned id;
+  int16_t x, y, pressed;
   
   for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
   {
-    int16_t pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
+    pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
     gwlua_set_button( &state, 0, map[ id ].gw, pressed != 0 );
 
     pressed = input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
     gwlua_set_button( &state, 1, map[ id ].gw, pressed != 0 );
   }
+
+  x = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X );
+  y = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y );
+  pressed = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED );
+  gwlua_set_pointer( &state, x, y, pressed != 0 );
   
   gwlua_tick( &state );
   rl_sprites_blit();

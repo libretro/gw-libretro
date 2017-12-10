@@ -34,7 +34,7 @@ struct binary_t { const char* name; const unsigned char* data; size_t size; };
 //;
 #include <string.h>
 
-#define TOTAL_KEYWORDS 87
+#define TOTAL_KEYWORDS 88
 #define MIN_WORD_LENGTH 8
 #define MAX_WORD_LENGTH 15
 #define MIN_HASH_VALUE 8
@@ -59,15 +59,15 @@ hash (str, len)
       146, 146, 146, 146, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146, 146, 146, 146, 146, 146, 146,
-      146, 146, 146, 146, 146, 146,  17, 146, 146, 146,
+      146, 146, 146, 146, 146, 146,  20, 146, 146, 146,
         3,   2,   1,   0,   8,   4,  65,  61,  57,  53,
        49,  45,  41,  37, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146, 146, 146, 146,  78,   0,   1,
-        1,  73,   0,  12,  32,  27,  22,  17,   0,   0,
-        3,   0,  59, 146,  60,   0,   2,  64, 146,   0,
-        2,   0, 146,   0, 146, 146, 146, 146, 146, 146,
+        2,  73,   0,  12,  32,  27,  22,  17,   0,   0,
+        1,   0,  62, 146,  60,   5,  71,  67, 146,   0,
+        5,  72, 146,   0, 146, 146, 146, 146, 146, 146,
       146, 146, 146, 146
     };
   register unsigned int hval = len;
@@ -104,35 +104,32 @@ in_word_set (str, len)
 {
   static const unsigned char lengthtable[] =
     {
-       0,  0,  0,  0,  0,  0,  0,  0,  8,  9,  9,  8, 12, 12,
-      12, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+       0,  0,  0,  0,  0,  0,  0,  0,  8,  9,  9,  0,  0, 12,
+       8, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-      12, 12,  8, 12, 11,  8, 13,  0,  0,  0,  0,  0,  0,  0,
+      12, 12,  8, 14, 12, 12, 12, 11,  8, 13,  0,  0,  0,  0,
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-       0,  0, 11, 11,  0,  0,  8,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0, 11,  8, 11,  0,  0,  0,  0,  0,  0,
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
        0,  0,  0,  0,  0, 12
     };
   static const struct binary_t wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 78 "gwlua/entries.gperf"
+#line 79 "gwlua/entries.gperf"
       {"fmod.lua", gwlua_lua_fmod_lua, sizeof( gwlua_lua_fmod_lua )},
-#line 80 "gwlua/entries.gperf"
+#line 81 "gwlua/entries.gperf"
       {"forms.lua", gwlua_lua_forms_lua, sizeof( gwlua_lua_forms_lua )},
 #line 73 "gwlua/entries.gperf"
       {"class.lua", gwlua_lua_class_lua, sizeof( gwlua_lua_class_lua )},
-#line 87 "gwlua/entries.gperf"
-      {"snes.rle", gwlua_png_snes_rle, sizeof( gwlua_png_snes_rle )},
-#line 89 "gwlua/entries.gperf"
-      {"sysutils.lua", gwlua_lua_sysutils_lua, sizeof( gwlua_lua_sysutils_lua )},
-#line 75 "gwlua/entries.gperf"
+      {""}, {""},
+#line 76 "gwlua/entries.gperf"
       {"controls.lua", gwlua_lua_controls_lua, sizeof( gwlua_lua_controls_lua )},
 #line 88 "gwlua/entries.gperf"
-      {"stdctrls.lua", gwlua_lua_stdctrls_lua, sizeof( gwlua_lua_stdctrls_lua )},
+      {"snes.rle", gwlua_png_snes_rle, sizeof( gwlua_png_snes_rle )},
 #line 67 "gwlua/entries.gperf"
       {"boxybold_5f.rle", gwlua_png_boxybold_5f_rle, sizeof( gwlua_png_boxybold_5f_rle )},
 #line 51 "gwlua/entries.gperf"
@@ -271,34 +268,39 @@ in_word_set (str, len)
       {"boxybold_32.rle", gwlua_png_boxybold_32_rle, sizeof( gwlua_png_boxybold_32_rle )},
 #line 6 "gwlua/entries.gperf"
       {"boxybold_22.rle", gwlua_png_boxybold_22_rle, sizeof( gwlua_png_boxybold_22_rle )},
-#line 81 "gwlua/entries.gperf"
+#line 82 "gwlua/entries.gperf"
       {"graphics.lua", gwlua_lua_graphics_lua, sizeof( gwlua_lua_graphics_lua )},
-#line 85 "gwlua/entries.gperf"
+#line 86 "gwlua/entries.gperf"
       {"messages.lua", gwlua_lua_messages_lua, sizeof( gwlua_lua_messages_lua )},
-#line 84 "gwlua/entries.gperf"
+#line 85 "gwlua/entries.gperf"
       {"math.lua", gwlua_lua_math_lua, sizeof( gwlua_lua_math_lua )},
-#line 77 "gwlua/entries.gperf"
+#line 75 "gwlua/entries.gperf"
+      {"compatinit.lua", gwlua_lua_compatinit_lua, sizeof( gwlua_lua_compatinit_lua )},
+#line 89 "gwlua/entries.gperf"
+      {"stdctrls.lua", gwlua_lua_stdctrls_lua, sizeof( gwlua_lua_stdctrls_lua )},
+#line 90 "gwlua/entries.gperf"
+      {"sysutils.lua", gwlua_lua_sysutils_lua, sizeof( gwlua_lua_sysutils_lua )},
+#line 78 "gwlua/entries.gperf"
       {"extctrls.lua", gwlua_lua_extctrls_lua, sizeof( gwlua_lua_extctrls_lua )},
 #line 74 "gwlua/entries.gperf"
       {"classes.lua", gwlua_lua_classes_lua, sizeof( gwlua_lua_classes_lua )},
-#line 83 "gwlua/entries.gperf"
+#line 84 "gwlua/entries.gperf"
       {"jpeg.lua", gwlua_lua_jpeg_lua, sizeof( gwlua_lua_jpeg_lua )},
-#line 79 "gwlua/entries.gperf"
+#line 80 "gwlua/entries.gperf"
       {"fmodtypes.lua", gwlua_lua_fmodtypes_lua, sizeof( gwlua_lua_fmodtypes_lua )},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""},
-#line 90 "gwlua/entries.gperf"
+#line 91 "gwlua/entries.gperf"
       {"windows.lua", gwlua_lua_windows_lua, sizeof( gwlua_lua_windows_lua )},
-#line 76 "gwlua/entries.gperf"
-      {"dialogs.lua", gwlua_lua_dialogs_lua, sizeof( gwlua_lua_dialogs_lua )},
-      {""}, {""},
-#line 82 "gwlua/entries.gperf"
+#line 83 "gwlua/entries.gperf"
       {"hand.rle", gwlua_png_hand_rle, sizeof( gwlua_png_hand_rle )},
+#line 77 "gwlua/entries.gperf"
+      {"dialogs.lua", gwlua_lua_dialogs_lua, sizeof( gwlua_lua_dialogs_lua )},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 86 "gwlua/entries.gperf"
+      {""}, {""}, {""}, {""}, {""}, {""}, {""},
+#line 87 "gwlua/entries.gperf"
       {"registry.lua", gwlua_lua_registry_lua, sizeof( gwlua_lua_registry_lua )}
     };
 

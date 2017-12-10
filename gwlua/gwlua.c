@@ -121,8 +121,8 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom )
   
   state->rom = rom;
   state->width = state->height = 0;
+  state->zoom.x0 = state->zoom.y0 = state->zoom.w = state->zoom.h = -1;
   state->screen = NULL;
-  state->help = 0;
   state->now = 0;
   memset( (void*)state->input, 0, sizeof( state->input ) );
   state->tick_ref = LUA_NOREF;
@@ -160,25 +160,14 @@ int gwlua_reset( gwlua_t* state )
 
 void gwlua_set_button( gwlua_t* state, int port, int button, int pressed )
 {
-  if ( button != GWLUA_START )
-  {
-    state->input[ port ][ button ] = pressed;
-  }
-  else
-  {
-    if ( pressed )
-    {
-      if ( !state->input[ port ][ GWLUA_START ] )
-      {
-        state->input[ port ][ GWLUA_START ] = 1;
-        state->help = !state->help;
-      }
-    }
-    else
-    {
-      state->input[ port ][ GWLUA_START ] = 0;
-    }
-  }
+  state->input[ port ][ button ] = pressed;
+}
+
+void gwlua_set_pointer( gwlua_t* state, int x, int y, int pressed )
+{
+  state->pointer.x = x;
+  state->pointer.y = y;
+  state->pointer.pressed = pressed;
 }
 
 /*---------------------------------------------------------------------------*/

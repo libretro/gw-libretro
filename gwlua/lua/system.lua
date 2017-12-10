@@ -1,12 +1,16 @@
-local cache = {}
-
 return function( M )
+  ----------------------------------------------------------------------------
+  -- Setup version
   local major, minor, patch = M.GW_VERSIONSTR:match( '(%d+)%.(%d+)%.(%d+)' )
   
   M.GW_MAJOR = major + 0
   M.GW_MINOR = minor + 0
   M.GW_PATCH = patch + 0
   M.GW_VERSION = M.GW_MAJOR << 16 | M.GW_MINOR << 8 | M.GW_PATCH
+
+  ----------------------------------------------------------------------------
+  -- Define the function what loads Delphi units
+  local cache = {}
 
   M.loadunit = function( name )
     local entry = name .. '.lua'
@@ -38,6 +42,8 @@ return function( M )
     error( 'unit ' .. entry .. ' not found' )
   end
 
+  ----------------------------------------------------------------------------
+  -- Redefine the log function to accept variable arguments
   local log = M.log
 
   M.log = function( ... )
@@ -50,6 +56,22 @@ return function( M )
     log( table.concat( msg ), '' )
   end
   
+  ----------------------------------------------------------------------------
+  -- Create functions to divide rectangles
+  M.splith = function( rect )
+    local left  = { left = rect.left, top = rect.top, width = rect.width // 2, height = rect.height }
+    local right = { left = rect.left + rect.width // 2, top = rect.top, width = rect.width // 2, height = rect.height }
+    return left, right
+  end
+
+  M.splitv = function( rect )
+    local top    = { left = rect.left, top = rect.top, width = rect.width, height = rect.height // 2 }
+    local bottom = { left = rect.left, top = rect.top + rect.height // 2, width = rect.width, height = rect.height // 2 }
+    return top, bottom
+  end
+
+  ----------------------------------------------------------------------------
+  -- Create the TObject class
   local class = M.loadunit 'class'
   
   M.tobject = class.new()
@@ -57,6 +79,8 @@ return function( M )
   function M.tobject:new()
   end
   
+  ----------------------------------------------------------------------------
+  -- Load the controller and hand sprites
   local snes = M.newimage()
   snes.picture.data = M.loadbin( "snes.rle" )
   snes.visible = false
@@ -64,121 +88,33 @@ return function( M )
   local hand = M.newimage()
   hand.picture.data = M.loadbin( "hand.rle" )
   hand.visible = false
-  
-  local sprites = {
-    [ " " ] = "boxybold_20.rle",
-    [ "!" ] = "boxybold_21.rle",
-    [ "\"" ] = "boxybold_22.rle",
-    [ "#" ] = "boxybold_23.rle",
-    [ "$" ] = "boxybold_24.rle",
-    [ "%" ] = "boxybold_25.rle",
-    [ "&" ] = "boxybold_26.rle",
-    [ "'" ] = "boxybold_27.rle",
-    [ "(" ] = "boxybold_28.rle",
-    [ ")" ] = "boxybold_29.rle",
-    [ "*" ] = "boxybold_2a.rle",
-    [ "+" ] = "boxybold_2b.rle",
-    [ "," ] = "boxybold_2c.rle",
-    [ "-" ] = "boxybold_2d.rle",
-    [ "." ] = "boxybold_2e.rle",
-    [ "/" ] = "boxybold_2f.rle",
-    [ "0" ] = "boxybold_30.rle",
-    [ "1" ] = "boxybold_31.rle",
-    [ "2" ] = "boxybold_32.rle",
-    [ "3" ] = "boxybold_33.rle",
-    [ "4" ] = "boxybold_34.rle",
-    [ "5" ] = "boxybold_35.rle",
-    [ "6" ] = "boxybold_36.rle",
-    [ "7" ] = "boxybold_37.rle",
-    [ "8" ] = "boxybold_38.rle",
-    [ "9" ] = "boxybold_39.rle",
-    [ ":" ] = "boxybold_3a.rle",
-    [ ";" ] = "boxybold_3b.rle",
-    [ "<" ] = "boxybold_3c.rle",
-    [ "=" ] = "boxybold_3d.rle",
-    [ ">" ] = "boxybold_3e.rle",
-    [ "?" ] = "boxybold_3f.rle",
-    [ "@" ] = "boxybold_40.rle",
-    [ "A" ] = "boxybold_41.rle",
-    [ "B" ] = "boxybold_42.rle",
-    [ "C" ] = "boxybold_43.rle",
-    [ "D" ] = "boxybold_44.rle",
-    [ "E" ] = "boxybold_45.rle",
-    [ "F" ] = "boxybold_46.rle",
-    [ "G" ] = "boxybold_47.rle",
-    [ "H" ] = "boxybold_48.rle",
-    [ "I" ] = "boxybold_49.rle",
-    [ "J" ] = "boxybold_4a.rle",
-    [ "K" ] = "boxybold_4b.rle",
-    [ "L" ] = "boxybold_4c.rle",
-    [ "M" ] = "boxybold_4d.rle",
-    [ "N" ] = "boxybold_4e.rle",
-    [ "O" ] = "boxybold_4f.rle",
-    [ "P" ] = "boxybold_50.rle",
-    [ "Q" ] = "boxybold_51.rle",
-    [ "R" ] = "boxybold_52.rle",
-    [ "S" ] = "boxybold_53.rle",
-    [ "T" ] = "boxybold_54.rle",
-    [ "U" ] = "boxybold_55.rle",
-    [ "V" ] = "boxybold_56.rle",
-    [ "W" ] = "boxybold_57.rle",
-    [ "X" ] = "boxybold_58.rle",
-    [ "Y" ] = "boxybold_59.rle",
-    [ "Z" ] = "boxybold_5a.rle",
-    [ "[" ] = "boxybold_5b.rle",
-    [ "\\" ] = "boxybold_5c.rle",
-    [ "]" ] = "boxybold_5d.rle",
-    [ "^" ] = "boxybold_5e.rle",
-    [ "_" ] = "boxybold_5f.rle",
-    [ "`" ] = "boxybold_60.rle",
-    [ "{" ] = "boxybold_7b.rle",
-    [ "|" ] = "boxybold_7c.rle",
-    [ "}" ] = "boxybold_7d.rle",
-    [ "~" ] = "boxybold_7e.rle",
-  }
-  
-  for char, name in pairs( sprites ) do
-    local spt = M.newimage()
-    spt.picture.data = M.loadbin( name )
-    spt.visible = false
-    sprites[ char ] = spt
+
+  ----------------------------------------------------------------------------
+  -- Load the Boxy Bold font
+  local boxybold = {}
+
+  for char in string.gmatch( ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`{|}~', '.' ) do
+    local sprite = M.newimage()
+    sprite.picture.data = M.loadbin( string.format( 'boxybold_%x.rle', char:byte() ) )
+    sprite.visible = false
+
+    boxybold[ char ] = sprite
   end
   
-  sprites[ "a" ] = sprites.A
-  sprites[ "b" ] = sprites.B
-  sprites[ "c" ] = sprites.C
-  sprites[ "d" ] = sprites.D
-  sprites[ "e" ] = sprites.E
-  sprites[ "f" ] = sprites.F
-  sprites[ "g" ] = sprites.G
-  sprites[ "h" ] = sprites.H
-  sprites[ "i" ] = sprites.I
-  sprites[ "j" ] = sprites.J
-  sprites[ "k" ] = sprites.K
-  sprites[ "l" ] = sprites.L
-  sprites[ "m" ] = sprites.M
-  sprites[ "n" ] = sprites.N
-  sprites[ "o" ] = sprites.O
-  sprites[ "p" ] = sprites.P
-  sprites[ "q" ] = sprites.Q
-  sprites[ "r" ] = sprites.R
-  sprites[ "s" ] = sprites.S
-  sprites[ "t" ] = sprites.T
-  sprites[ "u" ] = sprites.U
-  sprites[ "v" ] = sprites.V
-  sprites[ "w" ] = sprites.W
-  sprites[ "x" ] = sprites.X
-  sprites[ "y" ] = sprites.Y
-  sprites[ "z" ] = sprites.Z
+  for low in string.gmatch( 'abcdefghijklmnopqrstuvwxyz', '.' ) do
+    boxybold[ low ] = boxybold[ low:upper() ]
+  end
   
-  local render = function( x, y, text, alignment )
+  ----------------------------------------------------------------------------
+  -- Create a label
+  local createlabel = function( x, y, text, alignment )
     local len = 1
-    local list = {}
+    local sprites = {}
     
     for i = 1, #text do
-      local spt = sprites[ text:sub( i, i ) ] or sprites[ '?' ]
-      list[ i ] = spt.picture
-      len = len + spt.width - 1
+      local sprite = boxybold[ text:sub( i, i ) ] or boxybold[ '?' ]
+      sprites[ i ] = sprite.picture
+      len = len + sprite.width - 1
     end
     
     if alignment == 'left' then
@@ -191,30 +127,32 @@ return function( M )
     
     y = y - 8
     
-    for i = 1, #list do
-      local spt = M.newimage()
-      spt.picture = list[ i ]
-      list[ i ] = spt
+    for i = 1, #sprites do
+      local sprite = M.newimage()
+      sprite.picture = sprites[ i ]
+      sprites[ i ] = sprite
       
-      spt.left = x
-      spt.top = y
-      spt.visible = false
-      spt.layer = 30001
+      sprite.left = x
+      sprite.top = y
+      sprite.visible = false
+      sprite.layer = 30001
       
-      x = x + spt.width - 1
+      x = x + sprite.width - 1
     end
     
     return {
       setvisible = function( self, visible )
-        for i = 1, #list do
-          list[ i ].visible = visible
+        for i = 1, #sprites do
+          sprites[ i ].visible = visible
         end
       end
     }
   end
   
-  local createhelp = function( width, height, msgs )
-    local pos = {
+  ----------------------------------------------------------------------------
+  -- Create the controller help
+  local createhelp = function( options, msgs )
+    local positions = {
       up     = {  80,  72 },
       down   = {  80, 118 },
       left   = {  58,  95, 'right' },
@@ -233,8 +171,8 @@ return function( M )
       cred2  = { 207, 232 }
     }
     
-    local snes_x = ( width - snes.width ) // 2
-    local snes_y = ( height - snes.height ) // 2
+    local snes_x = ( options.background.width - snes.width ) // 2
+    local snes_y = ( options.background.height - snes.height ) // 2
     
     local snes_spt = M.newimage()
     snes_spt.left = snes_x
@@ -243,75 +181,142 @@ return function( M )
     snes_spt.visible = false
     snes_spt.layer = 30000
     
-    local text = {}
+    local labels = {}
     
-    for button, pos in pairs( pos ) do
-      text[ button ] = render( snes_x + pos[ 1 ], snes_y + pos[ 2 ], msgs[ button ] or '', pos[ 3 ] )
+    for _, control in ipairs( options.controls ) do
+      if control.keys then
+        for key in pairs( control.keys ) do
+          local pos = positions[ key ]
+          labels[ #labels + 1 ] = createlabel( snes_x + pos[ 1 ], snes_y + pos[ 2 ], control.label, pos[ 3 ] )
+        end
+      end
     end
 
-    local help = { active = false }
-
-    help.isactive = function( self )
-      return self.active
+    for key, msg in pairs( msgs ) do
+      local pos = positions[ key ]
+      labels[ #labels + 1 ] = createlabel( snes_x + pos[ 1 ], snes_y + pos[ 2 ], msg, pos[ 3 ] )
     end
-    
-    help.setvisible = function( self, visible )
+
+    local setvisible = function( visible )
       snes_spt.visible = visible
       
-      for _, render in pairs( text ) do
-        render:setvisible( visible )
+      for _, label in ipairs( labels ) do
+        label:setvisible( visible )
       end
-
-      self.active = visible
     end
-    
-    return help
+
+    return {
+      show = function( self )
+        setvisible( true )
+      end,
+
+      hide = function( self )
+        setvisible( false )
+      end
+    }
   end
 
-  local createmenu = function( keydown, keyup, zoom, width, options, help )
-    local entries = {}
-    local menu = {}
+  ----------------------------------------------------------------------------
+  -- Create the zones help
+  local createzones = function( options )
+    local labels = {}
+    
+    for _, control in ipairs( options.controls ) do
+      local zone = control.zone
 
-    for _, entry in ipairs( options ) do
-      local btn_x, btn_y = entry[ 1 ].left, entry[ 1 ].top
-      local btn_w, btn_h = entry[ 1 ].width, entry[ 1 ].height
+      if zone then
+        local cx = zone.left + zone.width // 2
+        local cy = zone.top + zone.height // 2
 
-      local center_x = btn_x + btn_w // 2
-      local center_y = btn_y + btn_h // 2
-
-      local hand_x = center_x - 8
-      local hand_y = center_y
-
-      local cursor = M.newimage()
-      cursor.left, cursor.top = hand_x, hand_y
-      cursor.picture = hand.picture
-      cursor.visible = false
-      cursor.layer = 30000
-
-      local text = render( hand_x + 14, hand_y + cursor.height + 10, entry[ 2 ] )
-
-      entries[ #entries + 1 ] = {
-        setvisible = function( self, visible )
-          cursor.visible = visible
-          text:setvisible( visible )
-        end,
-
-        activate = function( self )
-          keydown( entry[ 3 ] )
-        end,
-
-        deactivate = function( self )
-          keyup( entry[ 3 ] )
-        end
-      }
+        labels[ #labels + 1 ] = createlabel( cx, cy, control.label )
+      end
     end
 
-    if zoom then
-      local center_x = zoom[ 1 ] + zoom[ 3 ] // 2
-      local center_y = zoom[ 2 ] + zoom[ 4 ] // 2
+    local zoom = options.zoom
 
-      if width < 480 then
-        center_x = center_x - ( 480 - width ) // 2
+    if zoom then
+      local cx = zoom.left + zoom.width // 2
+      local cy = zoom.top + zoom.height // 2
+
+      labels[ #labels + 1 ] = createlabel( cx, cy - 8, 'Zoom' )
+      labels[ #labels + 1 ] = createlabel( cx, cy + 8, 'Out' )
+    end
+
+    local setvisible = function( visible )
+      for _, label in ipairs( labels ) do
+        label:setvisible( visible )
+      end
+    end
+
+    return {
+      show = function( self )
+        setvisible( true )
+      end,
+
+      hide = function( self )
+        setvisible( false )
+      end
+    }
+  end
+
+  ----------------------------------------------------------------------------
+  -- Create the hand menu
+  local createmenu = function( options, help, zones )
+    local menu = {}
+    local entries = {}
+
+    for _, control in ipairs( options.controls ) do
+      if not control.xkeys then
+        local button = control.button
+        local btn_x, btn_y = button.left, button.top
+        local btn_w, btn_h = button.width, button.height
+
+        local center_x = btn_x + btn_w // 2
+        local center_y = btn_y + btn_h // 2
+
+        local hand_x, hand_y = center_x - 8, center_y
+
+        local cursor = M.newimage()
+        cursor.left, cursor.top = hand_x, hand_y
+        cursor.picture = hand.picture
+        cursor.visible = false
+        cursor.layer = 30000
+
+        local label = createlabel( hand_x + 14, hand_y + cursor.height + 10, control.label )
+
+        local setvisible = function( visible )
+          cursor.visible = visible
+          label:setvisible( visible )
+        end
+
+        entries[ #entries + 1 ] = {
+          show = function( self )
+            setvisible( true )
+          end,
+
+          hide = function( self )
+            setvisible( false )
+          end,
+
+          press = function( self )
+            options.onbutton( button, true )
+          end,
+
+          release = function( self )
+            options.onbutton( button, false )
+          end
+        }
+      end
+    end
+
+    local zoom = options.zoom
+
+    if zoom then
+      local center_x = zoom.left + zoom.width // 2
+      local center_y = zoom.top + zoom.height // 2
+
+      if options.background.width < 480 then
+        center_x = center_x - ( 480 - options.background.width ) // 2
       end
 
       local hand_x, hand_y = center_x - 8, center_y
@@ -322,25 +327,33 @@ return function( M )
       cursor.visible = false
       cursor.layer = 30000
 
-      local text1 = render( hand_x + 14, hand_y + cursor.height + 10, "Zoom" )
-      local text2 = render( hand_x + 14, hand_y + cursor.height + 10, "Cancel Zoom" )
+      local zoom_in = createlabel( hand_x + 14, hand_y + cursor.height + 10, "Zoom" )
+      local zoom_out = createlabel( hand_x + 14, hand_y + cursor.height + 10, "Cancel Zoom" )
+
+      local setvisible = function( visible )
+        cursor.visible = visible
+
+        if menu.zoom then
+          zoom_out:setvisible( visible )
+        else
+          zoom_in:setvisible( visible )
+        end
+      end
 
       entries[ #entries + 1 ] = {
-        setvisible = function( self, visible )
-          cursor.visible = visible
-
-          if menu.zoom then
-            text2:setvisible( visible )
-          else
-            text1:setvisible( visible )
-          end
+        show = function( self )
+          setvisible( true )
         end,
 
-        activate = function( self )
+        hide = function( self )
+          setvisible( false )
+        end,
+
+        press = function( self )
           menu.zoom = not menu.zoom
         end,
 
-        deactivate = function( self )
+        release = function( self )
         end
       }
     end
@@ -349,50 +362,87 @@ return function( M )
     menu.entries = entries
     menu.curr = 1
     menu.help = help
+    menu.zones = zones
     menu.zoom = false
 
     menu.isactive = function( self )
       return self.state == 'active' or self.state == 'help'
     end
 
-    menu.menuon = function( self )
+    menu.show = function( self )
       system.setzoom( nil )
+      self:hidezones()
       self.state = 'active'
       self.curr = 1
-      self.entries[ self.curr ]:setvisible( true )
+      self.entries[ self.curr ]:show()
     end
 
-    menu.menuoff = function( self )
+    menu.hide = function( self )
       self.state = 'inactive'
-      system.setzoom( menu.zoom and zoom or nil)
+      self:setzoom( self.zoom )
     end
 
-    menu.helpon = function( self )
+    menu.showhelp = function( self )
       system.setzoom( nil )
+      self:hidezones()
       self.state = 'help'
-      self.help:setvisible( true )
+      self.help:show()
     end
 
-    menu.helpoff = function( self )
+    menu.hidehelp = function( self )
       self.state = 'inactive'
-      self.help:setvisible( false )
-      system.setzoom( menu.zoom and zoom or nil)
+      self.help:hide()
+      self:setzoom( self.zoom )
     end
 
-    menu.next = function( self )
-      self.entries[ self.curr ]:setvisible( false )
-      self.curr = self.curr + 1
+    menu.showzones = function( self )
+      self.zones:show()
 
-      if self.curr > #self.entries then
-        self:menuoff()
-      else
-        self.entries[ self.curr ]:setvisible( true )
+      self.timer = system.newtimer()
+      self.timer.interval = 3000
+      self.timer.enabled = true
+      self.timer.ontimer = function()
+        self.zones:hide()
+        self.timer.enabled = false
+        self.timer = nil
       end
     end
 
-    menu.choose = function( self )
-      self.entries[ self.curr ]:setvisible( false )
-      self.entries[ self.curr ]:activate()
+    menu.hidezones = function( self )
+      if self.timer then
+        self.zones:hide()
+        self.timer.enabled = false
+        self.timer = nil
+      end
+    end
+
+    menu.setzoom = function( self, zoom, showzones )
+      self.zoom = zoom
+      system.setzoom( self.zoom and options.zoom or nil )
+
+      if not zoom then
+        self:hidezones()
+      end
+
+      if zoom and showzones then
+        self:showzones()
+      end
+    end
+
+    menu.next = function( self )
+      self.entries[ self.curr ]:hide()
+      self.curr = self.curr + 1
+
+      if self.curr <= #self.entries then
+        self.entries[ self.curr ]:show()
+      else
+        self:hide()
+      end
+    end
+
+    menu.press = function( self )
+      self.entries[ self.curr ]:hide()
+      self.entries[ self.curr ]:press()
       self.state = 'pressing'
     end
 
@@ -401,20 +451,20 @@ return function( M )
         if button == 'select' then
           self:next()
         elseif button == 'start' then
-          self:choose()
+          self:press()
         end
       elseif self.state == 'inactive' then
         if button == 'select' then
-          self:menuon()
+          self:show()
         elseif button == 'start' then
-          self:helpon()
+          self:showhelp()
         end
       elseif self.state == 'help' then
         if button == 'start' then
-          self:helpoff()
+          self:hidehelp()
         elseif button == 'select' then
-          self:helpoff()
-          self:menuon()
+          self:hidehelp()
+          self:showmenu()
         end
       end
     end
@@ -422,9 +472,15 @@ return function( M )
     menu.onkeyup = function( self, button )
       if button == 'start' then
         if self.state == 'pressing' then
-          self.entries[ self.curr ]:deactivate()
-          self:menuoff()
+          self.entries[ self.curr ]:release()
+          self:hide()
         end
+      end
+    end
+
+    menu.tick = function( self )
+      if self.timer then
+        self.timer:tick()
       end
     end
 
@@ -432,127 +488,193 @@ return function( M )
   end
   
   M.init = function( background, keymap, keydown, keyup, timers, zoom, options )
-    system.setbackground( background.picture )
-    local bgwidth, bgheight = background.width, background.height
-    background.picture = nil
-
-    local state, newstate = {}, {}
-    local zoomed = false
-
-    if options then
-      local del = {}
-
-      for _, option in ipairs( options ) do
-        for button, keys in pairs( keymap ) do
-          if keys[ 1 ] == option[ 3 ] then
-            del[ button ] = true
-          end
-        end
-      end
-
-      for button in pairs( del ) do
-        keymap[ button ] = nil
-      end
-    end
-
-    local msgs = {}
-    
-    for button, keys in pairs( keymap ) do
-      msgs[ button ] = keys[ #keys ]
-      keys[ #keys ] = nil
-    end
-
-    if options then
-      msgs.select = 'Menu'
-      msgs.start = 'Select'
+    if type( background ) ~= 'table' then
+      -- Use the compatibility init function
+      local compatinit = M.loadunit( 'compatinit' )
+      M.snes = snes
+      M.hand = hand
+      M.render = createlabel
+      return compatinit( background, keymap, keydown, keyup, timers, zoom, options, M )
     else
-      msgs.select = zoom and 'Zoom' or ''
-      msgs.start = 'Help'
+      options = background
+      
+      local zoom = options.zoom
+      zoom[ 1 ] = zoom.left
+      zoom[ 2 ] = zoom.top
+      zoom[ 3 ] = zoom.width
+      zoom[ 4 ] = zoom.height
     end
 
-    msgs.cred1 = 'MADrigal\'s Simulators'
-    msgs.cred2 = 'libretro port by @leiradel'
+    local msgs = {
+      select = 'Menu',
+      start  = 'Select',
+      cred1  = 'MADrigal\'s Simulators',
+      cred2  = 'libretro port by @leiradel'
+    }
 
-    local help = createhelp( bgwidth, bgheight, msgs )
-    local menu
-
-    if options then
-      menu = createmenu( keydown, keyup, zoom, bgwidth, options, help )
-    end
+    local help = createhelp( options, msgs )
+    local zones = createzones( options )
+    local menu = createmenu( options, help, zones )
+    local state, newstate = {}, {}
     
-    return function()
-      local gameactive = true
-      
-      if help:isactive() then
-        gameactive = false
-      end
-      
-      if menu and menu:isactive() then
-        gameactive = false
-      end
+    local width = options.background.width
+    local height = options.background.height
+    system.setbackground( options.background.picture )
+    options.background.picture = nil
 
+    return function()
       system.inputstate( newstate )
-      
-      for button, pressed in pairs( newstate ) do
-        if state[ button ] ~= pressed then
-          local keys = keymap[ button ]
-          
-          if keys then
-            if gameactive then
-              if pressed then
-                for _, key in ipairs( keys ) do
-                  keydown( key )
+
+      if state.pointer_pressed ~= newstate.pointer_pressed then
+        local pressed = newstate.pointer_pressed
+        state.pointer_pressed = pressed
+
+        -- Only process clicks if the menu is not active
+        if not menu:isactive() then
+          local x, y = newstate.pointer_x, newstate.pointer_y
+          local handled = false
+
+          if pressed then
+            if system.iszoomed() then
+              local cx, cy = width >> 1, height >> 1
+              local dx, dy = x - cx, y - cy
+              local xx, yy = dx * dx, dy * dy
+
+              if xx + yy <= 2500 then
+                -- If the center of the zoomed screen has been clicked, zoom out
+                menu:setzoom( false )
+                handled = true
+              end
+            else
+              local zoom = options.zoom
+
+              if zoom then
+                local x0, y0 = zoom.left, zoom.top
+                local x1, y1 = x0 + zoom.width, y0 + zoom.height
+
+                if x >= x0 and x < x1 and y >= y0 and y < y1 then
+                  -- If the screen has been clicked and zoom is supported, zoom in and show the zones
+                  menu:setzoom( true, true )
+                  handled = true
+                end
+              end
+            end
+          end
+
+          if not handled then
+            -- If the click has not already been handled, look for a control
+            for i = 1, #options.controls do
+              local control = options.controls[ i ]
+
+              if system.iszoomed() then
+                if control.zone  then
+                  local zone = control.zone
+                  local x0, y0 = zone.left, zone.top
+                  local x1, y1 = x0 + zone.width, y0 + zone.height
+
+                  if x >= x0 and x < x1 and y >= y0 and y < y1 then
+                    -- If the screen is zoomed and a zone has been clicked, send the key events
+                    for i = 1, #control.xkeys do
+                      options.onkey( control.xkeys[ i ], pressed )
+                    end
+
+                    handled = true
+                    break
+                  end
                 end
               else
-                for _, key in ipairs( keys ) do
-                  keyup( key )
+                if control.button then
+                  local button = control.button
+                  local x0, y0 = button.left, button.top
+                  local x1, y1 = x0 + button.width, y0 + button.height
+
+                  if x >= x0 and x < x1 and y >= y0 and y < y1 then
+                    -- If the screen is not zoomed and a button has been clicked, send key events or press the button
+                    if control.xkeys then
+                      for i = 1, #control.xkeys do
+                        options.onkey( control.xkeys[ i ], pressed )
+                      end
+                    else
+                      options.onbutton( button, pressed )
+                    end
+
+                    handled = true
+                    break
+                  end
                 end
               end
             end
           end
-          
-          state[ button ] = pressed
-          
-          if menu then
-            if pressed then
-              menu:onkeydown( button )
-            else
-              menu:onkeyup( button )
-            end
-          else
-            if button == 'start' then
-              if pressed then
-                system.setzoom( nil )
-              end
 
-              help:setvisible( pressed )
-
-              if not pressed then
-                system.setzoom( zoomed and zoom or nil )
-              end
-            elseif button == 'select' and pressed then
-              zoomed = not zoomed
-              system.setzoom( zoomed and zoom or nil )
-            end
+          if not handled and options.rawmouse then
+            options.rawmouse( x, y, pressed) 
           end
         end
       end
+
+      -- Remove pointer events from the table
+      newstate.pointer_x = nil
+      newstate.pointer_y = nil
+      newstate.pointer_pressed = nil
       
-      if gameactive then
+      for key, pressed in pairs( newstate ) do
+        if state[ key ] == nil then
+          state[ key ] = false
+        end
+
+        if state[ key ] ~= pressed then
+          state[ key ] = pressed
+
+          if not menu:isactive() then
+            local handled = false
+
+            for i = 1, #options.controls do
+              local control = options.controls[ i ]
+
+              if control.keys and control.keys[ key ] then
+                -- If a control responds to the pressed key, send the key events
+                for j = 1, #control.xkeys do
+                  options.onkey( control.xkeys[ j ], pressed )
+                end
+
+                handled = true
+              end
+            end
+
+            if not handled and key ~= 'select' and key ~= 'start' and options.rawkey then
+              options.rawkey( key, pressed )
+            end
+          end
+          
+          -- Send the key to the menu
+          if pressed then
+            menu:onkeydown( key )
+          else
+            menu:onkeyup( key )
+          end
+        end
+      end
+
+      menu:tick()
+      
+      if not menu:isactive() then
+        -- If the game is active, make sure sounds are playing, and tick the timers
         if not system.issoundactive() then
           system.resumesounds()
         end
 
-        for _, timer in ipairs( timers ) do
+        for _, timer in ipairs( options.timers ) do
           timer:tick()
         end
       else
+        -- If the menu is active, pause the sounds
         if system.issoundactive() then
           system.pausesounds()
         end
       end
 
-      return gameactive
+      -- Returns whether the game is active or not, to avoid advancing the game time
+      return not menu:isactive()
     end
   end
 end
