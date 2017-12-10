@@ -38,6 +38,16 @@ unit1.pfpoweron.data = system.loadbin( 'Poweron.pcm' )
 unit1.pfstart.data = system.loadbin( 'Start.pcm' )
 unit1.pfstgstart.data = system.loadbin( 'Stgstart.pcm' )
 
+-- Fix structures
+do
+  for i = 0, 6 do
+    for j = 0, 8 do
+      unit1.alabyrinth[ i ][ j ].chicky = {}
+      unit1.alabyrinth[ i ][ j ].wolf = {}
+    end
+  end
+end
+
 unit1.form1.oncreate()
 unit1.form1.im_hint_1.picture = nil
 unit1.form1.im_hint_2.picture = nil
