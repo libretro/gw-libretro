@@ -66,29 +66,36 @@ local tick = system.init(
   menu
 )
 
+local state = {}
 local last_barrowkeypressed
 
 local newtick = function()
-  local state = tick()
+  local active = tick()
   
-  if unit1.barrowkeypressed ~= last_barrowkeypressed then
-    -- repeat keypresses when barrowkeypressed is true again
-    if unit1.barrowkeypressed then
-      for button, pressed in pairs( state ) do
-        local keys = keymap[ button ]
-        
-        if keys then
-          if pressed then
-            for _, key in ipairs( keys ) do
-              unit1.form1.onkeydown( nil, key, 0 )
+  if active then
+    if unit1.bcontroller ~= last_bcontroller then
+      last_barrowkeypressed = unit1.barrowkeypressed
+
+      -- repeat keypresses when barrowkeypressed is true again
+      if last_barrowkeypressed then
+        system.inputstate( state )
+
+        for button, pressed in pairs( state ) do
+          local keys = keymap[ button ]
+          
+          if keys then
+            if pressed then
+              for _, key in ipairs( keys ) do
+                unit1.form1.onkeydown( nil, key, 0 )
+              end
             end
           end
         end
       end
     end
-    
-    last_barrowkeypressed = unit1.barrowkeypressed
   end
+
+  return active
 end
 
 return newtick
