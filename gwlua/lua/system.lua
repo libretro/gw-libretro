@@ -467,7 +467,7 @@ return function( M )
           self:hidehelp()
         elseif button == 'select' then
           self:hidehelp()
-          self:showmenu()
+          self:show()
         end
       end
     end
@@ -520,8 +520,6 @@ return function( M )
     local menu = createmenu( options, help, zones )
     local state, newstate = {}, {}
     
-    local width = options.background.width
-    local height = options.background.height
     system.setbackground( options.background.picture )
     options.background.picture = nil
 
@@ -539,7 +537,9 @@ return function( M )
 
           if pressed then
             if system.iszoomed() then
-              local cx, cy = width >> 1, height >> 1
+              local zoom = options.zoom
+              local cx = zoom.left + zoom.width // 2
+              local cy = zoom.top + zoom.height // 2
               local dx, dy = x - cx, y - cy
               local xx, yy = dx * dx, dy * dy
 

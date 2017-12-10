@@ -10,6 +10,11 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.6.2
+
+* Fixed call to undefined method `showmenu`.
+* Fixed calculating the center of the screen when zoom is on.
+
 ### 1.6.1
 
 * Added label position fine tuning to avoid they being on top of each other.
