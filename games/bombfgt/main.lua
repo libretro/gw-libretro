@@ -60,7 +60,7 @@ return system.init{
       button = unit1.form1.btn_shoot_right_top,
       label  = 'Shoot',
       keys   = { b = true },
-      xkeys  = { forms.vk_control }
+      xkeys  = { forms.vk_menu }
     }
   },
 
