@@ -10,6 +10,10 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.6.1
+
+* Added label position fine tuning to avoid they being on top of each other.
+
 ### 1.6.0
 
 * Added support for mouse and touch screens.

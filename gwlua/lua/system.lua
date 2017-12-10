@@ -228,6 +228,9 @@ return function( M )
         local cx = zone.left + zone.width // 2
         local cy = zone.top + zone.height // 2
 
+        cx = cx + ( control.lbl_dx or 0 )
+        cy = cy + ( control.lbl_dy or 0 )
+
         labels[ #labels + 1 ] = createlabel( cx, cy, control.label )
       end
     end
