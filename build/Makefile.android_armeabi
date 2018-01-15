@@ -44,8 +44,8 @@ platform       = android
 PLATDEFS       = -DANDROID -DINLINE=inline -DHAVE_STDINT_H -DBSPF_UNIX -DHAVE_INTTYPES -DLSB_FIRST
 PLATCFLAGS     = -I$(NDK_ROOT_DIR)/platforms/android-13/arch-arm/usr/include -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -march=armv5te -mtune=xscale -msoft-float -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security
 PLATCXXFLAGS   = -I$(NDK_ROOT_DIR)/platforms/android-13/arch-arm/usr/include -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -march=armv5te -mtune=xscale -msoft-float -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300 -Wa,--noexecstack -Wformat -Werror=format-security -fno-exceptions -fno-rtti
-PLATLDFLAGS    = -shared --sysroot=$(NDK_ROOT_DIR)/platforms/android-3/arch-arm -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm
-PLATLDXFLAGS   = -shared --sysroot=$(NDK_ROOT_DIR)/platforms/android-3/arch-arm -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm $(NDK_ROOT_DIR)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/thumb/libgnustl_static.a
+PLATLDFLAGS    = -shared --sysroot=$(NDK_ROOT_DIR)/platforms/android-13/arch-arm -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm
+PLATLDXFLAGS   = -shared --sysroot=$(NDK_ROOT_DIR)/platforms/android-13/arch-arm -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -lc -lm $(NDK_ROOT_DIR)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/thumb/libgnustl_static.a
 
 ################
 # libretro setup
