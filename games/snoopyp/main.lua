@@ -50,6 +50,10 @@ for i = 1, 28 do
   unit1.apfnote[ i ].data = system.loadbin( string.format( 'Note%d.pcm', i ) )
 end
 
+for i = 1, 4 do
+  unit1.aim_woodstock[ i ].snore = {}
+end
+
 unit1.form1.oncreate()
 unit1.form1.im_background_closed.visible = false
 unit1.form1.im_background_closed = nil

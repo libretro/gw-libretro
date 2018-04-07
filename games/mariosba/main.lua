@@ -57,6 +57,10 @@ unit1.pfs_move.data = system.loadbin( 'Move.pcm' )
 unit1.pfs_movebomb.data = system.loadbin( 'Movebomb.pcm' )
 unit1.pfs_start.data = system.loadbin( 'Start.pcm' )
 
+for i = 1, 5 do
+  unit1.aim_enemy[ i ].flame = {}
+end
+
 unit1.form1.oncreate()
 unit1.form1.im_background_closed.visible = false
 unit1.form1.im_background_closed = nil

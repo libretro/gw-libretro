@@ -38,6 +38,10 @@ unit1.pf_miss.data = system.loadbin( 'Miss.pcm' )
 unit1.pf_shot.data = system.loadbin( 'Shot.pcm' )
 unit1.pf_start.data = system.loadbin( 'Start.pcm' )
 
+for i = 8, 9 do
+  unit1.rgamelevels[ i ].ienemyspeed = {}
+end
+
 unit1.form1.oncreate()
 
 unit1.bsound = true
