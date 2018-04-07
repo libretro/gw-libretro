@@ -5,8 +5,7 @@
 *~
 version.c
 
-games/_all
-games/_mgw
+games/etc/*
 games/**/*.mgw
 games/**/*.srm
 games/**/*.zip
@@ -20,3 +19,6 @@ games/**/zip
 games/**/README.txt
 games/**/unit1.lua
 games/**/Makefile
+
+!games/etc/mkmake.lua
+!games/etc/mkall.lua
