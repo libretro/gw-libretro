@@ -8,8 +8,6 @@
 
 #define get_state( L ) ( ( gwlua_t* )lua_touserdata( L, lua_upvalueindex( 1 ) ) )
 
-static uint16_t s_layer;
-
 static int l_pic_index( lua_State* L )
 {
   const char* key = luaL_checkstring( L, 2 );
@@ -224,8 +222,10 @@ static int l_new( lua_State* L )
   {
     return luaL_error( L, "sprite limit reached" );
   }
+
+  gwlua_t* state = get_state(L);
   
-  self->sprite->layer = s_layer--;
+  self->sprite->layer = state->layer--;
   self->width = 0;
   self->height = 0;
   self->mousedown_ref = LUA_NOREF;
@@ -259,6 +259,4 @@ void register_image( lua_State* L, gwlua_t* state )
   
   lua_pushlightuserdata( L, (void*)state );
   luaL_setfuncs( L, statics, 1 );
-
-  s_layer = 16384;
 }

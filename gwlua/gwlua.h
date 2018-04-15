@@ -103,6 +103,9 @@ struct gwlua_t
     char pressed;
   }
   pointer;
+
+  /* sprites */
+  uint16_t layer;
   
   /* references */
   int tick_ref;

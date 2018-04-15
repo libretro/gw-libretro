@@ -125,6 +125,7 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom )
   state->screen = NULL;
   state->now = 0;
   memset( (void*)state->input, 0, sizeof( state->input ) );
+  state->layer = 16383;
   state->tick_ref = LUA_NOREF;
   
   lua_pushcfunction( state->L, l_create );

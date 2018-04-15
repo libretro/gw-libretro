@@ -10,6 +10,10 @@ The [SNES controller](http://commons.wikimedia.org/wiki/File:SNES_controller.svg
 
 ## Changelog
 
+### 1.6.3
+
+* Fixed the first sprite layer being set to 0 instead of 16383.
+
 ### 1.6.2
 
 * Fixed call to undefined method `showmenu`.
