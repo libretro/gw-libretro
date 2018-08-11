@@ -279,12 +279,12 @@ bool retro_load_game( const struct retro_game_info* info )
 
 size_t retro_get_memory_size( unsigned id )
 {
-  return id == RETRO_MEMORY_SAVE_RAM ? sizeof( sram ) : 0;
+  return (id == RETRO_MEMORY_SAVE_RAM || id == RETRO_MEMORY_SYSTEM_RAM) ? sizeof( sram ) : 0;
 }
 
 void* retro_get_memory_data( unsigned id )
 {
-  return id == RETRO_MEMORY_SAVE_RAM ? (void*)&sram : NULL;
+  return (id == RETRO_MEMORY_SAVE_RAM || id == RETRO_MEMORY_SYSTEM_RAM) ? (void*)&sram : NULL;
 }
 
 void retro_set_video_refresh( retro_video_refresh_t cb )
