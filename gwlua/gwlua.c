@@ -35,12 +35,17 @@ static int l_traceback( lua_State* L )
 
 static int l_pcall( lua_State* L, int nargs, int nres )
 {
+  int errndx = lua_gettop( L ) - nargs;
   lua_pushcfunction( L, l_traceback );
-  lua_insert( L, -nargs - 2 );
+  lua_insert( L, errndx );
   
-  if ( lua_pcall( L, nargs, nres, -nargs - 2 ) != LUA_OK )
+  int ret = lua_pcall( L, nargs, nres, errndx );
+  lua_remove(L, errndx);
+  
+  if ( ret != LUA_OK )
   {
     gwlua_log( "\n==============================\n%s\n------------------------------\n", lua_tostring( L, -1 ) );
+    lua_pop( L, 1 );
     return -1;
   }
   

@@ -148,6 +148,11 @@ static int l_playsound( lua_State* L )
         break;
       }
     }
+
+    if ( channel == -1 )
+    {
+      return 0;
+    }
   }
   else if ( channels[ channel ] != -1 )
   {

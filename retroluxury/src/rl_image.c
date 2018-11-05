@@ -26,7 +26,10 @@ rl_image_t* rl_image_create( const void* data, size_t size )
   // rows array size
   mem += height * sizeof( uint32_t );
   // rle size
-  size -= 2 * sizeof( uint16_t ) /* width & height */ + height * sizeof( uint32_t ) /* row pointers */;
+  size -= 2 * sizeof( uint16_t ) /* width & height */
+          + sizeof(uint32_t) /* used */
+          + height * sizeof( uint32_t ) /* row pointers */;
+
   mem += size;
   
   rl_image_t* image = (rl_image_t*)rl_malloc( mem );
