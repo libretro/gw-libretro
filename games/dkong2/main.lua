@@ -56,7 +56,7 @@ unit1.bsound = true
 unit1.imode = 2
 unit1.form1.gam_set_mode()
 
-local tick = system.init(
+return system.init(
   unit1.form1.im_background_open,
   keymap,
   function( key ) unit1.form1.onkeydown( nil, key, 0 ) end,
@@ -65,37 +65,3 @@ local tick = system.init(
   nil,
   menu
 )
-
-local state = {}
-local last_barrowkeypressed
-
-local newtick = function()
-  local active = tick()
-  
-  if active then
-    if unit1.bcontroller ~= last_bcontroller then
-      last_barrowkeypressed = unit1.barrowkeypressed
-
-      -- repeat keypresses when barrowkeypressed is true again
-      if last_barrowkeypressed then
-        system.inputstate( state )
-
-        for button, pressed in pairs( state ) do
-          local keys = keymap[ button ]
-          
-          if keys then
-            if pressed then
-              for _, key in ipairs( keys ) do
-                unit1.form1.onkeydown( nil, key, 0 )
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-
-  return active
-end
-
-return newtick
