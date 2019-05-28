@@ -187,12 +187,18 @@ char* getenv( const char* name )
 
 /*---------------------------------------------------------------------------*/
 
+#ifndef GIT_VERSION
 extern const char* gw_version;
+#endif
 
 void retro_get_system_info( struct retro_system_info* info )
 {
   info->library_name = "Game & Watch";
+#ifdef GIT_VERSION
+  info->library_version = GIT_VERSION;
+#else
   info->library_version = gw_version;
+#endif
   info->need_fullpath = false;
   info->block_extract = false;
   info->valid_extensions = "mgw";
@@ -242,8 +248,10 @@ void retro_init()
     log_cb = log.log;
 }
 
+#ifndef GIT_VERSION
 extern const char* gw_gitstamp;
 extern const char* rl_gitstamp;
+#endif
 
 bool retro_load_game( const struct retro_game_info* info )
 {
@@ -259,7 +267,9 @@ bool retro_load_game( const struct retro_game_info* info )
   }
 
   
+#ifndef GIT_VERSION
   log_cb( RETRO_LOG_INFO, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
+#endif
 
   int res = gwrom_init( &rom, (void*)info->data, info->size, GWROM_COPY_ALWAYS );
   
