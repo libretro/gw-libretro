@@ -187,8 +187,8 @@ char* getenv( const char* name )
 
 /*---------------------------------------------------------------------------*/
 
-const char* gw_version = "git";
-const char* gw_hithash = "abcde1234";
+extern const char* gw_version;
+extern const char* gw_hithash;
 
 void retro_get_system_info( struct retro_system_info* info )
 {
