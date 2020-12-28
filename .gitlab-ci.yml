@@ -55,6 +55,12 @@ include:
   # Nintendo Switch
   - project: 'libretro-infrastructure/ci-templates'
     file: '/libnx-static.yml'
+    
+# Stages for building
+stages:
+  - build-prepare
+  - build-shared
+  - build-static
 
 ##############################################################################
 #################################### STAGES ##################################
