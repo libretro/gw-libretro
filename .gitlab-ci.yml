@@ -116,12 +116,6 @@ libretro-build-vita:
   extends:
     - .libretro-vita-static-retroarch-master
     - .core-defs
-
-# PlayStation2
-libretro-build-ps2:
-  extends:
-    - .libretro-ps2-static-retroarch-master
-    - .core-defs
     
 # Nintendo 3DS
 libretro-build-ctr:
