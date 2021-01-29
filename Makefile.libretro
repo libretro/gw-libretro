@@ -41,7 +41,7 @@ else
 
 TARGET_NAME := gw
 
-LOG_PERFORMANCE = 1
+LOG_PERFORMANCE = 0
 HAVE_COMPAT = 0
 
 SOURCES_C   :=
@@ -62,6 +62,9 @@ ifeq ($(platform),)
       ifeq ($(shell uname -p),powerpc)
          arch = ppc
       endif
+      ifeq ($(shell uname -p),arm)
+         arch = arm
+      endif
    else ifneq ($(findstring win,$(shell uname -a)),)
       platform = win
    endif
@@ -74,14 +77,6 @@ else ifneq (,$(findstring rpi,$(platform)))
 endif
 
 CC_AS ?= $(CC)
-
-ifeq ($(ARCHFLAGS),)
-   ifeq ($(archs),ppc)
-      ARCHFLAGS = -arch ppc -arch ppc64
-   else
-      ARCHFLAGS = -arch i386 -arch x86_64
-   endif
-endif
 
 # Unix
 ifneq (,$(findstring unix,$(platform)))
@@ -146,7 +141,41 @@ else ifeq ($(platform), osx)
    SHARED := -dynamiclib
    OSXVER = `sw_vers -productVersion | cut -d. -f 2`
    OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-   fpic += -mmacosx-version-min=10.2
+   MINVERSION=
+   ifeq ($(OSX_LT_MAVERICKS),YES)
+   	   MINVERSION = -mmacosx-version-min=10.2
+   else ifeq ($(shell uname -p),arm)
+   	   MINVERSION =
+   endif
+
+
+
+ifeq ($(platform), osx)
+ifeq ($(UNIVERSAL),1)
+ifeq ($(ARCHFLAGS),)
+   ARCHFLAGS = -arch i386 -arch x86_64
+   ifeq ($(archs),ppc)
+      ARCHFLAGS = -arch ppc -arch ppc64
+   endif
+   ifeq ($(archs),arm)
+      ARCHFLAGS = -arch arm64
+   endif
+endif
+   CFLAGS += $(ARCHFLAGS)
+   LFLAGS += $(ARCHFLAGS)
+endif
+endif
+
+
+   ifeq ($(CROSS_COMPILE),1)
+		TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
+		CFLAGS   += $(TARGET_RULE)
+		CPPFLAGS += $(TARGET_RULE)
+		CXXFLAGS += $(TARGET_RULE)
+		LDFLAGS  += $(TARGET_RULE)
+   endif
+
+   fpic += $(MINVERSION)
 
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
@@ -379,13 +408,6 @@ CXXFLAGS += $(fpic) $(DEFINES)
 CXXFLAGS += -Wall
 
 LDFLAGS +=
-
-ifeq ($(platform), osx)
-ifndef ($(NOUNIVERSAL))
-   CFLAGS += $(ARCHFLAGS)
-   LFLAGS += $(ARCHFLAGS)
-endif
-endif
 
 LUA_FILES =
 PNG_FILES =
