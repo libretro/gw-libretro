@@ -180,7 +180,7 @@ libretro-build-tvos-arm64:
 # PlayStation Portable
 libretro-build-psp:
   extends:
-    - .libretro-vita-static-retroarch-master
+    - .libretro-psp-static-retroarch-master
     - .core-defs
     
 # PlayStation Vita
