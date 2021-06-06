@@ -8,7 +8,8 @@
 
 /*---------------------------------------------------------------------------*/
 
-static bool libretro_supports_bitmasks = false;
+static bool libretro_supports_persistent_buffer = false;
+static bool libretro_supports_bitmasks          = false;
 
 static void dummy_log( enum retro_log_level level, const char* fmt, ... ) { }
 
@@ -191,8 +192,14 @@ void retro_get_system_info( struct retro_system_info* info )
 
 void retro_set_environment( retro_environment_t cb )
 {
-  env_cb = cb;
-  
+  static const struct retro_system_content_info_override content_overrides[] = {
+     {
+        "mgw",    /* extensions */
+        false,    /* need_fullpath */
+        true      /* persistent_data */
+     },
+     { NULL, false, false }
+  };
   static const struct retro_variable vars[] = {
     { NULL, NULL },
   };
@@ -215,9 +222,13 @@ void retro_set_environment( retro_environment_t cb )
     { pointers, 1 },
     { NULL, 0 }
   };
+
+  env_cb = cb;
   
   cb( RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars );
   cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
+  cb( RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE,
+        (void*)content_overrides);
 }
 
 unsigned retro_api_version(void)
@@ -241,34 +252,58 @@ extern const char* rl_gitstamp;
 
 bool retro_load_game( const struct retro_game_info* info )
 {
-  enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   int res;
+   const struct retro_game_info_ext 
+      *info_ext                = NULL;
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   const uint8_t *rom_data     = NULL;
+   uint32_t rom_flags          = 0;
+   size_t rom_size             = 0;
 
-  if (!info)
-     return false;
-  
-  if ( !env_cb( RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt ) )
-  {
-    log_cb( RETRO_LOG_ERROR, "RGB565 is not supported\n" );
-    return false;
-  }
+   if (!info)
+      return false;
 
-  
-  log_cb( RETRO_LOG_INFO, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
+   if ( !env_cb( RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt ) )
+   {
+      log_cb( RETRO_LOG_ERROR, "RGB565 is not supported\n" );
+      return false;
+   }
 
-  int res = gwrom_init( &rom, (void*)info->data, info->size, GWROM_COPY_ALWAYS );
-  
-  if ( res != GWROM_OK )
-  {
-    log_cb( RETRO_LOG_ERROR, "Error initializing the rom: ", gwrom_error_message( res ) );
-    init = -1;
-    return false;
-  }
-  
-  env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
-  memset( (void*)&state, 0, sizeof( state ) );
-  state.width = state.height = 128;
-  init = 0;
-  return true;
+
+   log_cb( RETRO_LOG_INFO, "\n%s\n%s", gw_gitstamp, rl_gitstamp );
+
+   if (env_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &info_ext) &&
+         info_ext->persistent_data)
+   {
+      libretro_supports_persistent_buffer = true;
+      rom_data                            = (const uint8_t*)info_ext->data;
+      rom_size                            = info_ext->size;
+   }
+   else
+   {
+      libretro_supports_persistent_buffer = false;
+      rom_data                            = (const uint8_t*)info->data;
+      rom_size                            = info->size;
+      /* If buffer is not persistent, we need to copy always */
+      rom_flags                           = GWROM_COPY_ALWAYS;
+   }
+
+   res = gwrom_init( &rom, (void*)rom_data, rom_size, rom_flags);
+
+   if ( res != GWROM_OK )
+   {
+      log_cb( RETRO_LOG_ERROR, "Error initializing the rom: ",
+            gwrom_error_message( res ) );
+      init = -1;
+      return false;
+   }
+
+   env_cb( RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_descriptors );
+   memset( (void*)&state, 0, sizeof( state ) );
+   state.width  = 128;
+   state.height = 128;
+   init         = 0;
+   return true;
 }
 
 size_t retro_get_memory_size( unsigned id )
@@ -428,6 +463,7 @@ void retro_unload_game(void)
 {
   gwlua_destroy(&state);
   gwrom_destroy(&rom);
+  libretro_supports_persistent_buffer = false;
 }
 
 unsigned retro_get_region(void) { return RETRO_REGION_NTSC; }
