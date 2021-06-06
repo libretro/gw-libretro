@@ -8,11 +8,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-static void dummy_log( enum retro_log_level level, const char* fmt, ... )
-{
-  (void)level;
-  (void)fmt;
-}
+static void dummy_log( enum retro_log_level level, const char* fmt, ... ) { }
 
 #define SRAM_MAX 8
 
@@ -58,7 +54,7 @@ static struct retro_input_descriptor input_descriptors[] =
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
   { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-  // TODO: Is this needed?
+  /* TODO: Is this needed? */
   { 255, 255, 255, 255, NULL }
 };
 
@@ -67,72 +63,70 @@ static struct retro_input_descriptor input_descriptors[] =
 
 static int find_key( const char* key )
 {
-  for ( int i = 0; i < sram.count; i++ )
-  {
-    if ( !strcmp( sram.keys[ i ], key ) )
-    {
-      return i;
-    }
-  }
-  
-  return -1;
+   for ( int i = 0; i < sram.count; i++ )
+   {
+      if ( !strcmp( sram.keys[ i ], key ) )
+         return i;
+   }
+
+   return -1;
 }
 
 const char* gwlua_load_value( gwlua_t* state, const char* key, int* type )
 {
-  int i = find_key( key );
+   int i = find_key( key );
 
-  if ( i != -1 )
-  {
-    *type = sram.types[ i ];
-    return sram.values[ i ];
-  }
-  
-  return NULL;
+   if (i != -1)
+   {
+      *type = sram.types[ i ];
+      return sram.values[ i ];
+   }
+
+   return NULL;
 }
 
 void gwlua_save_value( gwlua_t* state, const char* key, const char* value, int type )
 {
-  int i = find_key( key );
+   int i = find_key( key );
 
-  if ( i == -1 )
-  {
-    if ( sram.count == SRAM_MAX )
-    {
-      /* TODO: return an error when SRAM is full */
-      log_cb( RETRO_LOG_ERROR, "Out of space writing <%s, %s> to SRAM\n", key, value );
-      return;
-    }
+   if ( i == -1 )
+   {
+      if ( sram.count == SRAM_MAX )
+      {
+         /* TODO: return an error when SRAM is full */
+         log_cb( RETRO_LOG_ERROR, "Out of space writing <%s, %s> to SRAM\n", key, value );
+         return;
+      }
 
-    i = sram.count++;
-  }
+      i = sram.count++;
+   }
 
-  sram.types[ i ] = type;
-  
-  strncpy( sram.keys[ i ], key, sizeof( sram.keys[ i ] ) );
-  sram.keys[ i ][ sizeof( sram.keys[ i ] ) - 1 ] = 0;
-  
-  strncpy( sram.values[ i ], value, sizeof( sram.values[ i ] ) );
-  sram.values[ i ][ sizeof( sram.values[ i ] ) - 1 ] = 0;
+   sram.types[ i ] = type;
+
+   strncpy( sram.keys[ i ], key, sizeof( sram.keys[ i ] ) );
+   sram.keys[ i ][ sizeof( sram.keys[ i ] ) - 1 ] = 0;
+
+   strncpy( sram.values[ i ], value, sizeof( sram.values[ i ] ) );
+   sram.values[ i ][ sizeof( sram.values[ i ] ) - 1 ] = 0;
 }
 
 int gwlua_set_fb( unsigned width, unsigned height )
 {
-  struct retro_game_geometry geometry;
-  
-  geometry.base_width = width;
-  geometry.base_height = height;
-  geometry.max_width = width;
-  geometry.max_height = height;
-  geometry.aspect_ratio = 0.0f;
-  
-  env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
-  
-  offset = 0;
-  soft_width = width;
-  soft_height = height;
-  
-  return 0;
+   struct retro_game_geometry geometry;
+
+   geometry.base_width   = width;
+   geometry.base_height  = height;
+   geometry.max_width    = width;
+   geometry.max_height   = height;
+   geometry.aspect_ratio = 0.0f;
+
+   env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
+
+   offset      = 0;
+   soft_width  = width;
+   soft_height = height;
+
+   return 0;
 }
 
 void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height )
@@ -141,24 +135,24 @@ void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height )
   
   if ( x0 >= 0 )
   {
-    geometry.base_width = width;
+    geometry.base_width  = width;
     geometry.base_height = height;
-    soft_width = width;
-    soft_height = height;
-    offset = y0 * state->width + x0;
+    soft_width           = width;
+    soft_height          = height;
+    offset               = y0 * state->width + x0;
   }
   else
   {
-    geometry.base_width = state->width;
+    geometry.base_width  = state->width;
     geometry.base_height = state->height;
-    soft_width = state->width;
-    soft_height = state->height;
-    offset = 0;
+    soft_width           = state->width;
+    soft_height          = state->height;
+    offset               = 0;
   }
   
-  geometry.max_width = state->width;
-  geometry.max_height = state->height;
-  geometry.aspect_ratio = 0.0f;
+  geometry.max_width     = state->width;
+  geometry.max_height    = state->height;
+  geometry.aspect_ratio  = 0.0f;
   
   env_cb( RETRO_ENVIRONMENT_SET_GEOMETRY, &geometry );
 }
@@ -176,13 +170,7 @@ void gwlua_vlog( const char* format, va_list args )
 /* compatibility functions */
 
 #ifdef __CELLOS_LV2__
-
-char* getenv( const char* name )
-{
-  (void)name;
-  return NULL;
-}
-
+char* getenv( const char* name ) { return NULL; }
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -192,10 +180,10 @@ extern const char* gw_hithash;
 
 void retro_get_system_info( struct retro_system_info* info )
 {
-  info->library_name = "Game & Watch";
-  info->library_version = gw_version;
-  info->need_fullpath = false;
-  info->block_extract = false;
+  info->library_name     = "Game & Watch";
+  info->library_version  = gw_version;
+  info->need_fullpath    = false;
+  info->block_extract    = false;
   info->valid_extensions = "mgw";
 }
 
@@ -209,13 +197,13 @@ void retro_set_environment( retro_environment_t cb )
   
   static const struct retro_controller_description controllers[] = {
     { "Controller", RETRO_DEVICE_JOYPAD },
-    // TODO: Is this needed?
+    /* TODO: Is this needed? */
     { NULL, 0 }
   };
 
   static const struct retro_controller_description pointers[] = {
     { "Pointer", RETRO_DEVICE_POINTER },
-    // TODO: Is this needed?
+    /* TODO: Is this needed? */
     { NULL, 0 }
   };
 
@@ -230,12 +218,12 @@ void retro_set_environment( retro_environment_t cb )
   cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
 }
 
-unsigned retro_api_version()
+unsigned retro_api_version(void)
 {
   return RETRO_API_VERSION;
 }
 
-void retro_init()
+void retro_init(void)
 {
   struct retro_log_callback log;
   
@@ -324,142 +312,90 @@ void retro_get_system_av_info( struct retro_system_av_info* info )
   info->timing.sample_rate = 44100.0;
 }
 
-void retro_run()
+void retro_run(void)
 {
-  static const struct { unsigned retro; int gw; } map[] =
-  {
-    { RETRO_DEVICE_ID_JOYPAD_UP,     GWLUA_UP },
-    { RETRO_DEVICE_ID_JOYPAD_DOWN,   GWLUA_DOWN },
-    { RETRO_DEVICE_ID_JOYPAD_LEFT,   GWLUA_LEFT },
-    { RETRO_DEVICE_ID_JOYPAD_RIGHT,  GWLUA_RIGHT },
-    { RETRO_DEVICE_ID_JOYPAD_A,      GWLUA_A },
-    { RETRO_DEVICE_ID_JOYPAD_B,      GWLUA_B },
-    { RETRO_DEVICE_ID_JOYPAD_X,      GWLUA_X },
-    { RETRO_DEVICE_ID_JOYPAD_Y,      GWLUA_Y },
-    { RETRO_DEVICE_ID_JOYPAD_L,      GWLUA_L1 },
-    { RETRO_DEVICE_ID_JOYPAD_R,      GWLUA_R1 },
-    { RETRO_DEVICE_ID_JOYPAD_L2,     GWLUA_L2 },
-    { RETRO_DEVICE_ID_JOYPAD_R2,     GWLUA_R2 },
-    { RETRO_DEVICE_ID_JOYPAD_L3,     GWLUA_L3 },
-    { RETRO_DEVICE_ID_JOYPAD_R3,     GWLUA_R3 },
-    { RETRO_DEVICE_ID_JOYPAD_SELECT, GWLUA_SELECT },
-    { RETRO_DEVICE_ID_JOYPAD_START,  GWLUA_START },
-  };
-  
-  input_poll_cb();
-  
-  if ( init == 0 )
-  {
-    /* Initialize game */
-    if ( gwlua_create( &state, &rom ) )
-    {
-      log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
-      init = -1;
+   unsigned id;
+   int16_t x, y, pressed;
+   static const struct { unsigned retro; int gw; } map[] =
+   {
+      { RETRO_DEVICE_ID_JOYPAD_UP,     GWLUA_UP },
+      { RETRO_DEVICE_ID_JOYPAD_DOWN,   GWLUA_DOWN },
+      { RETRO_DEVICE_ID_JOYPAD_LEFT,   GWLUA_LEFT },
+      { RETRO_DEVICE_ID_JOYPAD_RIGHT,  GWLUA_RIGHT },
+      { RETRO_DEVICE_ID_JOYPAD_A,      GWLUA_A },
+      { RETRO_DEVICE_ID_JOYPAD_B,      GWLUA_B },
+      { RETRO_DEVICE_ID_JOYPAD_X,      GWLUA_X },
+      { RETRO_DEVICE_ID_JOYPAD_Y,      GWLUA_Y },
+      { RETRO_DEVICE_ID_JOYPAD_L,      GWLUA_L1 },
+      { RETRO_DEVICE_ID_JOYPAD_R,      GWLUA_R1 },
+      { RETRO_DEVICE_ID_JOYPAD_L2,     GWLUA_L2 },
+      { RETRO_DEVICE_ID_JOYPAD_R2,     GWLUA_R2 },
+      { RETRO_DEVICE_ID_JOYPAD_L3,     GWLUA_L3 },
+      { RETRO_DEVICE_ID_JOYPAD_R3,     GWLUA_R3 },
+      { RETRO_DEVICE_ID_JOYPAD_SELECT, GWLUA_SELECT },
+      { RETRO_DEVICE_ID_JOYPAD_START,  GWLUA_START },
+   };
+
+   input_poll_cb();
+
+   if ( init == 0 )
+   {
+      /* Initialize game */
+      if ( gwlua_create( &state, &rom ) )
+      {
+         log_cb( RETRO_LOG_ERROR, "Error inializing gwlua" );
+         init = -1;
+         return;
+      }
+
+      struct retro_system_av_info info;
+      retro_get_system_av_info( &info );
+      env_cb( RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info );
+
+      init = 1;
+   }
+   else if ( init == -1) /* Error, return */
       return;
-    }
-    
-    struct retro_system_av_info info;
-    retro_get_system_av_info( &info );
-    env_cb( RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info );
-    
-    init = 1;
-  }
-  else if ( init == -1 )
-  {
-    /* Error, return */
-    return;
-  }
-  else
-  {
-    /* erase sprites here to avoid blank screenshots */
-    rl_sprites_unblit();
-  }
-  
-  /* Run game */
-  unsigned id;
-  int16_t x, y, pressed;
-  
-  for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
-  {
-    pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-    gwlua_set_button( &state, 0, map[ id ].gw, pressed != 0 );
+   else /* erase sprites here to avoid blank screenshots */
+      rl_sprites_unblit();
 
-    pressed = input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-    gwlua_set_button( &state, 1, map[ id ].gw, pressed != 0 );
-  }
+   /* Run game */
+   for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
+   {
+      pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
+      gwlua_set_button( &state, 0, map[ id ].gw, pressed != 0 );
 
-  x = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X );
-  y = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y );
-  pressed = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED );
-  gwlua_set_pointer( &state, x, y, pressed != 0 );
-  
-  gwlua_tick( &state );
-  rl_sprites_blit();
-  
-  video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
-  audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
+      pressed = input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
+      gwlua_set_button( &state, 1, map[ id ].gw, pressed != 0 );
+   }
+
+   x = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X );
+   y = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y );
+   pressed = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED );
+   gwlua_set_pointer( &state, x, y, pressed != 0 );
+
+   gwlua_tick( &state );
+   rl_sprites_blit();
+
+   video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
+   audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }
 
-void retro_deinit()
+void retro_deinit(void) { }
+void retro_set_controller_port_device( unsigned port, unsigned device ) { }
+void retro_reset(void) { gwlua_reset(&state); }
+size_t retro_serialize_size(void) { return 0; }
+bool retro_serialize( void* data, size_t size ) { return false; }
+bool retro_unserialize( const void* data, size_t size ) { return false; }
+void retro_cheat_reset(void) { }
+void retro_cheat_set( unsigned a, bool b, const char* c ) { }
+
+bool retro_load_game_special(unsigned a, const struct retro_game_info* b, size_t c) { return false; }
+
+void retro_unload_game(void)
 {
+  gwlua_destroy(&state);
+  gwrom_destroy(&rom);
 }
 
-void retro_set_controller_port_device( unsigned port, unsigned device )
-{
-  (void)port;
-  (void)device;
-}
-
-void retro_reset()
-{
-  gwlua_reset( &state );
-}
-
-size_t retro_serialize_size()
-{
-  return 0;
-}
-
-bool retro_serialize( void* data, size_t size )
-{
-  (void)data;
-  (void)size;
-  return false;
-}
-
-bool retro_unserialize( const void* data, size_t size )
-{
-  (void)data;
-  (void)size;
-  return false;
-}
-
-void retro_cheat_reset()
-{
-}
-
-void retro_cheat_set( unsigned a, bool b, const char* c )
-{
-  (void)a;
-  (void)b;
-  (void)c;
-}
-
-bool retro_load_game_special(unsigned a, const struct retro_game_info* b, size_t c)
-{
-  (void)a;
-  (void)b;
-  (void)c;
-  return false;
-}
-
-void retro_unload_game()
-{
-  gwlua_destroy( &state );
-  gwrom_destroy( &rom );
-}
-
-unsigned retro_get_region()
-{
-  return RETRO_REGION_NTSC;
-}
+unsigned retro_get_region(void) { return RETRO_REGION_NTSC; }

@@ -1,5 +1,5 @@
-const char* gw_version = "1.6.3";
-const char* gw_githash = "dddc9d553f7503f17c3dfd1906bc94c07eff8515";
+const char* gw_version  = "1.6.3";
+const char* gw_githash  = "dddc9d553f7503f17c3dfd1906bc94c07eff8515";
 const char* gw_gitstamp =
   "+------------------------------------------+\n"
   "|               GW-LIBRETRO                |\n"
