@@ -8,6 +8,8 @@
 
 /*---------------------------------------------------------------------------*/
 
+static bool libretro_supports_bitmasks = false;
+
 static void dummy_log( enum retro_log_level level, const char* fmt, ... ) { }
 
 #define SRAM_MAX 8
@@ -229,6 +231,9 @@ void retro_init(void)
   
   if ( env_cb( RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log ) )
     log_cb = log.log;
+
+  if (env_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
+     libretro_supports_bitmasks = true;
 }
 
 extern const char* gw_gitstamp;
@@ -315,7 +320,8 @@ void retro_get_system_av_info( struct retro_system_av_info* info )
 void retro_run(void)
 {
    unsigned id;
-   int16_t x, y, pressed;
+   int16_t inputs[2];
+   int16_t x, y;
    static const struct { unsigned retro; int gw; } map[] =
    {
       { RETRO_DEVICE_ID_JOYPAD_UP,     GWLUA_UP },
@@ -359,20 +365,46 @@ void retro_run(void)
    else /* erase sprites here to avoid blank screenshots */
       rl_sprites_unblit();
 
+   inputs[0] = 0;
+   inputs[1] = 0;
+
+   if (libretro_supports_bitmasks)
+   {
+      int16_t ret  = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0,
+            RETRO_DEVICE_ID_JOYPAD_MASK);
+      int16_t ret2 = input_state_cb(1, RETRO_DEVICE_JOYPAD, 0,
+            RETRO_DEVICE_ID_JOYPAD_MASK);
+      for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
+      {
+         if (ret  & (1 << map[id].retro))
+            inputs[0] |= (1 << map[id].retro);
+         if (ret2 & (1 << map[id].retro))
+            inputs[1] |= (1 << map[id].retro);
+      }
+   }
+   else
+   {
+      for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
+      {
+         if (input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro ))
+            inputs[0] |= (1 << map[id].retro);
+         if (input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro ))
+            inputs[1] |= (1 << map[id].retro);
+      }
+   }
+
    /* Run game */
    for ( id = 0; id < sizeof( map ) / sizeof( map [ 0 ] ); id++ )
    {
-      pressed = input_state_cb( 0, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-      gwlua_set_button( &state, 0, map[ id ].gw, pressed != 0 );
-
-      pressed = input_state_cb( 1, RETRO_DEVICE_JOYPAD, 0, map[ id ].retro );
-      gwlua_set_button( &state, 1, map[ id ].gw, pressed != 0 );
+      int16_t pressed1 = (inputs[0] & (1 << map[id].retro));
+      int16_t pressed2 = (inputs[1] & (1 << map[id].retro));
+      gwlua_set_button( &state, 0, map[ id ].gw, pressed1 != 0 );
+      gwlua_set_button( &state, 1, map[ id ].gw, pressed2 != 0 );
    }
 
    x = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X );
    y = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y );
-   pressed = input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED );
-   gwlua_set_pointer( &state, x, y, pressed != 0 );
+   gwlua_set_pointer( &state, x, y, input_state_cb( 2, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED ) != 0 );
 
    gwlua_tick( &state );
    rl_sprites_blit();
@@ -381,7 +413,7 @@ void retro_run(void)
    audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }
 
-void retro_deinit(void) { }
+void retro_deinit(void) { libretro_supports_bitmasks = false; }
 void retro_set_controller_port_device( unsigned port, unsigned device ) { }
 void retro_reset(void) { gwlua_reset(&state); }
 size_t retro_serialize_size(void) { return 0; }
