@@ -343,7 +343,18 @@ else ifeq ($(platform), gcw0)
    fpic := -fPIC
    CFLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
    CXXFLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
-
+   
+# RETROFW
+else ifeq ($(platform), retrofw)
+   TARGET := $(TARGET_NAME)_libretro.so
+   CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
+   CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
+   AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
+   SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
+   fpic := -fPIC
+   CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+   CXXFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+   
 # Vita
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
