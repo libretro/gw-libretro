@@ -79,6 +79,10 @@ include:
   # Nintendo Switch
   - project: 'libretro-infrastructure/ci-templates'
     file: '/libnx-static.yml'
+    
+  # OpenDingux
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/dingux-mips32.yml'
 
   # tvOS (AppleTV)
   - project: 'libretro-infrastructure/ci-templates'
@@ -224,4 +228,3 @@ libretro-build-retrofw-mips32:
   extends:
     - .libretro-retrofw-mips32-make-default
     - .core-defs
-
