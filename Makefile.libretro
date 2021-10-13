@@ -354,7 +354,18 @@ else ifeq ($(platform), retrofw)
    fpic := -fPIC
    CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
    CXXFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
-   
+
+# MIYOO
+else ifeq ($(platform), miyoo)
+   TARGET := $(TARGET_NAME)_libretro.so
+   CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   AR = /opt/miyoo/usr/bin/arm-linux-ar
+   SHARED := -shared -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
+   fpic := -fPIC
+   CFLAGS += -ffast-math -march=armv5te -mtune=arm926ej-s
+   CXXFLAGS += -ffast-math -march=armv5te -mtune=arm926ej-s 
+
 # Vita
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
