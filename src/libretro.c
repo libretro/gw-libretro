@@ -172,7 +172,7 @@ void gwlua_vlog( const char* format, va_list args )
 /*---------------------------------------------------------------------------*/
 /* compatibility functions */
 
-#ifdef __CELLOS_LV2__
+#ifdef __PS3__
 char* getenv( const char* name ) { return NULL; }
 #endif
 
