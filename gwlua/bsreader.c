@@ -61,15 +61,15 @@ static size_t getliteral( stream_t* stream, char* literal, size_t size )
 }
 
 const char* bsread( lua_State* L, void* data, size_t* size )
-{
-  (void)L;
-  
+{  
   stream_t* stream = (stream_t*)data;
   int bit;
   const char* literal;
   
   const bsnode_t* node = BS_ROOT;
-  
+
+  (void)L;
+
   while ( node->token == -1 )
   {
     bit = getbit( stream );

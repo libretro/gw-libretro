@@ -381,6 +381,8 @@ void retro_run(void)
 
    if ( init == 0 )
    {
+      struct retro_system_av_info info;
+
       /* Initialize game */
       if ( gwlua_create( &state, &rom ) )
       {
@@ -389,7 +391,6 @@ void retro_run(void)
          return;
       }
 
-      struct retro_system_av_info info;
       retro_get_system_av_info( &info );
       env_cb( RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info );
 

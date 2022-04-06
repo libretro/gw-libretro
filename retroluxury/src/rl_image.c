@@ -15,14 +15,17 @@ rl_image_t* rl_image_create( const void* data, size_t size )
     const uint32_t* restrict u32;
   }
   ptr;
-  
-  ptr.v = data;
-  
-  int width  = ne16( *ptr.u16++ );
-  int height = ne16( *ptr.u16++ );
-  
+  int width;
+  int height;
   // structure size
   size_t mem = sizeof( rl_image_t );
+  rl_image_t* image;
+
+  ptr.v = data;
+  
+  width  = ne16( *ptr.u16++ );
+  height = ne16( *ptr.u16++ );
+  
   // rows array size
   mem += height * sizeof( uint32_t );
   // rle size
@@ -32,19 +35,19 @@ rl_image_t* rl_image_create( const void* data, size_t size )
 
   mem += size;
   
-  rl_image_t* image = (rl_image_t*)rl_malloc( mem );
+  image = (rl_image_t*)rl_malloc( mem );
   
   if ( image )
   {
+    uint32_t* restrict rows = (uint32_t*)( image->data );
+    uint16_t* restrict rle = (uint16_t*)( rows + height );
+
     image->width  = width;
     image->height = height;
     image->used   = ne32( *ptr.u32++ );
     
-    uint32_t* restrict rows = (uint32_t*)( image->data );
     image->rows = rows;
-    
-    uint16_t* restrict rle = (uint16_t*)( rows + height );
-    
+        
     for ( int i = 0; i < height; i++ )
     {
       *rows++ = height * sizeof( uint32_t ) + ne32( *ptr.u32++ );
@@ -71,12 +74,15 @@ rl_imageset_t* rl_imageset_create( const void* data, size_t size )
     const uint32_t* restrict u32;
   }
   ptr;
+  int num_images;
+  
+  rl_imageset_t* imageset;
   
   ptr.v = data;
   
-  int num_images = ne16( *ptr.u16++ );
+  num_images = ne16( *ptr.u16++ );
   
-  rl_imageset_t* imageset = (rl_imageset_t*)rl_malloc( sizeof( rl_imageset_t ) + num_images * sizeof( rl_image_t* ) );
+  imageset = (rl_imageset_t*)rl_malloc( sizeof( rl_imageset_t ) + num_images * sizeof( rl_image_t* ) );
   
   if ( imageset )
   {
@@ -167,12 +173,13 @@ void rl_image_blit_nobg( const rl_image_t* image, int x, int y )
     do
     {
       const uint16_t* restrict rle = (uint16_t*)( image->data + image->rows[ y0++ ] );
+      uint16_t* restrict dest = save;
+      int runs = runcnt;
+
       rle += rle[ x0 ];
       
-      uint16_t* restrict dest = save;
       save += pitch;
       
-      int runs = runcnt;
       
       do
       {
@@ -184,10 +191,10 @@ void rl_image_blit_nobg( const rl_image_t* image, int x, int y )
           /* decode */
           int code   = *rle++;
           int count  = code & 0x1fff;
+	  uint32_t c1, c2;
+
           code >>= 13;
-          
-          uint32_t c1, c2;
-          
+                    
           switch ( code & 7 )
           {
           case 4: /* opaque */
@@ -256,6 +263,7 @@ uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg_ )
   
   int width, height;
   uint16_t* fb = rl_backgrnd_fb( &width, &height );
+  uint16_t* restrict bg = bg_;
   
   if ( x < -RL_BACKGRND_MARGIN )
   {
@@ -281,9 +289,7 @@ uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg_ )
   {
     y1 -= y + y1 - height;
   }
-  
-  uint16_t* restrict bg = bg_;
-  
+    
   if ( y1 > 0 && x1 > 0 )
   {
     int       pitch  = width + RL_BACKGRND_MARGIN;
@@ -299,12 +305,12 @@ uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg_ )
     do
     {
       const uint16_t* restrict rle = (uint16_t*)( image->data + image->rows[ y0++ ] );
+      uint16_t* restrict dest = save;
+      int runs = runcnt;
+      
       rle += rle[ x0 ];
       
-      uint16_t* restrict dest = save;
       save += pitch;
-      
-      int runs = runcnt;
       
       do
       {
@@ -316,10 +322,10 @@ uint16_t* rl_image_blit( const rl_image_t* image, int x, int y, uint16_t* bg_ )
           /* decode */
           int code   = *rle++;
           int count  = code & 0x1fff;
+	  uint32_t c1, c2;
+
           code >>= 13;
-          
-          uint32_t c1, c2;
-          
+                    
           switch ( code & 7 )
           {
           case 4: /* opaque */
@@ -397,7 +403,8 @@ void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg_
   
   int width, height;
   uint16_t* fb = rl_backgrnd_fb( &width, &height );
-  
+  const uint16_t* restrict bg = bg_;
+
   if ( x < -RL_BACKGRND_MARGIN )
   {
     x   = -x;
@@ -422,9 +429,7 @@ void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg_
   {
     y1 -= y + y1 - height;
   }
-  
-  const uint16_t* restrict bg = bg_;
-  
+    
   if ( y1 > 0 && x1 > 0 )
   {
     int       pitch  = width + RL_BACKGRND_MARGIN;
@@ -440,13 +445,13 @@ void rl_image_unblit( const rl_image_t* image, int x, int y, const uint16_t* bg_
     do
     {
       const uint16_t* restrict rle = (uint16_t*)( image->data + image->rows[ y0++ ] );
+      uint16_t* restrict dest = save;
+      int runs = runcnt;
+
       rle += rle[ x0 ];
       
-      uint16_t* restrict dest = save;
       save += pitch;
-      
-      int runs = runcnt;
-      
+            
       do
       {
         /* number of rle encodings in this chunk */

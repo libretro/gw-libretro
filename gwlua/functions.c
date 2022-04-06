@@ -355,13 +355,14 @@ static int l_setbackground( lua_State* L )
   rl_image_t* bg = **picture;
   
   int width = MAX( bg->width, 480 );
+  int x0;
   
   if ( rl_backgrnd_create( width, bg->height ) )
   {
     return luaL_error( L, "out of memory allocating the background framebuffer" );
   }
   
-  int x0 = ( width - bg->width ) / 2;
+  x0 = ( width - bg->width ) / 2;
   
   state->screen = rl_backgrnd_fb( &state->width, &state->height );
   rl_backgrnd_clear( 0 );

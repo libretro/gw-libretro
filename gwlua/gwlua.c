@@ -36,10 +36,11 @@ static int l_traceback( lua_State* L )
 static int l_pcall( lua_State* L, int nargs, int nres )
 {
   int errndx = lua_gettop( L ) - nargs;
+  int ret;
   lua_pushcfunction( L, l_traceback );
   lua_insert( L, errndx );
   
-  int ret = lua_pcall( L, nargs, nres, errndx );
+  ret = lua_pcall( L, nargs, nres, errndx );
   lua_remove(L, errndx);
   
   if ( ret != LUA_OK )
@@ -57,18 +58,20 @@ void register_functions( lua_State* L, gwlua_t* state );
 static int l_create( lua_State* L )
 {
   gwlua_t* state = (gwlua_t*)lua_touserdata( L, 1 );
-  
+  gwrom_entry_t entry;
+  int error;
+  void* bs;
+
   register_functions( L, state );
   
-  gwrom_entry_t entry;
-  int error = gwrom_find( &entry, state->rom, "main.bs" );
+  error = gwrom_find( &entry, state->rom, "main.bs" );
   
   if ( error != GWROM_OK )
   {
     return luaL_error( L, "%s", gwrom_error_message( error ) );
   }
   
-  void* bs = bsnew( entry.data );
+  bs = bsnew( entry.data );
   
   if ( !bs )
   {
@@ -90,6 +93,8 @@ static int l_create( lua_State* L )
 
 int gwlua_create( gwlua_t* state, gwrom_t* rom )
 {
+  int i;
+
   static const luaL_Reg lualibs[] =
   {
     { "_G", luaopen_base },
@@ -115,9 +120,7 @@ int gwlua_create( gwlua_t* state, gwrom_t* rom )
   lua_pushboolean( state->L, 1 );
   lua_setglobal( state->L, "_DEBUG" );
 #endif
-  
-  int i;
-  
+    
   for ( i = 0; i < sizeof( lualibs ) / sizeof( lualibs[ 0 ] ); i++ )
   {
     luaL_requiref( state->L, lualibs[ i ].name, lualibs[ i ].func, 1 );
