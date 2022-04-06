@@ -447,7 +447,10 @@ static int l_inputstate( lua_State* L )
   {
     for ( i = 1; i < sizeof( state->input[ 0 ] ) / sizeof( state->input[ 0 ][ 0 ] ); i++ )
     {
-      snprintf( name, sizeof( name ), "%s%s", button_name( i ), p == 0 ? "" : "/2" );
+      name[sizeof( name ) - 1] = '\0';
+      strncpy(name, button_name( i ), sizeof( name ) - 1);
+      if (p != 0)
+	strncat (name, "/2", sizeof( name ) - (strlen(name) + 1));
 
       lua_pushboolean( L, state->input[ p ][ i ] );
       lua_setfield( L, -2, name );
