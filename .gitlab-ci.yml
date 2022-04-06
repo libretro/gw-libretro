@@ -41,7 +41,11 @@ include:
   # MacOS ARM 64-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/osx-arm64.yml'
-    
+
+  # MacOS PPC
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/osx-ppc.yml'
+
   ################################## CELLULAR ################################
   # Android
   - project: 'libretro-infrastructure/ci-templates'
@@ -150,7 +154,13 @@ libretro-build-osx-arm64:
   extends:
     - .libretro-osx-arm64-make-default
     - .core-defs
-    
+
+# MacOS PPC
+libretro-build-osx-ppc:
+  extends:
+    - .libretro-osx-ppc-make-default
+    - .core-defs
+
 ################################### CELLULAR #################################
 # Android ARMv7a
 android-armeabi-v7a:
