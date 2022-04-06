@@ -373,6 +373,15 @@ else ifeq ($(platform), vita)
    STATIC_LINKING = 1
    CFLAGS += -DVITA -ftree-vectorize -mfloat-abi=hard -ffast-math -fsingle-precision-constant -funroll-loops
    CXXFLAGS += -DVITA -ftree-vectorize -mfloat-abi=hard -ffast-math -fsingle-precision-constant -funroll-loops
+# DOS
+else ifeq ($(platform), dos)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = i586-pc-msdosdjgpp-gcc
+	AR = i586-pc-msdosdjgpp-ar
+	CXX = i586-pc-msdosdjgpp-g++
+	CFLAGS += -march=i386
+	CXXFLAGS += -march=i386
+	STATIC_LINKING=1
 
 # Windows
 else
