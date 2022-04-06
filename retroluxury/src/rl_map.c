@@ -10,7 +10,8 @@ static rl_map_t* destroy( const rl_map_t* map )
 {
   if ( map )
   {
-    for ( int i = map->num_layers - 1; i >= 0; --i )
+    int i;
+    for ( i = map->num_layers - 1; i >= 0; --i )
     {
       rl_free( (void*)map->layers[ i ] );
     }
@@ -58,6 +59,7 @@ rl_map_t* rl_map_create( const void* data, size_t size, const rl_tileset_t* tile
   int numqw;
   uint32_t* restrict collision;
   const uint32_t* restrict coll_end;
+  int i;
 
   ptr.v = data;
   
@@ -95,7 +97,7 @@ rl_map_t* rl_map_create( const void* data, size_t size, const rl_tileset_t* tile
     *ndx++ = ne16( *ptr.u16++ );
   }
   
-  for ( int i = 1; i < num_layers; i++ )
+  for ( i = 1; i < num_layers; i++ )
   {
     map->layers[ i - 1 ] = (rl_layern_t*)alloc_zero( width * height * sizeof( uint16_t ) );
     

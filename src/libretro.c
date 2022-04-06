@@ -66,7 +66,8 @@ static struct retro_input_descriptor input_descriptors[] =
 
 static int find_key( const char* key )
 {
-   for ( int i = 0; i < sram.count; i++ )
+   int i;
+   for (i = 0; i < sram.count; i++ )
    {
       if ( !strcmp( sram.keys[ i ], key ) )
          return i;

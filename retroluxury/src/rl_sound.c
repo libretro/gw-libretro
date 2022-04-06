@@ -55,7 +55,8 @@ static rl_soundstop_t   ogg_stop_cb;
 
 void rl_sound_init( void )
 {
-  for ( int i = 0; i < RL_MAX_VOICES; i++ )
+  int i;
+  for ( i = 0; i < RL_MAX_VOICES; i++ )
   {
     voices[ i ].sound = NULL;
   }
@@ -329,7 +330,8 @@ again:
     
     if ( pcm_available < buf_free )
     {
-      for ( int i = pcm_available; i != 0; --i )
+      int i;
+      for ( i = pcm_available; i != 0; --i )
       {
         *buffer++ += *pcm++;
       }
@@ -350,7 +352,8 @@ again:
     }
     else
     {
-      for ( int i = buf_free; i != 0; --i )
+      int i;
+      for ( i = buf_free; i != 0; --i )
       {
         *buffer++ += *pcm++;
       }
@@ -367,7 +370,8 @@ again:
     
     if ( pcm_available < buf_free )
     {
-      for ( int i = pcm_available; i != 0; --i )
+      int i;
+      for ( i = pcm_available; i != 0; --i )
       {
         *buffer++ += *pcm;
         *buffer++ += *pcm++;
@@ -389,7 +393,8 @@ again:
     }
     else
     {
-      for ( int i = buf_free; i != 0; --i )
+      int i;
+      for ( i = buf_free; i != 0; --i )
       {
         *buffer++ += *pcm;
         *buffer++ += *pcm++;
@@ -405,6 +410,7 @@ const int16_t* rl_sound_mix( void )
   int32_t buffer[ RL_SAMPLES_PER_FRAME * 2 ];
   voice_t* restrict voice;
   const voice_t* restrict end;
+  int i;
 
   if ( !active )
   {
@@ -432,7 +438,7 @@ const int16_t* rl_sound_mix( void )
   ogg_mix( buffer );
 #endif
   
-  for ( int i = 0; i < RL_SAMPLES_PER_FRAME * 2; i++ )
+  for ( i = 0; i < RL_SAMPLES_PER_FRAME * 2; i++ )
   {
     int32_t sample = buffer[ i ];
     audio_buffer[ i ] = sample < -32768 ? -32768 : sample > 32767 ? 32767 : sample;

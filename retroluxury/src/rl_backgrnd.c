@@ -31,10 +31,11 @@ void rl_backgrnd_destroy( void )
 void rl_backgrnd_clear( uint16_t color )
 {
   uint16_t* pixel = fb;
+  int x, y;
   
-  for ( int y = 0; y < height; y++ )
+  for ( y = 0; y < height; y++ )
   {
-    for ( int x = 0; x < width; x++ )
+    for ( x = 0; x < width; x++ )
     {
       *pixel++ = color;
     }

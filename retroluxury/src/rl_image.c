@@ -41,6 +41,7 @@ rl_image_t* rl_image_create( const void* data, size_t size )
   {
     uint32_t* restrict rows = (uint32_t*)( image->data );
     uint16_t* restrict rle = (uint16_t*)( rows + height );
+    int i;
 
     image->width  = width;
     image->height = height;
@@ -48,12 +49,12 @@ rl_image_t* rl_image_create( const void* data, size_t size )
     
     image->rows = rows;
         
-    for ( int i = 0; i < height; i++ )
+    for ( i = 0; i < height; i++ )
     {
       *rows++ = height * sizeof( uint32_t ) + ne32( *ptr.u32++ );
     }
-    
-    for ( int i = 0; i < size; i += 2 )
+
+    for ( i = 0; i < size; i += 2 )
     {
       *rle++ = ne16( *ptr.u16++ );
     }
@@ -86,16 +87,18 @@ rl_imageset_t* rl_imageset_create( const void* data, size_t size )
   
   if ( imageset )
   {
+    int i, j;
+
     imageset->num_images = num_images;
     
-    for ( int i = 0; i < num_images; i++ )
+    for ( i = 0; i < num_images; i++ )
     {
       size_t image_size = ne32( *ptr.u32++ );
       imageset->images[ i ] = rl_image_create( ptr.v, image_size );
       
       if ( !imageset->images[ i ] )
       {
-        for ( int j = i - 1; j >= 0; --j )
+        for ( j = i - 1; j >= 0; --j )
         {
           rl_image_destroy( (void*)imageset->images[ j ] );
         }
@@ -115,7 +118,9 @@ rl_imageset_t* rl_imageset_create( const void* data, size_t size )
 
 void rl_imageset_destroy( const rl_imageset_t* imageset )
 {
-  for ( int i = imageset->num_images - 1; i >= 0; --i )
+  int i;
+
+  for ( i = imageset->num_images - 1; i >= 0; --i )
   {
     rl_image_destroy( imageset->images[ i ] );
   }

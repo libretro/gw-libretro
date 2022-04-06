@@ -119,10 +119,11 @@ void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, in
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest  += y * d_pitch + x;
     width *= 2;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)dest, (void*)source, width );
       
@@ -170,9 +171,10 @@ uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, in
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest += y * d_pitch + x;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)bg, (void*)dest, width * 2 );
       memcpy( (void*)dest, (void*)source, width * 2 );
@@ -219,10 +221,11 @@ void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest  += y * d_pitch + x;
     width *= 2;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)dest, (void*)bg, width );
       
