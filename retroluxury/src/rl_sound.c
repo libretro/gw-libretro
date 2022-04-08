@@ -55,7 +55,8 @@ static rl_soundstop_t   ogg_stop_cb;
 
 void rl_sound_init( void )
 {
-  for ( int i = 0; i < RL_MAX_VOICES; i++ )
+  int i;
+  for ( i = 0; i < RL_MAX_VOICES; i++ )
   {
     voices[ i ].sound = NULL;
   }
@@ -103,7 +104,9 @@ rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo )
   ptr;
   
   rl_sound_t* sound = (rl_sound_t*)rl_malloc( sizeof( rl_sound_t ) + size );
-  
+  uint16_t* restrict pcm;
+  const uint16_t* restrict end;
+
   if ( sound )
   {
     size /= 2;
@@ -111,10 +114,10 @@ rl_sound_t* rl_sound_create( const void* data, size_t size, int stereo )
     sound->samples = size;
     sound->stereo  = stereo;
     
-    uint16_t* restrict pcm = (uint16_t*)( (uint8_t*)sound + sizeof( *sound ) );
+    pcm = (uint16_t*)( (uint8_t*)sound + sizeof( *sound ) );
     ptr.v = data;
     
-    const uint16_t* restrict end = pcm + size;
+    end = pcm + size;
     
     while ( pcm < end )
     {
@@ -327,7 +330,8 @@ again:
     
     if ( pcm_available < buf_free )
     {
-      for ( int i = pcm_available; i != 0; --i )
+      int i;
+      for ( i = pcm_available; i != 0; --i )
       {
         *buffer++ += *pcm++;
       }
@@ -348,7 +352,8 @@ again:
     }
     else
     {
-      for ( int i = buf_free; i != 0; --i )
+      int i;
+      for ( i = buf_free; i != 0; --i )
       {
         *buffer++ += *pcm++;
       }
@@ -365,7 +370,8 @@ again:
     
     if ( pcm_available < buf_free )
     {
-      for ( int i = pcm_available; i != 0; --i )
+      int i;
+      for ( i = pcm_available; i != 0; --i )
       {
         *buffer++ += *pcm;
         *buffer++ += *pcm++;
@@ -387,7 +393,8 @@ again:
     }
     else
     {
-      for ( int i = buf_free; i != 0; --i )
+      int i;
+      for ( i = buf_free; i != 0; --i )
       {
         *buffer++ += *pcm;
         *buffer++ += *pcm++;
@@ -401,6 +408,9 @@ again:
 const int16_t* rl_sound_mix( void )
 {
   int32_t buffer[ RL_SAMPLES_PER_FRAME * 2 ];
+  voice_t* restrict voice;
+  const voice_t* restrict end;
+  int i;
 
   if ( !active )
   {
@@ -410,8 +420,8 @@ const int16_t* rl_sound_mix( void )
   
   memset( buffer, 0, sizeof( buffer ) );
 
-  voice_t* restrict voice = voices;
-  const voice_t* restrict end   = voices + RL_MAX_VOICES;
+  voice = voices;
+  end   = voices + RL_MAX_VOICES;
   
   do
   {
@@ -428,7 +438,7 @@ const int16_t* rl_sound_mix( void )
   ogg_mix( buffer );
 #endif
   
-  for ( int i = 0; i < RL_SAMPLES_PER_FRAME * 2; i++ )
+  for ( i = 0; i < RL_SAMPLES_PER_FRAME * 2; i++ )
   {
     int32_t sample = buffer[ i ];
     audio_buffer[ i ] = sample < -32768 ? -32768 : sample > 32767 ? 32767 : sample;

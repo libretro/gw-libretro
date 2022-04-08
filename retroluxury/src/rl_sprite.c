@@ -68,6 +68,7 @@ void rl_sprites_blit_nobg( void )
 {
   spt_t* sptptr = sprites;
   const spt_t* endptr = sprites + num_sprites;
+  rl_sprite_t guard;
   
   if ( sptptr < endptr )
   {
@@ -82,7 +83,6 @@ void rl_sprites_blit_nobg( void )
   
   qsort( (void*)sprites, num_sprites, sizeof( spt_t ), compare );
   
-  rl_sprite_t guard;
   guard.flags = RL_SPRITE_UNUSED;
   sprites[ num_sprites ].sprite = &guard; /* guard */
   
@@ -120,6 +120,7 @@ void rl_sprites_blit( void )
 {
   spt_t* sptptr = sprites;
   const spt_t* endptr = sprites + num_sprites;
+  rl_sprite_t guard;
   
   if ( sptptr < endptr )
   {
@@ -134,7 +135,6 @@ void rl_sprites_blit( void )
   
   qsort( (void*)sprites, num_sprites, sizeof( spt_t ), compare );
   
-  rl_sprite_t guard;
   guard.flags = RL_SPRITE_UNUSED;
   sprites[ num_sprites ].sprite = &guard; /* guard */
   

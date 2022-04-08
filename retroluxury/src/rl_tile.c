@@ -14,16 +14,22 @@ rl_tileset_t* rl_tileset_create( const void* data, size_t size )
     const uint16_t* restrict u16;
   }
   ptr;
+  uint16_t* restrict pixel;
+  const uint16_t* restrict end;
+  rl_tileset_t* tileset;
+  int width;
+  int height;
+  int num_tiles;
   
   ptr.v = data;
   
-  int width     = ne16( *ptr.u16++ );
-  int height    = ne16( *ptr.u16++ );
-  int num_tiles = ne16( *ptr.u16++ );
+  width     = ne16( *ptr.u16++ );
+  height    = ne16( *ptr.u16++ );
+  num_tiles = ne16( *ptr.u16++ );
   
   size -= 3 * sizeof( uint16_t );
   
-  rl_tileset_t* tileset = (rl_tileset_t*)rl_malloc( sizeof( rl_tileset_t ) + size );
+  tileset = (rl_tileset_t*)rl_malloc( sizeof( rl_tileset_t ) + size );
   
   if ( tileset )
   {
@@ -32,9 +38,9 @@ rl_tileset_t* rl_tileset_create( const void* data, size_t size )
     tileset->size      = width * height;
     tileset->num_tiles = num_tiles;
     
-    uint16_t* restrict pixel = (uint16_t*)( (uint8_t*)tileset + sizeof( rl_tileset_t ) );
+    pixel = (uint16_t*)( (uint8_t*)tileset + sizeof( rl_tileset_t ) );
     
-    const uint16_t* restrict end = pixel + size / 2;
+    end = pixel + size / 2;
     
     while ( pixel < end )
     {
@@ -113,10 +119,11 @@ void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, in
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest  += y * d_pitch + x;
     width *= 2;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)dest, (void*)source, width );
       
@@ -164,9 +171,10 @@ uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, in
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest += y * d_pitch + x;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)bg, (void*)dest, width * 2 );
       memcpy( (void*)dest, (void*)source, width * 2 );
@@ -213,10 +221,11 @@ void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )
   
   if ( width > 0 && height > 0 )
   {
+    int y;
     dest  += y * d_pitch + x;
     width *= 2;
     
-    for ( int y = height; y > 0; --y )
+    for ( y = height; y > 0; --y )
     {
       memcpy( (void*)dest, (void*)bg, width );
       

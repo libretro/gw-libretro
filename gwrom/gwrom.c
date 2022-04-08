@@ -97,6 +97,7 @@ static int decompress_bzip2( void** new_data, size_t* new_size,
 {
    int res;
    bz_stream stream;
+   unsigned dest_len;
 
    /* setup the decompression stream */
    stream.bzalloc = bzalloc;
@@ -158,7 +159,7 @@ static int decompress_bzip2( void** new_data, size_t* new_size,
    }
 
    /* second decompression run: decompress data to the allocated buffer */
-   unsigned dest_len = *new_size;
+   dest_len = *new_size;
    res = BZ2_bzBuffToBuffDecompress( (char*)*new_data, &dest_len, (char*)data, size, 0, 0 );
 
    if ( res != BZ_OK )

@@ -66,7 +66,8 @@ static struct retro_input_descriptor input_descriptors[] =
 
 static int find_key( const char* key )
 {
-   for ( int i = 0; i < sram.count; i++ )
+   int i;
+   for (i = 0; i < sram.count; i++ )
    {
       if ( !strcmp( sram.keys[ i ], key ) )
          return i;
@@ -381,6 +382,8 @@ void retro_run(void)
 
    if ( init == 0 )
    {
+      struct retro_system_av_info info;
+
       /* Initialize game */
       if ( gwlua_create( &state, &rom ) )
       {
@@ -389,7 +392,6 @@ void retro_run(void)
          return;
       }
 
-      struct retro_system_av_info info;
       retro_get_system_av_info( &info );
       env_cb( RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info );
 

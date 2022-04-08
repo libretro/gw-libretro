@@ -215,7 +215,8 @@ static int l_tostring( lua_State* L )
 static int l_new( lua_State* L )
 {
   gwlua_image_t* self = (gwlua_image_t*)lua_newuserdata( L, sizeof( gwlua_image_t ) );
-  
+  gwlua_t* state;
+
   self->sprite = rl_sprite_create();
   
   if ( !self->sprite )
@@ -223,7 +224,7 @@ static int l_new( lua_State* L )
     return luaL_error( L, "sprite limit reached" );
   }
 
-  gwlua_t* state = get_state(L);
+  state = get_state(L);
   
   self->sprite->layer = state->layer--;
   self->width = 0;

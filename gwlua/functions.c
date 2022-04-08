@@ -355,13 +355,14 @@ static int l_setbackground( lua_State* L )
   rl_image_t* bg = **picture;
   
   int width = MAX( bg->width, 480 );
+  int x0;
   
   if ( rl_backgrnd_create( width, bg->height ) )
   {
     return luaL_error( L, "out of memory allocating the background framebuffer" );
   }
   
-  int x0 = ( width - bg->width ) / 2;
+  x0 = ( width - bg->width ) / 2;
   
   state->screen = rl_backgrnd_fb( &state->width, &state->height );
   rl_backgrnd_clear( 0 );
@@ -446,7 +447,10 @@ static int l_inputstate( lua_State* L )
   {
     for ( i = 1; i < sizeof( state->input[ 0 ] ) / sizeof( state->input[ 0 ][ 0 ] ); i++ )
     {
-      snprintf( name, sizeof( name ), "%s%s", button_name( i ), p == 0 ? "" : "/2" );
+      name[sizeof( name ) - 1] = '\0';
+      strncpy(name, button_name( i ), sizeof( name ) - 1);
+      if (p != 0)
+	strncat (name, "/2", sizeof( name ) - (strlen(name) + 1));
 
       lua_pushboolean( L, state->input[ p ][ i ] );
       lua_setfield( L, -2, name );
