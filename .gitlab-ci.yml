@@ -21,7 +21,11 @@ include:
   # Windows 32-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/windows-i686-mingw.yml'
-    
+
+  # DJGPP
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/djgpp-static.yml'
+
   # Linux 64-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/linux-x64.yml'
@@ -37,7 +41,11 @@ include:
   # MacOS ARM 64-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/osx-arm64.yml'
-    
+
+  # MacOS PPC
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/osx-ppc.yml'
+
   ################################## CELLULAR ################################
   # Android
   - project: 'libretro-infrastructure/ci-templates'
@@ -93,6 +101,9 @@ include:
     file: '/tvos-arm64.yml'
     
   #################################### MISC ##################################
+  # Emscripten
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/emscripten-static.yml'
     
 # Stages for building
 stages:
@@ -115,6 +126,12 @@ libretro-build-windows-x64:
 libretro-build-windows-i686:
   extends:
     - .libretro-windows-i686-mingw-make-default
+    - .core-defs
+
+# DJGPP
+libretro-build-djgpp-i586:
+  extends:
+    - .libretro-djgpp-static-retroarch-master
     - .core-defs
 
 # Linux 64-bit
@@ -140,7 +157,13 @@ libretro-build-osx-arm64:
   extends:
     - .libretro-osx-arm64-make-default
     - .core-defs
-    
+
+# MacOS PPC
+libretro-build-osx-ppc:
+  extends:
+    - .libretro-osx-ppc-make-default
+    - .core-defs
+
 ################################### CELLULAR #################################
 # Android ARMv7a
 android-armeabi-v7a:
@@ -237,4 +260,29 @@ libretro-build-retrofw-mips32:
 libretro-build-miyoo-arm32:
   extends:
     - .libretro-miyoo-arm32-make-default
+    - .core-defs
+
+# OpenDingux
+libretro-build-dingux-mips32:
+  extends:
+    - .libretro-dingux-mips32-make-default
+    - .core-defs
+
+# OpenDingux Beta
+libretro-build-dingux-odbeta-mips32:
+  extends:
+    - .libretro-dingux-odbeta-mips32-make-default
+    - .core-defs
+
+# OpenDingux Beta
+libretro-build-rs90-odbeta-mips32:
+  extends:
+    - .libretro-rs90-odbeta-mips32-make-default
+    - .core-defs
+
+#################################### MISC ##################################
+# Emscripten
+libretro-build-emscripten:
+  extends:
+    - .libretro-emscripten-static-retroarch-master
     - .core-defs
