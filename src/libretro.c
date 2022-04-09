@@ -38,6 +38,8 @@ static sram_t  sram;
 static int     offset;
 static int     soft_width;
 static int     soft_height;
+static uint16_t *pixels;
+static size_t  pixels_size;
 
 static struct retro_input_descriptor input_descriptors[] =
 {
@@ -446,7 +448,50 @@ void retro_run(void)
    gwlua_tick( &state );
    rl_sprites_blit();
 
+   // Several reasons to have a temporary buffer on PSP
+   // 1. PSP needs a pixel-pitch divisible by 8 (byte-pitch by 16)
+   // 2. Largest width is around 512
+   // 3. It keeps looking into buffer even after video_cb call
+
+#ifdef PSP
+   {
+     int in_width = soft_width;
+     int divisor = (in_width + 511) / 512;
+     int out_width = in_width / divisor;
+     int out_height = soft_height / divisor;
+     int out_pitch = ((state.width / divisor) + 7) & ~7;
+     int in_pitch = state.width;
+     size_t cur_pixels_size = out_pitch * out_height * sizeof( uint16_t );
+
+     if (cur_pixels_size > pixels_size) {
+       if (pixels)
+	 free(pixels);
+       pixels = malloc(cur_pixels_size);
+       pixels_size = pixels ? cur_pixels_size : 0;
+     }
+     if (pixels) {
+       int line;
+       if (divisor == 1) {
+	   for (line = 0; line < out_height; line++) {
+	     const uint16_t *src = state.screen + offset + in_pitch * line;
+	     uint16_t *dest = pixels + out_pitch * line;
+	     memcpy(dest, src, out_width * sizeof( uint16_t ));
+	   }
+       } else {
+	 for (line = 0; line < out_height; line++) {
+	   const uint16_t *src = state.screen + offset + in_pitch * divisor * line;
+	   uint16_t *dest = pixels + out_pitch * line;
+	   uint16_t *dest_end = dest + out_width;
+	   for(; dest < dest_end; dest++, src += divisor)
+	     *dest = *src;
+	 }
+       }
+       video_cb( pixels, out_width, out_height, out_pitch * sizeof( uint16_t ) );
+     }
+   }
+#else
    video_cb( state.screen + offset, soft_width, soft_height, state.width * sizeof( uint16_t ) );
+#endif
    audio_cb( rl_sound_mix(), RL_SAMPLES_PER_FRAME );
 }
 
