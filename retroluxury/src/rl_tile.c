@@ -81,7 +81,7 @@ void rl_tileset_unblit( const rl_tileset_t* tileset, int x, int y, const uint16_
   rl_tile_unblit( width, height, x, y, bg );
 }
 
-void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, int y )
+void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, int y0 )
 {
   int d_width, d_height;
   uint16_t* restrict dest = rl_backgrnd_fb( &d_width, &d_height );
@@ -104,23 +104,23 @@ void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, in
     width -= out;
   }
   
-  if ( y < 0 )
+  if ( y0 < 0 )
   {
-    height += y;
-    source -= y * pitch;
-    y = 0;
+    height += y0;
+    source -= y0 * pitch;
+    y0 = 0;
   }
   
-  if ( y + height > d_height )
+  if ( y0 + height > d_height )
   {
-    int out = y + height - d_height;
+    int out = y0 + height - d_height;
     height -= out;
   }
   
   if ( width > 0 && height > 0 )
   {
     int y;
-    dest  += y * d_pitch + x;
+    dest  += y0 * d_pitch + x;
     width *= 2;
     
     for ( y = height; y > 0; --y )
@@ -133,7 +133,7 @@ void rl_tile_blit_nobg( int width, int height, const uint16_t* pixels, int x, in
   }
 }
 
-uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, int y, uint16_t* bg )
+uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, int y0, uint16_t* bg )
 {
   int d_width, d_height;
   uint16_t* restrict dest = rl_backgrnd_fb( &d_width, &d_height );
@@ -156,23 +156,23 @@ uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, in
     width -= out;
   }
   
-  if ( y < 0 )
+  if ( y0 < 0 )
   {
-    height += y;
-    source -= y * pitch;
-    y = 0;
+    height += y0;
+    source -= y0 * pitch;
+    y0 = 0;
   }
   
-  if ( y + height > d_height )
+  if ( y0 + height > d_height )
   {
-    int out = y + height - d_height;
+    int out = y0 + height - d_height;
     height -= out;
   }
   
   if ( width > 0 && height > 0 )
   {
     int y;
-    dest += y * d_pitch + x;
+    dest += y0 * d_pitch + x;
     
     for ( y = height; y > 0; --y )
     {
@@ -187,7 +187,7 @@ uint16_t* rl_tile_blit( int width, int height, const uint16_t* pixels, int x, in
   return bg;
 }
 
-void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )
+void rl_tile_unblit( int width, int height, int x, int y0, const uint16_t* bg )
 {
   int d_width, d_height;
   uint16_t* restrict dest = rl_backgrnd_fb( &d_width, &d_height );
@@ -207,22 +207,22 @@ void rl_tile_unblit( int width, int height, int x, int y, const uint16_t* bg )
     width -= out;
   }
   
-  if ( y < 0 )
+  if ( y0 < 0 )
   {
-    height += y;
-    y = 0;
+    height += y0;
+    y0 = 0;
   }
   
-  if ( y + height > d_height )
+  if ( y0 + height > d_height )
   {
-    int out = y + height - d_height;
+    int out = y0 + height - d_height;
     height -= out;
   }
   
   if ( width > 0 && height > 0 )
   {
     int y;
-    dest  += y * d_pitch + x;
+    dest  += y0 * d_pitch + x;
     width *= 2;
     
     for ( y = height; y > 0; --y )
