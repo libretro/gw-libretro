@@ -53,7 +53,7 @@ typedef struct
 {
   rl_sprite_t* sprite;
   int width, height;
-  int mousedown_ref, mouseup_ref;
+  int mousedown_ref, mouseup_ref, click_ref;
 }
 gwlua_image_t;
 
