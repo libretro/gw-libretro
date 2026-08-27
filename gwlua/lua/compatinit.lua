@@ -264,7 +264,23 @@ return function( background, keymap, keydown, keyup, timers, zoom, options, M )
   if options then
     menu = createmenu( keydown, keyup, zoom, bgwidth, options, help, M )
   end
-  
+
+  -- Pointer support. The games' controls keep the mouse handlers they
+  -- had as desktop applications; extctrls records every image the game
+  -- creates, so a click can be delivered to the control it lands on
+  -- exactly as the original program would have received it.
+  local extctrls = M.loadunit( 'extctrls' )
+  local classes = M.loadunit( 'classes' )
+  local controls = M.loadunit( 'controls' )
+  local captured = nil
+
+  -- setbackground pads games narrower than 480 to 480 and translates
+  -- the sprites to match, but control rectangles stay in game space.
+  -- The unzoomed pointer arrives in framebuffer space, so it needs the
+  -- same shift taken back out; the zoomed pointer is already mapped to
+  -- game space through the zoom rectangle and must be left alone.
+  local xpad = ( ( bgwidth < 480 and 480 or bgwidth ) - bgwidth ) // 2
+
   return function()
     local gameactive = true
     
@@ -277,7 +293,78 @@ return function( background, keymap, keydown, keyup, timers, zoom, options, M )
     end
 
     system.inputstate( newstate )
-    
+
+    if state.pointer_pressed ~= newstate.pointer_pressed then
+      local pressed = newstate.pointer_pressed
+      state.pointer_pressed = pressed
+
+      local x, y = newstate.pointer_x, newstate.pointer_y
+
+      if not system.iszoomed() then
+        x = x - xpad
+      end
+
+      -- Only process clicks if the menu and the help are not active
+      if pressed and gameactive then
+        local images = extctrls.images
+
+        -- Later images draw over earlier ones, so the topmost wins
+        for i = #images, 1, -1 do
+          local image = images[ i ]
+
+          -- A pictureless image draws nothing, so its visible flag has
+          -- no visual meaning; several games leave their transparent
+          -- hotspots flagged invisible (the Multi Screen ports skip the
+          -- lid-opening code that would have set them). Their handlers
+          -- only send inputs a keyboard could send at any time, so
+          -- hit-testing them regardless is safe.
+          if image.visible or not image.haspicture then
+            local onmousedown = image.onmousedown
+
+            if onmousedown or image.onclick then
+              local x0, y0 = image.left, image.top
+
+              if x >= x0 and x < x0 + image.width and y >= y0 and y < y0 + image.height then
+                captured = image
+
+                if onmousedown then
+                  onmousedown( image, controls.mbleft, { [ classes.ssleft ] = true }, x - x0, y - y0 )
+                end
+
+                break
+              end
+            end
+          end
+        end
+      elseif not pressed and captured then
+        -- The release always goes to the control that took the press,
+        -- wherever the pointer is by then, as it did on the desktop
+        local x0, y0 = captured.left, captured.top
+        local onmouseup = captured.onmouseup
+
+        if onmouseup then
+          onmouseup( captured, controls.mbleft, {}, x - x0, y - y0 )
+        end
+
+        -- A release inside the control is a click; the clamshell games
+        -- open their lid from onclick
+        if x >= x0 and x < x0 + captured.width and y >= y0 and y < y0 + captured.height then
+          local onclick = captured.onclick
+
+          if onclick then
+            onclick( captured )
+          end
+        end
+
+        captured = nil
+      end
+    end
+
+    -- Remove pointer events from the table
+    newstate.pointer_x = nil
+    newstate.pointer_y = nil
+    newstate.pointer_pressed = nil
+
     for button, pressed in pairs( newstate ) do
       if state[ button ] ~= pressed then
         local keys = keymap[ button ]

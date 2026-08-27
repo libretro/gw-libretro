@@ -74,6 +74,7 @@ static int l_gc( lua_State* L )
   rl_sprite_destroy( self->sprite );
   gwlua_ref_destroy( L, &self->mousedown_ref );
   gwlua_ref_destroy( L, &self->mouseup_ref );
+  gwlua_ref_destroy( L, &self->click_ref );
   return 0;
 }
 
@@ -99,7 +100,15 @@ static int l_index( lua_State* L )
   case 0xca597e70U: // onmouseup
     gwlua_ref_get( L, self->mouseup_ref );
     return 1;
-  
+
+  case 0x6c13e8e8U: // onclick
+    gwlua_ref_get( L, self->click_ref );
+    return 1;
+
+  case 0xc85b9c3dU: // haspicture
+    lua_pushboolean( L, self->sprite->image != NULL );
+    return 1;
+
   case 0x7c9a03b0U: // left
     lua_pushinteger( L, self->sprite->x );
     return 1;
@@ -167,6 +176,15 @@ static int l_newindex( lua_State* L )
     
     gwlua_ref_new( L, -1, &self->mouseup_ref );
     return 0;
+
+  case 0x6c13e8e8U: // onclick
+    if ( !lua_isnoneornil( L, 3 ) )
+    {
+      luaL_checktype( L, 3, LUA_TFUNCTION );
+    }
+    
+    gwlua_ref_new( L, -1, &self->click_ref );
+    return 0;
   
   case 0x7c9a03b0U: // left
     self->sprite->x = luaL_checkinteger( L, 3 );
@@ -196,7 +214,6 @@ static int l_newindex( lua_State* L )
   case 0x45b29eb9U: // autosize
   case 0xaf079762U: // stretch
   case 0xf62fb286U: // center
-  case 0x6c13e8e8U: // onclick
   case 0x164d61e1U: // dragcursor
   case 0x7c97e438U: // hint
     return 0;
@@ -231,6 +248,7 @@ static int l_new( lua_State* L )
   self->height = 0;
   self->mousedown_ref = LUA_NOREF;
   self->mouseup_ref = LUA_NOREF;
+  self->click_ref = LUA_NOREF;
   
   if ( luaL_newmetatable( L, "image" ) != 0 )
   {
